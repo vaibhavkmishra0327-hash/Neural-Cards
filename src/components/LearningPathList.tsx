@@ -1,14 +1,14 @@
 import { motion } from 'framer-motion';
-import { 
-  Calculator, 
-  FileCode, 
-  Bot, 
-  Brain, 
-  Zap, 
-  Rocket, 
+import {
+  Calculator,
+  FileCode,
+  Bot,
+  Brain,
+  Zap,
+  Rocket,
   ArrowRight,
   Clock,
-  BookOpen
+  BookOpen,
 } from 'lucide-react';
 
 // 👇 Note: Prop ka naam 'onPathSelect' rakha hai (App.tsx me bhi yahi use karna)
@@ -22,11 +22,12 @@ export function LearningPathList({ onPathSelect }: LearningPathListProps) {
     {
       id: 'math-for-ml', // Slug match hona chahiye
       title: 'Math for Machine Learning',
-      description: 'Master the mathematical foundations: linear algebra, calculus, probability & statistics.',
+      description:
+        'Master the mathematical foundations: linear algebra, calculus, probability & statistics.',
       topicsCount: '9 Topics',
       duration: '~40 hours',
       icon: <Calculator className="w-8 h-8 text-blue-500" />,
-      color: 'border-blue-500/20 bg-blue-500/5'
+      color: 'border-blue-500/20 bg-blue-500/5',
     },
     {
       id: 'python-for-ai',
@@ -35,7 +36,7 @@ export function LearningPathList({ onPathSelect }: LearningPathListProps) {
       topicsCount: '7 Topics',
       duration: '~30 hours',
       icon: <FileCode className="w-8 h-8 text-green-500" />,
-      color: 'border-green-500/20 bg-green-500/5'
+      color: 'border-green-500/20 bg-green-500/5',
     },
     {
       id: 'ml-fundamentals', // Slug match
@@ -44,7 +45,7 @@ export function LearningPathList({ onPathSelect }: LearningPathListProps) {
       topicsCount: '12 Topics',
       duration: '~60 hours',
       icon: <Bot className="w-8 h-8 text-pink-500" />,
-      color: 'border-pink-500/20 bg-pink-500/5'
+      color: 'border-pink-500/20 bg-pink-500/5',
     },
     {
       id: 'deep-learning',
@@ -53,7 +54,7 @@ export function LearningPathList({ onPathSelect }: LearningPathListProps) {
       topicsCount: '15 Topics',
       duration: '~80 hours',
       icon: <Brain className="w-8 h-8 text-purple-500" />,
-      color: 'border-purple-500/20 bg-purple-500/5'
+      color: 'border-purple-500/20 bg-purple-500/5',
     },
     {
       id: 'modern-ai',
@@ -62,7 +63,7 @@ export function LearningPathList({ onPathSelect }: LearningPathListProps) {
       topicsCount: '11 Topics',
       duration: '~50 hours',
       icon: <Zap className="w-8 h-8 text-yellow-500" />,
-      color: 'border-yellow-500/20 bg-yellow-500/5'
+      color: 'border-yellow-500/20 bg-yellow-500/5',
     },
     {
       id: 'mlops',
@@ -71,30 +72,30 @@ export function LearningPathList({ onPathSelect }: LearningPathListProps) {
       topicsCount: '10 Topics',
       duration: '~45 hours',
       icon: <Rocket className="w-8 h-8 text-orange-500" />,
-      color: 'border-orange-500/20 bg-orange-500/5'
-    }
+      color: 'border-orange-500/20 bg-orange-500/5',
+    },
   ];
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-[#0a0a0a] text-slate-900 dark:text-white pt-24 pb-20">
       <div className="container mx-auto px-4 max-w-6xl">
-        
         {/* Header Section */}
         <div className="text-center mb-16">
-          <motion.h1 
+          <motion.h1
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             className="text-4xl md:text-5xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600 dark:from-white dark:to-gray-400"
           >
-             AI Learning Roadmap
+            AI Learning Roadmap
           </motion.h1>
-          <motion.p 
+          <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2 }}
             className="text-lg text-slate-600 dark:text-gray-400 max-w-2xl mx-auto"
           >
-             A structured path to go from zero to AI Engineer. Select a module to start learning concepts, practicing flashcards, and tracking progress.
+            A structured path to go from zero to AI Engineer. Select a module to start learning
+            concepts, practicing flashcards, and tracking progress.
           </motion.p>
         </div>
 
@@ -129,14 +130,14 @@ export function LearningPathList({ onPathSelect }: LearningPathListProps) {
               <p className="text-sm text-slate-600 dark:text-gray-400 mb-6 leading-relaxed line-clamp-2">
                 {path.description}
               </p>
-              
+
               {/* Footer */}
               <div className="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-white/5">
                 <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-gray-500">
                   <Clock className="w-3.5 h-3.5" />
                   <span>{path.duration}</span>
                 </div>
-                
+
                 <div className="flex items-center gap-1 text-sm font-medium text-blue-600 dark:text-purple-500 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">
                   <span>Start</span>
                   <ArrowRight className="w-4 h-4" />

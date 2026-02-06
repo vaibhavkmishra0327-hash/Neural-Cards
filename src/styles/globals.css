@@ -152,9 +152,9 @@
   transition-duration: 150ms;
 }
 
-code[class*="language-"],
-pre[class*="language-"] {
-  font-family: "Fira Code", "Fira Mono", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+code[class*='language-'],
+pre[class*='language-'] {
+  font-family: 'Fira Code', 'Fira Mono', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
   font-size: 14px;
   line-height: 1.5;
   padding: 10px;
@@ -163,10 +163,10 @@ pre[class*="language-"] {
   color: #333;
 }
 
-code[class*="language-"]::before,
-pre[class*="language-"]::before {
+code[class*='language-']::before,
+pre[class*='language-']::before {
   content: attr(class);
-  font-family: "Fira Code", "Fira Mono", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+  font-family: 'Fira Code', 'Fira Mono', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
   font-size: 14px;
   line-height: 1.5;
   padding: 10px;
@@ -180,10 +180,10 @@ pre[class*="language-"]::before {
   pointer-events: none;
 }
 
-code[class*="language-"]::after,
-pre[class*="language-"]::after {
+code[class*='language-']::after,
+pre[class*='language-']::after {
   content: attr(class);
-  font-family: "Fira Code", "Fira Mono", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+  font-family: 'Fira Code', 'Fira Mono', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
   font-size: 14px;
   line-height: 1.5;
   padding: 10px;

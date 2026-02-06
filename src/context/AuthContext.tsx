@@ -33,7 +33,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
     });
 
     // Subscribe to auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
       setIsLoading(false);
@@ -59,16 +61,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
     signOut,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 /**
  * Hook to access auth state from any component
- * 
+ *
  * Usage:
  *   const { user, isAuthenticated, signOut } = useAuth();
  */

@@ -17,20 +17,14 @@ export interface CardSchedule {
  * @param quality - User's rating (0-5): 0=complete blackout, 5=perfect response
  * @returns New schedule for the card
  */
-export function calculateNextReview(
-  previousSchedule: CardSchedule,
-  quality: number
-): CardSchedule {
+export function calculateNextReview(previousSchedule: CardSchedule, quality: number): CardSchedule {
   let { easeFactor, interval, repetitions } = previousSchedule;
 
   // Quality must be 0-5
   quality = Math.max(0, Math.min(5, quality));
 
   // Update ease factor
-  easeFactor = Math.max(
-    1.3,
-    easeFactor + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02))
-  );
+  easeFactor = Math.max(1.3, easeFactor + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02)));
 
   // If quality < 3, reset repetitions
   if (quality < 3) {
@@ -57,7 +51,7 @@ export function calculateNextReview(
     easeFactor,
     interval,
     repetitions,
-    nextReview
+    nextReview,
   };
 }
 
@@ -69,7 +63,7 @@ export function initializeCardSchedule(): CardSchedule {
     easeFactor: 2.5,
     interval: 1,
     repetitions: 0,
-    nextReview: new Date()
+    nextReview: new Date(),
   };
 }
 
@@ -83,10 +77,8 @@ export function isDueForReview(schedule: CardSchedule): boolean {
 /**
  * Get cards due for review from a collection
  */
-export function getDueCards<T extends { schedule: CardSchedule }>(
-  cards: T[]
-): T[] {
-  return cards.filter(card => isDueForReview(card.schedule));
+export function getDueCards<T extends { schedule: CardSchedule }>(cards: T[]): T[] {
+  return cards.filter((card) => isDueForReview(card.schedule));
 }
 
 /**
@@ -97,7 +89,7 @@ export function difficultyToQuality(difficulty: 'easy' | 'medium' | 'hard'): num
   const mapping = {
     easy: 5,
     medium: 3,
-    hard: 1
+    hard: 1,
   };
   return mapping[difficulty];
 }

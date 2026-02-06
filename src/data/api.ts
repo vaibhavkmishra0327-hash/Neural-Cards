@@ -1,6 +1,6 @@
 import { supabase } from '../utils/supabase/client';
-import { Database } from '../types/database.types'; 
-import { learningPaths } from './learningPaths'; 
+import { Database } from '../types/database.types';
+import { learningPaths } from './learningPaths';
 import { log } from '../utils/logger';
 
 type Topic = Database['public']['Tables']['topics']['Row'];
@@ -21,7 +21,7 @@ export const getTopics = async () => {
 
 // 2. Flashcards fetch karna
 export const getFlashcardsByTopic = async (slug: string) => {
-  log.info("Fetching topic for slug:", slug);
+  log.info('Fetching topic for slug:', slug);
 
   // Step A: Topic ID nikalo
   const { data: topicData, error: topicError } = await supabase
@@ -41,13 +41,13 @@ export const getFlashcardsByTopic = async (slug: string) => {
   const { data: cards, error } = await supabase
     .from('flashcards')
     .select('*')
-    .eq('topic_id', topic.id); 
+    .eq('topic_id', topic.id);
 
   if (error) {
     log.error('Error fetching cards:', error);
     return [];
   }
-  
+
   return cards;
 };
 
@@ -84,7 +84,7 @@ export const getTopicsWithCardCount = async () => {
 
   if (countError) {
     log.error('Error fetching card counts:', countError);
-    return topics.map(t => ({ ...t, cardCount: 0 }));
+    return topics.map((t) => ({ ...t, cardCount: 0 }));
   }
 
   const countMap: Record<string, number> = {};
@@ -92,15 +92,12 @@ export const getTopicsWithCardCount = async () => {
     countMap[row.topic_id] = (countMap[row.topic_id] || 0) + 1;
   });
 
-  return topics.map(t => ({ ...t, cardCount: countMap[t.id] || 0 }));
+  return topics.map((t) => ({ ...t, cardCount: countMap[t.id] || 0 }));
 };
 
 // 4. Suggested Topics fetch karna
 export const getSuggestedTopics = async () => {
-  const { data, error } = await supabase
-    .from('topics')
-    .select('*')
-    .limit(3);
+  const { data, error } = await supabase.from('topics').select('*').limit(3);
 
   if (error) {
     log.error('Error fetching suggested topics:', error);
@@ -132,18 +129,18 @@ export const getUserProgress = async (userId: string) => {
         hasProgress: false,
         pathTitle: firstPath.title,
         pathId: firstPath.id,
-        topicTitle: "Start Your Journey",
+        topicTitle: 'Start Your Journey',
         topicSlug: firstTopic,
-        nextChapter: "Chapter 1: " + formatTitle(firstTopic),
+        nextChapter: 'Chapter 1: ' + formatTitle(firstTopic),
         progress: 0,
-        icon: firstPath.icon
+        icon: firstPath.icon,
       };
     }
 
     // C. Agar purana khiladi hai -> Next Topic calculate karo
     // 👇 Ab yahan error nahi aayega
     const lastTopicSlug = progressData[0].node_id;
-    
+
     // 1. Pata lagao ye slug kis Path mein hai
     let foundPath = null;
     let foundIndex = -1;
@@ -159,15 +156,17 @@ export const getUserProgress = async (userId: string) => {
       }
     }
 
-    if (!foundPath) return null; 
+    if (!foundPath) return null;
 
     // 2. Next Topic Logic
     const nextIndex = foundIndex + 1;
     const isPathFinished = nextIndex >= foundPath.topics.length;
-    
+
     const currentSlug = isPathFinished ? lastTopicSlug : foundPath.topics[nextIndex];
-    const displayTitle = isPathFinished ? "Path Completed! 🎉" : formatTitle(currentSlug);
-    const chapterText = isPathFinished ? "All chapters done" : `Chapter ${nextIndex + 1}: ${formatTitle(currentSlug)}`;
+    const displayTitle = isPathFinished ? 'Path Completed! 🎉' : formatTitle(currentSlug);
+    const chapterText = isPathFinished
+      ? 'All chapters done'
+      : `Chapter ${nextIndex + 1}: ${formatTitle(currentSlug)}`;
     const percent = Math.round(((foundIndex + 1) / foundPath.topics.length) * 100);
 
     return {
@@ -178,9 +177,8 @@ export const getUserProgress = async (userId: string) => {
       topicSlug: currentSlug,
       nextChapter: chapterText,
       progress: isPathFinished ? 100 : percent,
-      icon: foundPath.icon
+      icon: foundPath.icon,
     };
-
   } catch (error) {
     log.error('Progress Error:', error);
     return null;
@@ -189,6 +187,9 @@ export const getUserProgress = async (userId: string) => {
 
 // Helper
 const formatTitle = (slug: string) => {
-  if (!slug) return "";
-  return slug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+  if (!slug) return '';
+  return slug
+    .split('-')
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ');
 };

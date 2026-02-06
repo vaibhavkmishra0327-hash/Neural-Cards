@@ -5,7 +5,6 @@ interface FooterProps {
 }
 
 export function Footer({ onNavigate }: FooterProps) {
-  
   // Helper to handle internal navigation
   const handleNavClick = (e: React.MouseEvent, page: string) => {
     e.preventDefault();
@@ -17,26 +16,25 @@ export function Footer({ onNavigate }: FooterProps) {
 
   // Data Structure for Links (Industry Standard: Configuration driven UI)
   const learningPaths = [
-    { label: "Math for ML", page: "paths" },
-    { label: "Python for AI", page: "paths" },
-    { label: "Machine Learning", page: "paths" },
-    { label: "Deep Learning", page: "paths" },
+    { label: 'Math for ML', page: 'paths' },
+    { label: 'Python for AI', page: 'paths' },
+    { label: 'Machine Learning', page: 'paths' },
+    { label: 'Deep Learning', page: 'paths' },
   ];
 
   const companyLinks = [
-    { label: "About Us", page: "about" },
-    { label: "Topics", page: "topics" },
-    { label: "Dashboard", page: "dashboard" },
+    { label: 'About Us', page: 'about' },
+    { label: 'Topics', page: 'topics' },
+    { label: 'Dashboard', page: 'dashboard' },
   ];
 
   return (
     <footer className="bg-white dark:bg-[#0a0a0a] border-t border-gray-200 dark:border-gray-800 transition-colors duration-300">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid md:grid-cols-4 gap-8 mb-12">
-          
           {/* 1. Brand Section */}
           <div className="md:col-span-1 space-y-4">
-            <div 
+            <div
               className="flex items-center gap-2 cursor-pointer group"
               onClick={(e) => handleNavClick(e, 'home')}
             >
@@ -48,15 +46,22 @@ export function Footer({ onNavigate }: FooterProps) {
               </span>
             </div>
             <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
-              Master complex AI concepts faster using our science-backed spaced repetition algorithms. Built for serious learners.
+              Master complex AI concepts faster using our science-backed spaced repetition
+              algorithms. Built for serious learners.
             </p>
-            
+
             {/* Social Links */}
             <div className="flex gap-4 pt-2">
               <SocialLink href="#" icon={<Twitter className="h-5 w-5" />} />
-              <SocialLink href="https://github.com/vaibhavkmishra0327-hash" icon={<Github className="h-5 w-5" />} />
+              <SocialLink
+                href="https://github.com/vaibhavkmishra0327-hash"
+                icon={<Github className="h-5 w-5" />}
+              />
               <SocialLink href="#" icon={<Linkedin className="h-5 w-5" />} />
-              <SocialLink href="mailto:contact@neuralcards.com" icon={<Mail className="h-5 w-5" />} />
+              <SocialLink
+                href="mailto:contact@neuralcards.com"
+                icon={<Mail className="h-5 w-5" />}
+              />
             </div>
           </div>
 
@@ -66,7 +71,7 @@ export function Footer({ onNavigate }: FooterProps) {
             <ul className="space-y-3 text-sm">
               {learningPaths.map((link) => (
                 <li key={link.label}>
-                  <button 
+                  <button
                     onClick={(e) => handleNavClick(e, link.page)}
                     className="text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors text-left"
                   >
@@ -81,9 +86,30 @@ export function Footer({ onNavigate }: FooterProps) {
           <div>
             <h3 className="font-bold text-gray-900 dark:text-white mb-4">Resources</h3>
             <ul className="space-y-3 text-sm">
-              <li><a href="#" className="text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors">Documentation</a></li>
-              <li><a href="#" className="text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors">API Status</a></li>
-              <li><a href="#" className="text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors">Community</a></li>
+              <li>
+                <a
+                  href="#"
+                  className="text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
+                >
+                  Documentation
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#"
+                  className="text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
+                >
+                  API Status
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#"
+                  className="text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
+                >
+                  Community
+                </a>
+              </li>
             </ul>
           </div>
 
@@ -93,7 +119,7 @@ export function Footer({ onNavigate }: FooterProps) {
             <ul className="space-y-3 text-sm">
               {companyLinks.map((link) => (
                 <li key={link.label}>
-                  <button 
+                  <button
                     onClick={(e) => handleNavClick(e, link.page)}
                     className="text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors text-left"
                   >
@@ -108,11 +134,16 @@ export function Footer({ onNavigate }: FooterProps) {
         {/* Bottom Bar */}
         <div className="pt-8 border-t border-gray-200 dark:border-gray-800 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-500 dark:text-gray-500">
           <div className="flex items-center gap-1">
-            © {new Date().getFullYear()} NeuralCards. Made with <Heart className="h-3 w-3 text-red-500 fill-current" /> by Vaibhav.
+            © {new Date().getFullYear()} NeuralCards. Made with{' '}
+            <Heart className="h-3 w-3 text-red-500 fill-current" /> by Vaibhav.
           </div>
           <div className="flex gap-6">
-            <a href="#" className="hover:text-gray-900 dark:hover:text-white transition-colors">Privacy Policy</a>
-            <a href="#" className="hover:text-gray-900 dark:hover:text-white transition-colors">Terms of Service</a>
+            <a href="#" className="hover:text-gray-900 dark:hover:text-white transition-colors">
+              Privacy Policy
+            </a>
+            <a href="#" className="hover:text-gray-900 dark:hover:text-white transition-colors">
+              Terms of Service
+            </a>
           </div>
         </div>
       </div>
@@ -123,9 +154,9 @@ export function Footer({ onNavigate }: FooterProps) {
 // Small Helper Component for Social Icons to avoid repetition
 function SocialLink({ href, icon }: { href: string; icon: React.ReactNode }) {
   return (
-    <a 
-      href={href} 
-      target="_blank" 
+    <a
+      href={href}
+      target="_blank"
       rel="noopener noreferrer"
       className="p-2 bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/30 text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-all duration-300"
     >

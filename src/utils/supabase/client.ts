@@ -17,20 +17,16 @@ let supabaseInstance: SupabaseClient<Database> | null = null;
 export function getSupabaseClient(): SupabaseClient<Database> {
   if (!supabaseInstance) {
     // 👇 Create Client karte waqt Generic Type <Database> pass kiya
-    supabaseInstance = createClient<Database>(
-      `https://${projectId}.supabase.co`,
-      publicAnonKey,
-      {
-        auth: {
-          persistSession: true,
-          autoRefreshToken: true,
-          detectSessionInUrl: true,
-          storage: typeof window !== 'undefined' ? window.localStorage : undefined,
-        },
-      }
-    );
+    supabaseInstance = createClient<Database>(`https://${projectId}.supabase.co`, publicAnonKey, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true,
+        storage: typeof window !== 'undefined' ? window.localStorage : undefined,
+      },
+    });
   }
-  
+
   return supabaseInstance;
 }
 

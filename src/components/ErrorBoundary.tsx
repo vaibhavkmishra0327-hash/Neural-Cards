@@ -28,7 +28,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
     // Log to an error reporting service in production
     console.error('[ErrorBoundary] Caught error:', error, errorInfo);
-    
+
     // TODO: Send to Sentry / Datadog / LogRocket
     // errorReportingService.captureException(error, { extra: errorInfo });
   }
@@ -49,9 +49,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
         <div className="min-h-[60vh] flex items-center justify-center p-8">
           <div className="text-center max-w-md">
             <div className="text-6xl mb-4">💥</div>
-            <h2 className="text-2xl font-bold text-foreground mb-2">
-              Something went wrong
-            </h2>
+            <h2 className="text-2xl font-bold text-foreground mb-2">Something went wrong</h2>
             <p className="text-muted-foreground mb-6">
               An unexpected error occurred. Please try again.
             </p>
@@ -73,7 +71,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
                 Try Again
               </button>
               <button
-                onClick={() => window.location.href = '/'}
+                onClick={() => (window.location.href = '/')}
                 className="px-6 py-3 border border-border rounded-lg hover:bg-muted transition-colors font-medium"
               >
                 Go Home

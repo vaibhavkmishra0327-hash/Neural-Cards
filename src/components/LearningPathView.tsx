@@ -38,21 +38,21 @@ export function LearningPathView({ pathSlug, userId, onBack, onNodeClick }: Lear
     return (
       <div className="text-center py-20 text-white">
         <h2 className="text-xl font-bold">Path not found 😕</h2>
-        <button onClick={onBack} className="text-purple-500 hover:underline mt-4">Go Back</button>
+        <button onClick={onBack} className="text-purple-500 hover:underline mt-4">
+          Go Back
+        </button>
       </div>
     );
   }
 
   // Progress Percentage
-  const progressPercent = path.total_nodes > 0 
-    ? Math.round((path.completed_nodes / path.total_nodes) * 100) 
-    : 0;
+  const progressPercent =
+    path.total_nodes > 0 ? Math.round((path.completed_nodes / path.total_nodes) * 100) : 0;
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-3xl">
-      
       {/* 1. Header Section */}
-      <button 
+      <button
         onClick={onBack}
         className="flex items-center gap-2 text-slate-400 hover:text-white mb-6 transition-colors"
       >
@@ -65,49 +65,56 @@ export function LearningPathView({ pathSlug, userId, onBack, onNodeClick }: Lear
         </div>
         <h1 className="text-3xl font-bold text-white mb-2">{path.title}</h1>
         <p className="text-slate-400 mb-6 max-w-lg">{path.description}</p>
-        
+
         {/* Progress Bar */}
         <div className="w-full bg-slate-800 h-3 rounded-full overflow-hidden">
           {/* eslint-disable-next-line react/forbid-dom-props */}
-          <div 
+          <div
             className="bg-green-500 h-full transition-all duration-1000 ease-out"
             style={{ width: `${progressPercent}%` }}
           />
         </div>
-        <p className="text-right text-green-400 text-sm mt-2 font-bold">{progressPercent}% Completed</p>
+        <p className="text-right text-green-400 text-sm mt-2 font-bold">
+          {progressPercent}% Completed
+        </p>
       </div>
 
       {/* 2. The Clean Zig-Zag Roadmap */}
       <div className="relative flex flex-col items-center pb-20">
-        
         {/* Center Line (Background) */}
         <div className="absolute top-0 bottom-0 w-1 bg-slate-800 rounded-full z-0" />
 
         {path.nodes.map((node, index) => {
           // Zig-Zag Logic: Even = Left, Odd = Right
           const isLeft = index % 2 === 0;
-          
+
           const isLocked = node.status === 'locked';
           const isCompleted = node.status === 'completed';
           const isCurrent = node.status === 'unlocked';
 
           return (
-            <div key={node.id} className={`w-full flex ${isLeft ? 'justify-start' : 'justify-end'} mb-16 relative z-10`}>
-              
+            <div
+              key={node.id}
+              className={`w-full flex ${isLeft ? 'justify-start' : 'justify-end'} mb-16 relative z-10`}
+            >
               {/* Half-Width Container (Alignment fix) */}
-              <div className={`w-1/2 flex ${isLeft ? 'justify-end pr-10' : 'justify-start pl-10'} items-center relative`}>
-                
+              <div
+                className={`w-1/2 flex ${isLeft ? 'justify-end pr-10' : 'justify-start pl-10'} items-center relative`}
+              >
                 {/* Horizontal Connector Line */}
-                <div className={`absolute top-1/2 h-1 bg-slate-800 w-10 -z-10 ${isLeft ? 'right-0' : 'left-0'}`} />
+                <div
+                  className={`absolute top-1/2 h-1 bg-slate-800 w-10 -z-10 ${isLeft ? 'right-0' : 'left-0'}`}
+                />
 
                 {/* THE NODE BUTTON */}
                 <div className="relative group flex flex-col items-center">
-                  
                   {/* Floating Title Label */}
-                  <div className={`absolute -top-10 w-48 text-center text-sm font-bold transition-all duration-300
+                  <div
+                    className={`absolute -top-10 w-48 text-center text-sm font-bold transition-all duration-300
                     ${isCurrent ? 'text-purple-400 scale-105' : 'text-slate-500'}
                     ${isLocked ? 'opacity-50' : 'opacity-100'}
-                  `}>
+                  `}
+                  >
                     {node.title}
                   </div>
 
@@ -129,7 +136,7 @@ export function LearningPathView({ pathSlug, userId, onBack, onNodeClick }: Lear
                     {isCompleted && <Check className="h-8 w-8 text-white" strokeWidth={4} />}
                     {isCurrent && <Play className="h-8 w-8 text-white fill-current ml-1" />}
                     {isLocked && <Lock className="h-6 w-6 text-slate-500" />}
-                    
+
                     {/* Star Badge */}
                     {isCompleted && (
                       <div className="absolute -right-1 -bottom-1 bg-yellow-400 rounded-full p-1.5 border-2 border-white shadow-sm">

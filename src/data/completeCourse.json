@@ -57,7 +57,12 @@
               "seo": {
                 "metaTitle": "What are Vectors in Machine Learning? Complete Guide 2026",
                 "metaDescription": "Learn vectors and vector spaces for ML. Understand what vectors are, why they matter in AI, with examples, code, and real-world applications.",
-                "keywords": ["vectors in machine learning", "what is a vector", "vector space", "linear algebra for ML"]
+                "keywords": [
+                  "vectors in machine learning",
+                  "what is a vector",
+                  "vector space",
+                  "linear algebra for ML"
+                ]
               },
               "content": {
                 "concept": "A vector is an ordered collection of numbers that represents magnitude and direction in space. In machine learning, vectors are the fundamental data structure used to represent features, weights, and data points. A vector space is a collection of vectors that can be added together and multiplied by scalars while following specific mathematical rules.",

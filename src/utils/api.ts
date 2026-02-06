@@ -1,6 +1,6 @@
 /**
  * Optimized API Client
- * 
+ *
  * Features:
  * - Automatic caching with TTL
  * - Stale-while-revalidate
@@ -36,7 +36,7 @@ async function fetchWithRetry(
     } catch (error) {
       lastError = error as Error;
       log.warn(`Request failed (attempt ${i + 1}/${retries}):`, error);
-      
+
       // Wait before retrying (exponential backoff)
       if (i < retries - 1) {
         await new Promise((resolve) => setTimeout(resolve, Math.pow(2, i) * 1000));
@@ -73,7 +73,7 @@ async function apiRequest<T>(
   if (fetchOptions.method === 'GET' || !fetchOptions.method) {
     if (cacheKey) {
       const cached = cache.getStale<T>(cacheKey);
-      
+
       if (cached) {
         // Return cached data immediately
         if (!cached.isStale) {
@@ -83,7 +83,7 @@ async function apiRequest<T>(
 
         // Data is stale, return it but revalidate in background
         log.info(`Cache hit (stale): ${cacheKey}, revalidating...`);
-        
+
         // Revalidate in background (stale-while-revalidate)
         fetchWithRetry(url, requestOptions)
           .then((response) => response.json())

@@ -3,11 +3,11 @@ export interface PathNode {
   path_id: string;
   title: string;
   description: string | null; // ✅ Null allow kiya
-  topic_slug: string | null;  // ✅ Null allow kiya
+  topic_slug: string | null; // ✅ Null allow kiya
   step_order: number;
   position_x: number;
   position_y: number;
-  status: 'locked' | 'unlocked' | 'completed'; 
+  status: 'locked' | 'unlocked' | 'completed';
 }
 
 export interface LearningPath {

@@ -4,7 +4,7 @@ import { log } from './logger';
 
 /**
  * AI Content Generator
- * 
+ *
  * Security: Groq API key is NOT exposed to the browser.
  * All AI calls are proxied through Supabase Edge Functions.
  * The Groq SDK + API key live server-side only.
@@ -14,7 +14,7 @@ import { log } from './logger';
 function buildPrompts(topicName: string, type: 'flashcard' | 'blog') {
   if (type === 'flashcard') {
     return {
-      systemPrompt: "You are a JSON generator.",
+      systemPrompt: 'You are a JSON generator.',
       userPrompt: `
         You are an expert teacher. Create 5 educational flashcards about "${topicName}" for a beginner level student.
         
@@ -32,11 +32,11 @@ function buildPrompts(topicName: string, type: 'flashcard' | 'blog') {
             "code": null
           }
         ]
-      `
+      `,
     };
   } else {
     return {
-      systemPrompt: "You are a professional Tech Blogger.",
+      systemPrompt: 'You are a professional Tech Blogger.',
       userPrompt: `
         Write a comprehensive, engaging, and SEO-friendly blog post about "${topicName}".
         
@@ -49,19 +49,24 @@ function buildPrompts(topicName: string, type: 'flashcard' | 'blog') {
         6. Conclusion.
 
         Return ONLY the Markdown content. Do not wrap in JSON. Start directly with the # Title.
-      `
+      `,
     };
   }
 }
 
-export const generateContentWithGroq = async (topicName: string, type: 'flashcard' | 'blog' = 'flashcard') => {
+export const generateContentWithGroq = async (
+  topicName: string,
+  type: 'flashcard' | 'blog' = 'flashcard'
+) => {
   log.info(`Requesting AI content for: ${topicName} [Type: ${type}]`);
 
   const { systemPrompt, userPrompt } = buildPrompts(topicName, type);
 
   try {
     // Get user session for auth header
-    const { data: { session } } = await supabase.auth.getSession();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
     if (!session?.access_token) {
       log.error('No auth session found for AI generation');
       return type === 'flashcard' ? [] : '';
@@ -73,7 +78,7 @@ export const generateContentWithGroq = async (topicName: string, type: 'flashcar
       {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${session.access_token}`,
+          Authorization: `Bearer ${session.access_token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ systemPrompt, userPrompt, type }),
@@ -111,7 +116,6 @@ export const generateContentWithGroq = async (topicName: string, type: 'flashcar
       log.info('Blog content generated successfully');
       return text;
     }
-
   } catch (error) {
     log.error('AI generation failed:', error);
     return type === 'flashcard' ? [] : '';

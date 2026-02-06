@@ -1,8 +1,8 @@
-import { Hono } from "npm:hono";
-import { cors } from "npm:hono/cors";
-import { logger } from "npm:hono/logger";
-import { createClient } from "jsr:@supabase/supabase-js@2";
-import * as kv from "./kv_store.tsx";
+import { Hono } from 'npm:hono';
+import { cors } from 'npm:hono/cors';
+import { logger } from 'npm:hono/logger';
+import { createClient } from 'jsr:@supabase/supabase-js@2';
+import * as kv from './kv_store.tsx';
 
 const app = new Hono();
 
@@ -10,13 +10,13 @@ const app = new Hono();
 // Service role client for admin operations (creating users)
 const supabaseAdmin = createClient(
   Deno.env.get('SUPABASE_URL') ?? '',
-  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
 );
 
 // Anon client for JWT validation (validating user tokens)
 const supabaseAuth = createClient(
   Deno.env.get('SUPABASE_URL') ?? '',
-  Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+  Deno.env.get('SUPABASE_ANON_KEY') ?? ''
 );
 
 // Enable logger
@@ -24,24 +24,24 @@ app.use('*', logger(console.log));
 
 // Enable CORS - restricted to known origins
 app.use(
-  "/*",
+  '/*',
   cors({
     origin: [
-      "https://neuralcards.com",
-      "https://www.neuralcards.com",
-      "http://localhost:5173",
-      "http://localhost:3000",
+      'https://neuralcards.com',
+      'https://www.neuralcards.com',
+      'http://localhost:5173',
+      'http://localhost:3000',
     ],
-    allowHeaders: ["Content-Type", "Authorization"],
-    allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    exposeHeaders: ["Content-Length"],
+    allowHeaders: ['Content-Type', 'Authorization'],
+    allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    exposeHeaders: ['Content-Length'],
     maxAge: 600,
-  }),
+  })
 );
 
 // Health check endpoint
-app.get("/make-server-f02c4c3b/health", (c) => {
-  return c.json({ status: "ok" });
+app.get('/make-server-f02c4c3b/health', (c) => {
+  return c.json({ status: 'ok' });
 });
 
 // ====================
@@ -49,7 +49,7 @@ app.get("/make-server-f02c4c3b/health", (c) => {
 // ====================
 
 // Sign up new user
-app.post("/make-server-f02c4c3b/auth/signup", async (c) => {
+app.post('/make-server-f02c4c3b/auth/signup', async (c) => {
   try {
     const { email, password, name } = await c.req.json();
 
@@ -63,7 +63,7 @@ app.post("/make-server-f02c4c3b/auth/signup", async (c) => {
       password,
       user_metadata: { name },
       // Automatically confirm the user's email since an email server hasn't been configured
-      email_confirm: true
+      email_confirm: true,
     });
 
     if (error) {
@@ -87,16 +87,16 @@ app.post("/make-server-f02c4c3b/auth/signup", async (c) => {
       lastStudyDate: null,
       dailyGoal: 20,
       achievements: [],
-      isPremium: false
+      isPremium: false,
     };
-    
+
     await kv.set(`user:${userId}`, profile);
 
     // Initialize streak data
     await kv.set(`user:${userId}:streak`, {
       currentStreak: 0,
       longestStreak: 0,
-      lastStudyDate: null
+      lastStudyDate: null,
     });
 
     // Return user and profile (client will handle sign-in)
@@ -105,9 +105,9 @@ app.post("/make-server-f02c4c3b/auth/signup", async (c) => {
       user: {
         id: userId,
         email,
-        name
+        name,
       },
-      profile
+      profile,
     });
   } catch (error) {
     console.log('Signup error:', error);
@@ -120,24 +120,27 @@ app.post("/make-server-f02c4c3b/auth/signup", async (c) => {
 // ====================
 
 // Get user profile
-app.get("/make-server-f02c4c3b/user/profile", async (c) => {
+app.get('/make-server-f02c4c3b/user/profile', async (c) => {
   try {
     const accessToken = c.req.header('Authorization')?.split(' ')[1];
-    
+
     if (!accessToken) {
       console.log('No access token provided');
       return c.json({ error: 'No authorization token' }, 401);
     }
-    
-    const { data: { user }, error } = await supabaseAuth.auth.getUser(accessToken);
-    
+
+    const {
+      data: { user },
+      error,
+    } = await supabaseAuth.auth.getUser(accessToken);
+
     if (!user?.id || error) {
       console.log('Auth error:', error);
       return c.json({ error: 'Unauthorized' }, 401);
     }
 
     let profile = await kv.get(`user:${user.id}`);
-    
+
     // If profile doesn't exist, create it (for users who signed in without going through signup endpoint)
     if (!profile) {
       console.log('Creating new profile for user:', user.id);
@@ -151,16 +154,16 @@ app.get("/make-server-f02c4c3b/user/profile", async (c) => {
         lastStudyDate: null,
         dailyGoal: 20,
         achievements: [],
-        isPremium: false
+        isPremium: false,
       };
-      
+
       await kv.set(`user:${user.id}`, profile);
-      
+
       // Initialize streak data
       await kv.set(`user:${user.id}:streak`, {
         currentStreak: 0,
         longestStreak: 0,
-        lastStudyDate: null
+        lastStudyDate: null,
       });
     }
 
@@ -172,18 +175,21 @@ app.get("/make-server-f02c4c3b/user/profile", async (c) => {
 });
 
 // Update user profile
-app.put("/make-server-f02c4c3b/user/profile", async (c) => {
+app.put('/make-server-f02c4c3b/user/profile', async (c) => {
   try {
     const accessToken = c.req.header('Authorization')?.split(' ')[1];
-    const { data: { user }, error } = await supabaseAuth.auth.getUser(accessToken);
-    
+    const {
+      data: { user },
+      error,
+    } = await supabaseAuth.auth.getUser(accessToken);
+
     if (!user?.id || error) {
       return c.json({ error: 'Unauthorized' }, 401);
     }
 
     const updates = await c.req.json();
     const currentProfile = await kv.get(`user:${user.id}`);
-    
+
     if (!currentProfile) {
       return c.json({ error: 'Profile not found' }, 404);
     }
@@ -199,11 +205,14 @@ app.put("/make-server-f02c4c3b/user/profile", async (c) => {
 });
 
 // Record flashcard review with spaced repetition
-app.post("/make-server-f02c4c3b/flashcard/review", async (c) => {
+app.post('/make-server-f02c4c3b/flashcard/review', async (c) => {
   try {
     const accessToken = c.req.header('Authorization')?.split(' ')[1];
-    const { data: { user }, error } = await supabaseAuth.auth.getUser(accessToken);
-    
+    const {
+      data: { user },
+      error,
+    } = await supabaseAuth.auth.getUser(accessToken);
+
     if (!user?.id || error) {
       return c.json({ error: 'Unauthorized' }, 401);
     }
@@ -228,7 +237,7 @@ app.post("/make-server-f02c4c3b/flashcard/review", async (c) => {
         easeFactor: 2.5,
         repetitions: 0,
         interval: 1,
-        isBookmarked: false
+        isBookmarked: false,
       };
     }
 
@@ -270,7 +279,7 @@ app.post("/make-server-f02c4c3b/flashcard/review", async (c) => {
       nextReview: nextReview.toISOString(),
       easeFactor,
       interval,
-      repetitions
+      repetitions,
     };
 
     await kv.set(stateKey, state);
@@ -287,7 +296,7 @@ app.post("/make-server-f02c4c3b/flashcard/review", async (c) => {
         cardsReviewed: 0,
         totalCards: 0,
         lastStudied: new Date().toISOString(),
-        masteryLevel: 0
+        masteryLevel: 0,
       };
     }
 
@@ -298,9 +307,9 @@ app.post("/make-server-f02c4c3b/flashcard/review", async (c) => {
     // Update streak
     await updateStreak(user.id);
 
-    return c.json({ 
+    return c.json({
       state,
-      progress 
+      progress,
     });
   } catch (error) {
     console.log('Review flashcard error:', error);
@@ -310,11 +319,14 @@ app.post("/make-server-f02c4c3b/flashcard/review", async (c) => {
 
 // OPTIMIZATION: Batch flashcard review endpoint
 // Process multiple card reviews in a single request
-app.post("/make-server-f02c4c3b/flashcard/review/batch", async (c) => {
+app.post('/make-server-f02c4c3b/flashcard/review/batch', async (c) => {
   try {
     const accessToken = c.req.header('Authorization')?.split(' ')[1];
-    const { data: { user }, error } = await supabaseAuth.auth.getUser(accessToken);
-    
+    const {
+      data: { user },
+      error,
+    } = await supabaseAuth.auth.getUser(accessToken);
+
     if (!user?.id || error) {
       return c.json({ error: 'Unauthorized' }, 401);
     }
@@ -349,7 +361,7 @@ app.post("/make-server-f02c4c3b/flashcard/review/batch", async (c) => {
           easeFactor: 2.5,
           repetitions: 0,
           interval: 1,
-          isBookmarked: false
+          isBookmarked: false,
         };
       }
 
@@ -386,7 +398,7 @@ app.post("/make-server-f02c4c3b/flashcard/review/batch", async (c) => {
         nextReview: nextReview.toISOString(),
         easeFactor,
         interval,
-        repetitions
+        repetitions,
       };
 
       await kv.set(stateKey, state);
@@ -404,7 +416,7 @@ app.post("/make-server-f02c4c3b/flashcard/review/batch", async (c) => {
             cardsReviewed: 0,
             totalCards: 0,
             lastStudied: new Date().toISOString(),
-            masteryLevel: 0
+            masteryLevel: 0,
           };
         }
 
@@ -427,10 +439,10 @@ app.post("/make-server-f02c4c3b/flashcard/review/batch", async (c) => {
     // Update streak once for the batch
     await updateStreak(user.id);
 
-    return c.json({ 
+    return c.json({
       success: true,
       reviewsProcessed: results.length,
-      results
+      results,
     });
   } catch (error) {
     console.log('Batch review error:', error);
@@ -439,11 +451,14 @@ app.post("/make-server-f02c4c3b/flashcard/review/batch", async (c) => {
 });
 
 // Get topic progress
-app.get("/make-server-f02c4c3b/progress/:topicId", async (c) => {
+app.get('/make-server-f02c4c3b/progress/:topicId', async (c) => {
   try {
     const accessToken = c.req.header('Authorization')?.split(' ')[1];
-    const { data: { user }, error } = await supabaseAuth.auth.getUser(accessToken);
-    
+    const {
+      data: { user },
+      error,
+    } = await supabaseAuth.auth.getUser(accessToken);
+
     if (!user?.id || error) {
       return c.json({ error: 'Unauthorized' }, 401);
     }
@@ -460,17 +475,20 @@ app.get("/make-server-f02c4c3b/progress/:topicId", async (c) => {
 });
 
 // Get all user progress
-app.get("/make-server-f02c4c3b/progress", async (c) => {
+app.get('/make-server-f02c4c3b/progress', async (c) => {
   try {
     const accessToken = c.req.header('Authorization')?.split(' ')[1];
-    const { data: { user }, error } = await supabaseAuth.auth.getUser(accessToken);
-    
+    const {
+      data: { user },
+      error,
+    } = await supabaseAuth.auth.getUser(accessToken);
+
     if (!user?.id || error) {
       return c.json({ error: 'Unauthorized' }, 401);
     }
 
     const progressData = await kv.getByPrefix(`user:${user.id}:progress:`);
-    
+
     return c.json({ progress: progressData });
   } catch (error) {
     console.log('Get all progress error:', error);
@@ -479,19 +497,22 @@ app.get("/make-server-f02c4c3b/progress", async (c) => {
 });
 
 // Get streak data
-app.get("/make-server-f02c4c3b/streak", async (c) => {
+app.get('/make-server-f02c4c3b/streak', async (c) => {
   try {
     const accessToken = c.req.header('Authorization')?.split(' ')[1];
-    const { data: { user }, error } = await supabaseAuth.auth.getUser(accessToken);
-    
+    const {
+      data: { user },
+      error,
+    } = await supabaseAuth.auth.getUser(accessToken);
+
     if (!user?.id || error) {
       return c.json({ error: 'Unauthorized' }, 401);
     }
 
     const streak = await kv.get(`user:${user.id}:streak`);
-    
-    return c.json({ 
-      streak: streak || { currentStreak: 0, longestStreak: 0, lastStudyDate: null } 
+
+    return c.json({
+      streak: streak || { currentStreak: 0, longestStreak: 0, lastStudyDate: null },
     });
   } catch (error) {
     console.log('Get streak error:', error);
@@ -500,11 +521,14 @@ app.get("/make-server-f02c4c3b/streak", async (c) => {
 });
 
 // Bookmark/unbookmark flashcard
-app.post("/make-server-f02c4c3b/flashcard/bookmark", async (c) => {
+app.post('/make-server-f02c4c3b/flashcard/bookmark', async (c) => {
   try {
     const accessToken = c.req.header('Authorization')?.split(' ')[1];
-    const { data: { user }, error } = await supabaseAuth.auth.getUser(accessToken);
-    
+    const {
+      data: { user },
+      error,
+    } = await supabaseAuth.auth.getUser(accessToken);
+
     if (!user?.id || error) {
       return c.json({ error: 'Unauthorized' }, 401);
     }
@@ -527,7 +551,7 @@ app.post("/make-server-f02c4c3b/flashcard/bookmark", async (c) => {
         easeFactor: 2.5,
         repetitions: 0,
         interval: 1,
-        isBookmarked: false
+        isBookmarked: false,
       };
     }
 
@@ -542,23 +566,26 @@ app.post("/make-server-f02c4c3b/flashcard/bookmark", async (c) => {
 });
 
 // Get due flashcards for a topic
-app.get("/make-server-f02c4c3b/flashcards/due/:topicId", async (c) => {
+app.get('/make-server-f02c4c3b/flashcards/due/:topicId', async (c) => {
   try {
     const accessToken = c.req.header('Authorization')?.split(' ')[1];
-    const { data: { user }, error } = await supabaseAuth.auth.getUser(accessToken);
-    
+    const {
+      data: { user },
+      error,
+    } = await supabaseAuth.auth.getUser(accessToken);
+
     if (!user?.id || error) {
       return c.json({ error: 'Unauthorized' }, 401);
     }
 
     const topicId = c.req.param('topicId');
-    
+
     // Get all flashcard states for this user
     const allStates = await kv.getByPrefix(`user:${user.id}:flashcard:`);
-    
+
     // Filter for cards that are due for review
     const now = new Date();
-    const dueCards = allStates.filter(state => {
+    const dueCards = allStates.filter((state) => {
       const nextReview = new Date(state.nextReview);
       return nextReview <= now;
     });
@@ -582,7 +609,7 @@ async function updateStreak(userId: string) {
     streak = {
       currentStreak: 0,
       longestStreak: 0,
-      lastStudyDate: null
+      lastStudyDate: null,
     };
   }
 
@@ -629,45 +656,48 @@ async function updateStreak(userId: string) {
 // ====================
 // Keeps the Groq API key server-side only
 
-app.post("/make-server-f02c4c3b/generate-ai", async (c) => {
+app.post('/make-server-f02c4c3b/generate-ai', async (c) => {
   try {
     // Validate user auth
-    const authHeader = c.req.header("Authorization");
-    if (!authHeader) return c.json({ error: "Unauthorized" }, 401);
+    const authHeader = c.req.header('Authorization');
+    if (!authHeader) return c.json({ error: 'Unauthorized' }, 401);
 
-    const token = authHeader.replace("Bearer ", "");
-    const { data: { user }, error: authError } = await supabaseAuth.auth.getUser(token);
-    if (authError || !user) return c.json({ error: "Invalid token" }, 401);
+    const token = authHeader.replace('Bearer ', '');
+    const {
+      data: { user },
+      error: authError,
+    } = await supabaseAuth.auth.getUser(token);
+    if (authError || !user) return c.json({ error: 'Invalid token' }, 401);
 
     // Check admin (only admins can generate content)
     const adminEmail = Deno.env.get('ADMIN_EMAIL') || '';
     if (user.email?.toLowerCase() !== adminEmail.toLowerCase()) {
-      return c.json({ error: "Admin access required" }, 403);
+      return c.json({ error: 'Admin access required' }, 403);
     }
 
     const { systemPrompt, userPrompt, type } = await c.req.json();
     if (!systemPrompt || !userPrompt) {
-      return c.json({ error: "Missing prompts" }, 400);
+      return c.json({ error: 'Missing prompts' }, 400);
     }
 
     const groqApiKey = Deno.env.get('GROQ_API_KEY');
     if (!groqApiKey) {
-      return c.json({ error: "AI service not configured" }, 500);
+      return c.json({ error: 'AI service not configured' }, 500);
     }
 
     // Call Groq API server-side
     const groqResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${groqApiKey}`,
+        Authorization: `Bearer ${groqApiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt },
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt },
         ],
-        model: "llama-3.3-70b-versatile",
+        model: 'llama-3.3-70b-versatile',
         temperature: 0.7,
       }),
     });
@@ -675,7 +705,7 @@ app.post("/make-server-f02c4c3b/generate-ai", async (c) => {
     if (!groqResponse.ok) {
       const errText = await groqResponse.text();
       console.error('Groq API error:', errText);
-      return c.json({ error: "AI generation failed" }, 500);
+      return c.json({ error: 'AI generation failed' }, 500);
     }
 
     const result = await groqResponse.json();
@@ -684,7 +714,7 @@ app.post("/make-server-f02c4c3b/generate-ai", async (c) => {
     return c.json({ content, type });
   } catch (error) {
     console.error('AI proxy error:', error);
-    return c.json({ error: "Internal server error" }, 500);
+    return c.json({ error: 'Internal server error' }, 500);
   }
 });
 

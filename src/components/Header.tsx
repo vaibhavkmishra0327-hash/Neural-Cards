@@ -1,4 +1,15 @@
-import { Brain, Menu, X, Sun, Moon, LayoutDashboard, LogIn, ShieldAlert, Search, BookOpen } from 'lucide-react';
+import {
+  Brain,
+  Menu,
+  X,
+  Sun,
+  Moon,
+  LayoutDashboard,
+  LogIn,
+  ShieldAlert,
+  Search,
+  BookOpen,
+} from 'lucide-react';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '../context/ThemeContext';
@@ -10,10 +21,15 @@ interface HeaderProps {
   userEmail?: string;
 }
 
-export function Header({ currentPage = 'home', isAuthenticated = false, onNavigate, userEmail }: HeaderProps) {
+export function Header({
+  currentPage = 'home',
+  isAuthenticated = false,
+  onNavigate,
+  userEmail,
+}: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { isDarkMode, toggleTheme } = useTheme();
-  
+
   // Search states
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -23,7 +39,7 @@ export function Header({ currentPage = 'home', isAuthenticated = false, onNaviga
     { id: 'all-practice', label: 'Practice', icon: BookOpen },
     { id: 'paths', label: 'Learning Paths' },
     { id: 'blog', label: 'Blog' },
-    { id: 'about', label: 'About' }
+    { id: 'about', label: 'About' },
   ];
 
   const handleNavClick = (pageId: string) => {
@@ -37,10 +53,10 @@ export function Header({ currentPage = 'home', isAuthenticated = false, onNaviga
       if (onNavigate) {
         // Logic: Input "Linear Algebra" -> Slug "linear-algebra" -> Go to Practice
         const slug = searchQuery.toLowerCase().trim().replace(/ /g, '-');
-        
+
         // Seedha Practice Page par le jao
         onNavigate('practice', { slug: slug, title: searchQuery });
-        
+
         // Cleanup
         setSearchOpen(false);
         setSearchQuery('');
@@ -52,18 +68,17 @@ export function Header({ currentPage = 'home', isAuthenticated = false, onNaviga
   const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL || '';
 
   return (
-    <motion.header 
+    <motion.header
       className="sticky top-0 z-50 w-full border-b border-border bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60"
       initial={{ y: -100 }}
       animate={{ y: 0 }}
-      transition={{ duration: 0.5, type: "spring" }}
+      transition={{ duration: 0.5, type: 'spring' }}
     >
       <nav className="container mx-auto px-4 sm:px-6 lg:px-8" aria-label="Main navigation">
         <div className="flex h-16 items-center justify-between">
-          
           {/* Logo */}
-          <motion.div 
-            className="flex items-center gap-2 cursor-pointer" 
+          <motion.div
+            className="flex items-center gap-2 cursor-pointer"
             onClick={() => handleNavClick('home')}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -74,7 +89,7 @@ export function Header({ currentPage = 'home', isAuthenticated = false, onNaviga
           >
             <motion.div
               animate={{ rotate: [0, 360] }}
-              transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+              transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
               whileHover={{ scale: 1.2, rotate: 180, transition: { duration: 0.5 } }}
               className="bg-purple-600 p-1.5 rounded-lg text-white"
             >
@@ -106,31 +121,30 @@ export function Header({ currentPage = 'home', isAuthenticated = false, onNaviga
                   <motion.div
                     className="absolute -bottom-1 left-0 right-0 h-0.5 bg-purple-600 dark:bg-purple-400 rounded-full"
                     layoutId="activeNav"
-                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                    transition={{ type: 'spring', stiffness: 300, damping: 30 }}
                   />
                 )}
               </motion.button>
             ))}
 
             {userEmail === ADMIN_EMAIL && (
-                <motion.button
-                    onClick={() => handleNavClick('admin')}
-                    className={`text-sm font-bold flex items-center gap-1 transition-colors px-3 py-1 rounded-full border ${
-                        currentPage === 'admin'
-                            ? 'bg-red-500/10 text-red-600 border-red-500/50'
-                            : 'text-red-500 border-transparent hover:bg-red-500/10'
-                    }`}
-                    whileHover={{ scale: 1.05 }}
-                >
-                    <ShieldAlert className="w-4 h-4" />
-                    Admin
-                </motion.button>
+              <motion.button
+                onClick={() => handleNavClick('admin')}
+                className={`text-sm font-bold flex items-center gap-1 transition-colors px-3 py-1 rounded-full border ${
+                  currentPage === 'admin'
+                    ? 'bg-red-500/10 text-red-600 border-red-500/50'
+                    : 'text-red-500 border-transparent hover:bg-red-500/10'
+                }`}
+                whileHover={{ scale: 1.05 }}
+              >
+                <ShieldAlert className="w-4 h-4" />
+                Admin
+              </motion.button>
             )}
           </div>
 
           {/* Actions */}
           <div className="flex items-center gap-2">
-            
             {/* 👇 SEARCH BAR (Desktop) */}
             <div className="relative hidden md:flex items-center">
               <AnimatePresence>
@@ -150,7 +164,7 @@ export function Header({ currentPage = 'home', isAuthenticated = false, onNaviga
                   />
                 )}
               </AnimatePresence>
-              <motion.button 
+              <motion.button
                 onClick={() => setSearchOpen(!searchOpen)}
                 className={`p-2 rounded-full transition-colors ${searchOpen ? 'bg-purple-100 text-purple-600 dark:bg-purple-900/30' : 'text-muted-foreground hover:bg-muted'}`}
                 whileHover={{ scale: 1.1 }}
@@ -170,11 +184,23 @@ export function Header({ currentPage = 'home', isAuthenticated = false, onNaviga
             >
               <AnimatePresence mode="wait">
                 {isDarkMode ? (
-                  <motion.div key="sun" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.2 }}>
+                  <motion.div
+                    key="sun"
+                    initial={{ rotate: -90, opacity: 0 }}
+                    animate={{ rotate: 0, opacity: 1 }}
+                    exit={{ rotate: 90, opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
                     <Sun className="h-5 w-5" />
                   </motion.div>
                 ) : (
-                  <motion.div key="moon" initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }} transition={{ duration: 0.2 }}>
+                  <motion.div
+                    key="moon"
+                    initial={{ rotate: 90, opacity: 0 }}
+                    animate={{ rotate: 0, opacity: 1 }}
+                    exit={{ rotate: -90, opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
                     <Moon className="h-5 w-5" />
                   </motion.div>
                 )}
@@ -218,20 +244,19 @@ export function Header({ currentPage = 'home', isAuthenticated = false, onNaviga
         {/* Mobile Menu */}
         <AnimatePresence>
           {mobileMenuOpen && (
-            <motion.div 
+            <motion.div
               className="md:hidden border-t border-border py-4 overflow-hidden bg-background/95 backdrop-blur-xl absolute top-16 left-0 right-0 shadow-xl"
               initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
+              animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
             >
               <div className="flex flex-col gap-2 px-4 pb-4">
-                
                 {/* Mobile Search */}
                 <div className="relative mb-2">
                   <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                  <input 
-                    type="text" 
-                    placeholder="Search topics..." 
+                  <input
+                    type="text"
+                    placeholder="Search topics..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     onKeyDown={handleSearchSubmit}
@@ -244,7 +269,9 @@ export function Header({ currentPage = 'home', isAuthenticated = false, onNaviga
                     key={item.id}
                     onClick={() => handleNavClick(item.id)}
                     className={`text-left px-4 py-3 rounded-xl transition-colors ${
-                      currentPage === item.id ? 'bg-purple-500/10 text-purple-600 font-semibold' : 'text-muted-foreground hover:bg-muted'
+                      currentPage === item.id
+                        ? 'bg-purple-500/10 text-purple-600 font-semibold'
+                        : 'text-muted-foreground hover:bg-muted'
                     }`}
                     initial={{ x: -20, opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}
@@ -255,13 +282,23 @@ export function Header({ currentPage = 'home', isAuthenticated = false, onNaviga
                 ))}
 
                 {userEmail === ADMIN_EMAIL && (
-                    <motion.button onClick={() => handleNavClick('admin')} className="text-left px-4 py-3 rounded-xl text-red-500 hover:bg-red-500/10 flex items-center gap-2">
-                        <ShieldAlert className="w-4 h-4" /> Admin Panel
-                    </motion.button>
+                  <motion.button
+                    onClick={() => handleNavClick('admin')}
+                    className="text-left px-4 py-3 rounded-xl text-red-500 hover:bg-red-500/10 flex items-center gap-2"
+                  >
+                    <ShieldAlert className="w-4 h-4" /> Admin Panel
+                  </motion.button>
                 )}
-                
-                <motion.button onClick={() => handleNavClick(isAuthenticated ? 'dashboard' : 'auth')} className={`mt-2 w-full px-4 py-3 rounded-xl font-medium flex items-center justify-center gap-2 ${isAuthenticated ? 'bg-purple-600 text-white' : 'bg-foreground text-background'}`}>
-                  {isAuthenticated ? <LayoutDashboard className="w-4 h-4" /> : <LogIn className="w-4 h-4" />}
+
+                <motion.button
+                  onClick={() => handleNavClick(isAuthenticated ? 'dashboard' : 'auth')}
+                  className={`mt-2 w-full px-4 py-3 rounded-xl font-medium flex items-center justify-center gap-2 ${isAuthenticated ? 'bg-purple-600 text-white' : 'bg-foreground text-background'}`}
+                >
+                  {isAuthenticated ? (
+                    <LayoutDashboard className="w-4 h-4" />
+                  ) : (
+                    <LogIn className="w-4 h-4" />
+                  )}
                   {isAuthenticated ? 'Go to Dashboard' : 'Sign In'}
                 </motion.button>
               </div>

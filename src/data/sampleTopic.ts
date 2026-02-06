@@ -5,11 +5,13 @@ export const backpropagationTopic: Topic = {
   id: 'backpropagation',
   slug: 'backpropagation',
   title: 'Backpropagation in Neural Networks',
-  description: 'Learn how backpropagation algorithm works, the math behind it, and why it\'s fundamental to training deep learning models',
+  description:
+    "Learn how backpropagation algorithm works, the math behind it, and why it's fundamental to training deep learning models",
   category: 'Deep Learning',
   difficulty: 'intermediate',
   metaTitle: 'Backpropagation Explained: How Neural Networks Learn | NeuralCards',
-  metaDescription: 'Master backpropagation with clear explanations, formulas, Python code examples, and interactive flashcards. Learn the algorithm that powers deep learning.',
+  metaDescription:
+    'Master backpropagation with clear explanations, formulas, Python code examples, and interactive flashcards. Learn the algorithm that powers deep learning.',
   keywords: [
     'backpropagation',
     'neural network training',
@@ -18,12 +20,12 @@ export const backpropagationTopic: Topic = {
     'deep learning optimization',
     'how neural networks learn',
     'backpropagation algorithm',
-    'backprop explained'
+    'backprop explained',
   ],
   learningPath: 'deep-learning',
   estimatedMinutes: 45,
   prerequisites: ['neural-networks', 'derivatives-gradients', 'chain-rule'],
-  relatedTopics: ['gradient-descent', 'optimization-algorithms', 'activation-functions']
+  relatedTopics: ['gradient-descent', 'optimization-algorithms', 'activation-functions'],
 };
 
 export const backpropagationFlashcards: Flashcard[] = [
@@ -35,7 +37,8 @@ export const backpropagationFlashcards: Flashcard[] = [
     difficulty: 'easy',
     type: 'concept',
     tags: ['definition', 'basics'],
-    realWorldExample: 'When training a neural network to recognize cats, backpropagation calculates how much each neuron\'s weight needs to change to reduce prediction errors.'
+    realWorldExample:
+      "When training a neural network to recognize cats, backpropagation calculates how much each neuron's weight needs to change to reduce prediction errors.",
   },
   {
     id: 'bp-002',
@@ -50,7 +53,7 @@ export const backpropagationFlashcards: Flashcard[] = [
 # dz/dx = (dz/dy) * (dy/dx)
 
 # In neural networks:
-# ∂L/∂w1 = (∂L/∂a2) * (∂a2/∂z2) * (∂z2/∂a1) * (∂a1/∂z1) * (∂z1/∂w1)`
+# ∂L/∂w1 = (∂L/∂a2) * (∂a2/∂z2) * (∂z2/∂a1) * (∂a1/∂z1) * (∂z1/∂w1)`,
   },
   {
     id: 'bp-003',
@@ -59,13 +62,13 @@ export const backpropagationFlashcards: Flashcard[] = [
     back: '1. Forward pass: Compute predictions and loss\n2. Backward pass: Calculate gradients starting from output layer\n3. Update weights: Use gradients to adjust weights (gradient descent)\n4. Repeat: Iterate until convergence',
     difficulty: 'easy',
     type: 'concept',
-    tags: ['algorithm', 'steps']
+    tags: ['algorithm', 'steps'],
   },
   {
     id: 'bp-004',
     topicId: 'backpropagation',
     front: 'Write the gradient calculation for a single neuron',
-    back: 'For neuron with activation a = σ(z) where z = wx + b:\n\n∂L/∂w = ∂L/∂a × ∂a/∂z × ∂z/∂w\n       = δ × σ\'(z) × x\n\nWhere δ is the error signal from the next layer.',
+    back: "For neuron with activation a = σ(z) where z = wx + b:\n\n∂L/∂w = ∂L/∂a × ∂a/∂z × ∂z/∂w\n       = δ × σ'(z) × x\n\nWhere δ is the error signal from the next layer.",
     difficulty: 'hard',
     type: 'formula',
     tags: ['mathematics', 'gradients'],
@@ -84,7 +87,7 @@ delta_next = 0.5  # error from next layer
 
 # Gradient of loss w.r.t weight
 dL_dw = delta_next * sigmoid_derivative(z) * x
-dL_db = delta_next * sigmoid_derivative(z)`
+dL_db = delta_next * sigmoid_derivative(z)`,
   },
   {
     id: 'bp-005',
@@ -95,9 +98,9 @@ dL_db = delta_next * sigmoid_derivative(z)`
     type: 'concept',
     tags: ['efficiency', 'complexity'],
     pitfalls: [
-      'Don\'t confuse backpropagation (gradient computation) with gradient descent (weight update)',
-      'Backprop doesn\'t update weights - it only calculates gradients'
-    ]
+      "Don't confuse backpropagation (gradient computation) with gradient descent (weight update)",
+      "Backprop doesn't update weights - it only calculates gradients",
+    ],
   },
   {
     id: 'bp-006',
@@ -107,12 +110,13 @@ dL_db = delta_next * sigmoid_derivative(z)`
     difficulty: 'medium',
     type: 'concept',
     tags: ['problems', 'deep-learning'],
-    realWorldExample: 'In a 100-layer network with sigmoid activations, gradients might shrink to 10⁻⁴⁰, making the first layers essentially untrainable.',
+    realWorldExample:
+      'In a 100-layer network with sigmoid activations, gradients might shrink to 10⁻⁴⁰, making the first layers essentially untrainable.',
     pitfalls: [
       'ReLU activation helps mitigate this',
       'Skip connections (ResNet) provide gradient highways',
-      'Batch normalization also helps gradient flow'
-    ]
+      'Batch normalization also helps gradient flow',
+    ],
   },
   {
     id: 'bp-007',
@@ -167,7 +171,7 @@ y = np.array([[0], [1]])
 
 for epoch in range(1000):
     predictions = nn.forward(X)
-    nn.backward(X, y, learning_rate=0.1)`
+    nn.backward(X, y, learning_rate=0.1)`,
   },
   {
     id: 'bp-008',
@@ -178,10 +182,10 @@ for epoch in range(1000):
     type: 'concept',
     tags: ['comparison', 'interview'],
     pitfalls: [
-      'They\'re often confused but serve different purposes',
+      "They're often confused but serve different purposes",
       'You can compute gradients without updating weights',
-      'You need backprop to get gradients for gradient descent'
-    ]
+      'You need backprop to get gradients for gradient descent',
+    ],
   },
   {
     id: 'bp-009',
@@ -213,43 +217,50 @@ avg_db = total_db / batch_size
 
 # Update weights once per batch
 W -= learning_rate * avg_dW
-b -= learning_rate * avg_db`
+b -= learning_rate * avg_db`,
   },
   {
     id: 'bp-010',
     topicId: 'backpropagation',
     front: 'Why do we need the derivative of the activation function?',
-    back: 'The activation function derivative (σ\'(z)) determines how much the neuron\'s output changes with respect to its input. This is crucial for the chain rule - we need to know how the activation affects the final loss to properly propagate errors backward.',
+    back: "The activation function derivative (σ'(z)) determines how much the neuron's output changes with respect to its input. This is crucial for the chain rule - we need to know how the activation affects the final loss to properly propagate errors backward.",
     difficulty: 'medium',
     type: 'concept',
     tags: ['activation', 'derivatives'],
-    realWorldExample: 'If using ReLU, the derivative is 1 for positive inputs and 0 for negative. This means gradients pass through unchanged for active neurons but are blocked for inactive ones.'
-  }
+    realWorldExample:
+      'If using ReLU, the derivative is 1 for positive inputs and 0 for negative. This means gradients pass through unchanged for active neurons but are blocked for inactive ones.',
+  },
 ];
 
 export const backpropagationFAQs: FAQ[] = [
   {
     question: 'What is backpropagation in deep learning?',
-    answer: 'Backpropagation is the fundamental algorithm for training neural networks. It efficiently calculates how much each weight in the network contributes to the prediction error by propagating gradients backward from the output layer to the input layer using the chain rule of calculus.'
+    answer:
+      'Backpropagation is the fundamental algorithm for training neural networks. It efficiently calculates how much each weight in the network contributes to the prediction error by propagating gradients backward from the output layer to the input layer using the chain rule of calculus.',
   },
   {
     question: 'How does backpropagation work step by step?',
-    answer: 'Backpropagation works in four steps: (1) Forward pass - compute predictions layer by layer, (2) Calculate loss - compare predictions to actual values, (3) Backward pass - compute gradients by applying chain rule from output to input, (4) Update weights - use gradients with an optimizer like gradient descent to adjust weights.'
+    answer:
+      'Backpropagation works in four steps: (1) Forward pass - compute predictions layer by layer, (2) Calculate loss - compare predictions to actual values, (3) Backward pass - compute gradients by applying chain rule from output to input, (4) Update weights - use gradients with an optimizer like gradient descent to adjust weights.',
   },
   {
     question: 'What is the difference between backpropagation and gradient descent?',
-    answer: 'Backpropagation computes the gradients (derivatives of loss with respect to weights), while gradient descent uses those gradients to update the weights. Backpropagation is the "how to calculate" and gradient descent is the "how to update". They work together but serve different purposes.'
+    answer:
+      'Backpropagation computes the gradients (derivatives of loss with respect to weights), while gradient descent uses those gradients to update the weights. Backpropagation is the "how to calculate" and gradient descent is the "how to update". They work together but serve different purposes.',
   },
   {
     question: 'Why is backpropagation important for neural networks?',
-    answer: 'Before backpropagation, training deep neural networks was computationally infeasible. Backpropagation made it possible by providing an efficient O(n) algorithm to compute all gradients in one backward pass, enabling the deep learning revolution.'
+    answer:
+      'Before backpropagation, training deep neural networks was computationally infeasible. Backpropagation made it possible by providing an efficient O(n) algorithm to compute all gradients in one backward pass, enabling the deep learning revolution.',
   },
   {
     question: 'What are common problems with backpropagation?',
-    answer: 'The main problems are: (1) Vanishing gradients - gradients become too small in deep networks, (2) Exploding gradients - gradients become too large and cause instability, (3) Slow convergence in poorly initialized networks, (4) Dead neurons (especially with ReLU). Solutions include proper initialization, batch normalization, gradient clipping, and using ReLU/modern activations.'
+    answer:
+      'The main problems are: (1) Vanishing gradients - gradients become too small in deep networks, (2) Exploding gradients - gradients become too large and cause instability, (3) Slow convergence in poorly initialized networks, (4) Dead neurons (especially with ReLU). Solutions include proper initialization, batch normalization, gradient clipping, and using ReLU/modern activations.',
   },
   {
     question: 'Can you implement backpropagation in Python?',
-    answer: 'Yes, backpropagation can be implemented from scratch using NumPy. The key steps are: compute forward pass activations, calculate output layer error, propagate error backward using chain rule, compute gradients for each layer, and update weights. Modern frameworks like PyTorch and TensorFlow handle this automatically with autograd.'
-  }
+    answer:
+      'Yes, backpropagation can be implemented from scratch using NumPy. The key steps are: compute forward pass activations, calculate output layer error, propagate error backward using chain rule, compute gradients for each layer, and update weights. Modern frameworks like PyTorch and TensorFlow handle this automatically with autograd.',
+  },
 ];

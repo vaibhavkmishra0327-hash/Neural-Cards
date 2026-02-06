@@ -5,7 +5,8 @@ export const learningPaths: LearningPath[] = [
   {
     id: 'math-for-ml',
     title: 'Math for Machine Learning',
-    description: 'Master the mathematical foundations: linear algebra, calculus, probability & statistics',
+    description:
+      'Master the mathematical foundations: linear algebra, calculus, probability & statistics',
     icon: '📐',
     color: 'from-blue-500 to-cyan-500',
     topics: [
@@ -17,9 +18,9 @@ export const learningPaths: LearningPath[] = [
       'chain-rule',
       'probability-basics',
       'bayes-theorem',
-      'distributions'
+      'distributions',
     ],
-    estimatedHours: 40
+    estimatedHours: 40,
   },
   {
     id: 'python-for-ai',
@@ -34,9 +35,9 @@ export const learningPaths: LearningPath[] = [
       'data-manipulation',
       'matplotlib-basics',
       'seaborn-visualization',
-      'scikit-learn-intro'
+      'scikit-learn-intro',
     ],
-    estimatedHours: 30
+    estimatedHours: 30,
   },
   {
     id: 'machine-learning',
@@ -56,9 +57,9 @@ export const learningPaths: LearningPath[] = [
       'gradient-descent',
       'regularization',
       'cross-validation',
-      'bias-variance-tradeoff'
+      'bias-variance-tradeoff',
     ],
-    estimatedHours: 60
+    estimatedHours: 60,
   },
   {
     id: 'deep-learning',
@@ -81,9 +82,9 @@ export const learningPaths: LearningPath[] = [
       'gru',
       'attention-mechanism',
       'transformers',
-      'self-attention'
+      'self-attention',
     ],
-    estimatedHours: 80
+    estimatedHours: 80,
   },
   {
     id: 'modern-ai',
@@ -102,9 +103,9 @@ export const learningPaths: LearningPath[] = [
       'diffusion-models',
       'stable-diffusion',
       'vision-transformers',
-      'multimodal-models'
+      'multimodal-models',
     ],
-    estimatedHours: 50
+    estimatedHours: 50,
   },
   {
     id: 'mlops',
@@ -122,9 +123,9 @@ export const learningPaths: LearningPath[] = [
       'ab-testing',
       'feature-stores',
       'ml-pipelines',
-      'kubernetes-ml'
+      'kubernetes-ml',
     ],
-    estimatedHours: 45
+    estimatedHours: 45,
   },
   {
     id: 'interview-prep',
@@ -139,10 +140,10 @@ export const learningPaths: LearningPath[] = [
       'deep-learning-interview',
       'system-design-ml',
       'case-studies',
-      'behavioral-questions'
+      'behavioral-questions',
     ],
-    estimatedHours: 35
-  }
+    estimatedHours: 35,
+  },
 ];
 
 // 👇 2. YE LOGIC MISSING THA (Ise add karo tabhi match hoga)
@@ -151,7 +152,7 @@ export const learningPaths: LearningPath[] = [
 const formatTitle = (slug: string) => {
   return slug
     .split('-')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ');
 };
 
@@ -164,24 +165,24 @@ export const getLearningPath = async (slug: string) => {
 
   // 2. Topics array ko "Nodes" me convert karo
   const nodes = path.topics.map((topicSlug, index) => ({
-    id: topicSlug,               // Node ki ID
-    topic_slug: topicSlug,       // 🔥 YAHI Database se match karega
+    id: topicSlug, // Node ki ID
+    topic_slug: topicSlug, // 🔥 YAHI Database se match karega
     title: formatTitle(topicSlug), // Sundar naam display ke liye
     description: 'Tap to start learning',
     status: index === 0 ? 'unlocked' : 'locked', // Logic: Pehla khula, baaki band
     step_order: index + 1,
     // Zig-Zag Design Logic
     position_x: index % 2 === 0 ? 100 : 300,
-    position_y: (index + 1) * 160
+    position_y: (index + 1) * 160,
   }));
 
   // 3. Formatted data return karo
   return {
     ...path,
     slug: path.id, // App slug dhundta hai
-    nodes: nodes,  // Ab nodes available hain!
+    nodes: nodes, // Ab nodes available hain!
     total_nodes: nodes.length,
-    completed_nodes: 0
+    completed_nodes: 0,
   };
 };
 

@@ -2,7 +2,10 @@ import { supabase } from '../utils/supabase/client';
 import { LearningPath, PathNode } from '../types/learning-path.types';
 import { log } from '../utils/logger';
 
-export const getLearningPath = async (pathSlug: string, userId: string): Promise<LearningPath | null> => {
+export const getLearningPath = async (
+  pathSlug: string,
+  userId: string
+): Promise<LearningPath | null> => {
   try {
     // 1️⃣ Path Details Lao
     const { data: pathData, error: pathError } = await supabase
@@ -38,9 +41,8 @@ export const getLearningPath = async (pathSlug: string, userId: string): Promise
 
     // 4️⃣ Nodes + Progress Merge Karo
     const mergedNodes: PathNode[] = nodesData.map((node) => {
-      
       const userProgress = safeProgress.find((p) => p.node_id === node.id);
-      
+
       let status: 'locked' | 'unlocked' | 'completed' = 'locked';
 
       if (userProgress) {
@@ -55,23 +57,23 @@ export const getLearningPath = async (pathSlug: string, userId: string): Promise
         id: node.id,
         path_id: node.path_id,
         title: node.title,
-        description: node.description, 
+        description: node.description,
         topic_slug: node.topic_slug,
         step_order: node.step_order,
         position_x: node.position_x,
         position_y: node.position_y,
-        status: status 
+        status: status,
       };
     });
 
     // 5️⃣ Chaining Logic
     let completedCount = 0;
-    
+
     for (let i = 0; i < mergedNodes.length; i++) {
       if (mergedNodes[i].status === 'completed') {
         completedCount++;
-        if (i + 1 < mergedNodes.length && mergedNodes[i+1].status === 'locked') {
-          mergedNodes[i+1].status = 'unlocked';
+        if (i + 1 < mergedNodes.length && mergedNodes[i + 1].status === 'locked') {
+          mergedNodes[i + 1].status = 'unlocked';
         }
       }
     }
@@ -83,9 +85,8 @@ export const getLearningPath = async (pathSlug: string, userId: string): Promise
       slug: pathData.slug,
       nodes: mergedNodes,
       total_nodes: mergedNodes.length,
-      completed_nodes: completedCount
+      completed_nodes: completedCount,
     };
-
   } catch (error) {
     log.error('Unexpected error in getLearningPath:', error);
     return null;
@@ -94,14 +95,15 @@ export const getLearningPath = async (pathSlug: string, userId: string): Promise
 
 export const completeNode = async (nodeId: string, userId: string) => {
   try {
-    const { error } = await supabase
-      .from('user_path_progress')
-      .upsert({
+    const { error } = await supabase.from('user_path_progress').upsert(
+      {
         user_id: userId,
         node_id: nodeId,
         status: 'completed',
-        completed_at: new Date().toISOString()
-      }, { onConflict: 'user_id, node_id' });
+        completed_at: new Date().toISOString(),
+      },
+      { onConflict: 'user_id, node_id' }
+    );
 
     if (error) throw error;
   } catch (error) {

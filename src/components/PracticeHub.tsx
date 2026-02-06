@@ -12,16 +12,50 @@ interface PracticeHubProps {
 }
 
 // Category icons/colors
-const categoryColors: Record<string, { bg: string; text: string; border: string; gradient: string }> = {
-  'Mathematics': { bg: 'bg-blue-500/10', text: 'text-blue-600 dark:text-blue-400', border: 'border-blue-500/20', gradient: 'from-blue-500 to-cyan-500' },
-  'Programming': { bg: 'bg-green-500/10', text: 'text-green-600 dark:text-green-400', border: 'border-green-500/20', gradient: 'from-green-500 to-emerald-500' },
-  'Machine Learning': { bg: 'bg-purple-500/10', text: 'text-purple-600 dark:text-purple-400', border: 'border-purple-500/20', gradient: 'from-purple-500 to-pink-500' },
-  'Data Science': { bg: 'bg-orange-500/10', text: 'text-orange-600 dark:text-orange-400', border: 'border-orange-500/20', gradient: 'from-orange-500 to-amber-500' },
-  'Statistics': { bg: 'bg-teal-500/10', text: 'text-teal-600 dark:text-teal-400', border: 'border-teal-500/20', gradient: 'from-teal-500 to-cyan-500' },
-  'default': { bg: 'bg-gray-500/10', text: 'text-gray-600 dark:text-gray-400', border: 'border-gray-500/20', gradient: 'from-gray-500 to-slate-500' },
+const categoryColors: Record<
+  string,
+  { bg: string; text: string; border: string; gradient: string }
+> = {
+  Mathematics: {
+    bg: 'bg-blue-500/10',
+    text: 'text-blue-600 dark:text-blue-400',
+    border: 'border-blue-500/20',
+    gradient: 'from-blue-500 to-cyan-500',
+  },
+  Programming: {
+    bg: 'bg-green-500/10',
+    text: 'text-green-600 dark:text-green-400',
+    border: 'border-green-500/20',
+    gradient: 'from-green-500 to-emerald-500',
+  },
+  'Machine Learning': {
+    bg: 'bg-purple-500/10',
+    text: 'text-purple-600 dark:text-purple-400',
+    border: 'border-purple-500/20',
+    gradient: 'from-purple-500 to-pink-500',
+  },
+  'Data Science': {
+    bg: 'bg-orange-500/10',
+    text: 'text-orange-600 dark:text-orange-400',
+    border: 'border-orange-500/20',
+    gradient: 'from-orange-500 to-amber-500',
+  },
+  Statistics: {
+    bg: 'bg-teal-500/10',
+    text: 'text-teal-600 dark:text-teal-400',
+    border: 'border-teal-500/20',
+    gradient: 'from-teal-500 to-cyan-500',
+  },
+  default: {
+    bg: 'bg-gray-500/10',
+    text: 'text-gray-600 dark:text-gray-400',
+    border: 'border-gray-500/20',
+    gradient: 'from-gray-500 to-slate-500',
+  },
 };
 
-const getCategoryStyle = (category: string) => categoryColors[category] || categoryColors['default'];
+const getCategoryStyle = (category: string) =>
+  categoryColors[category] || categoryColors['default'];
 
 export function PracticeHub({ onChapterClick }: PracticeHubProps) {
   const [topics, setTopics] = useState<Topic[]>([]);
@@ -44,19 +78,20 @@ export function PracticeHub({ onChapterClick }: PracticeHubProps) {
   }, []);
 
   // Get unique categories
-  const categories = ['all', ...Array.from(new Set(topics.map(t => t.category)))];
+  const categories = ['all', ...Array.from(new Set(topics.map((t) => t.category)))];
 
   // Filter topics
-  const filteredTopics = topics.filter(topic => {
-    const matchesSearch = topic.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          topic.description?.toLowerCase().includes(searchQuery.toLowerCase());
+  const filteredTopics = topics.filter((topic) => {
+    const matchesSearch =
+      topic.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      topic.description?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory === 'all' || topic.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
   // Group by category
   const groupedTopics: Record<string, Topic[]> = {};
-  filteredTopics.forEach(topic => {
+  filteredTopics.forEach((topic) => {
     if (!groupedTopics[topic.category]) groupedTopics[topic.category] = [];
     groupedTopics[topic.category].push(topic);
   });
@@ -98,17 +133,23 @@ export function PracticeHub({ onChapterClick }: PracticeHubProps) {
             {/* Stats */}
             <div className="flex items-center justify-center gap-8 mb-8">
               <div className="text-center">
-                <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">{topics.length}</div>
+                <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+                  {topics.length}
+                </div>
                 <div className="text-sm text-gray-500 dark:text-gray-400">Chapters</div>
               </div>
               <div className="w-px h-10 bg-gray-300 dark:bg-gray-700" />
               <div className="text-center">
-                <div className="text-2xl font-bold text-pink-600 dark:text-pink-400">{totalCards}</div>
+                <div className="text-2xl font-bold text-pink-600 dark:text-pink-400">
+                  {totalCards}
+                </div>
                 <div className="text-sm text-gray-500 dark:text-gray-400">Flashcards</div>
               </div>
               <div className="w-px h-10 bg-gray-300 dark:bg-gray-700" />
               <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{categories.length - 1}</div>
+                <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                  {categories.length - 1}
+                </div>
                 <div className="text-sm text-gray-500 dark:text-gray-400">Categories</div>
               </div>
             </div>
@@ -162,7 +203,10 @@ export function PracticeHub({ onChapterClick }: PracticeHubProps) {
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
             {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div key={i} className="h-48 rounded-2xl bg-gray-200 dark:bg-gray-800 animate-pulse" />
+              <div
+                key={i}
+                className="h-48 rounded-2xl bg-gray-200 dark:bg-gray-800 animate-pulse"
+              />
             ))}
           </div>
         ) : filteredTopics.length === 0 ? (
@@ -172,7 +216,9 @@ export function PracticeHub({ onChapterClick }: PracticeHubProps) {
             className="text-center py-20"
           >
             <div className="text-6xl mb-4">🔍</div>
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">No chapters found</h3>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+              No chapters found
+            </h3>
             <p className="text-gray-500 dark:text-gray-400">Try a different search or category</p>
           </motion.div>
         ) : (
@@ -213,11 +259,15 @@ export function PracticeHub({ onChapterClick }: PracticeHubProps) {
                         whileTap={{ scale: 0.98 }}
                       >
                         {/* Hover gradient overlay */}
-                        <div className={`absolute inset-0 bg-gradient-to-br ${style.gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-300`} />
+                        <div
+                          className={`absolute inset-0 bg-gradient-to-br ${style.gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-300`}
+                        />
 
                         <div className="relative z-10">
                           {/* Category Badge */}
-                          <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${style.bg} ${style.text} mb-4`}>
+                          <div
+                            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${style.bg} ${style.text} mb-4`}
+                          >
                             <BookOpen className="w-3 h-3" />
                             {category}
                           </div>
@@ -237,7 +287,9 @@ export function PracticeHub({ onChapterClick }: PracticeHubProps) {
                           {/* Footer: Card count + Arrow */}
                           <div className="flex items-center justify-between mt-auto pt-3 border-t border-gray-100 dark:border-gray-700/50">
                             <div className="flex items-center gap-2">
-                              <div className={`w-2 h-2 rounded-full bg-gradient-to-r ${style.gradient}`} />
+                              <div
+                                className={`w-2 h-2 rounded-full bg-gradient-to-r ${style.gradient}`}
+                              />
                               <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
                                 {topic.cardCount} {topic.cardCount === 1 ? 'card' : 'cards'}
                               </span>

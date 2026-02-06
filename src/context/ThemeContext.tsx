@@ -32,19 +32,17 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
   }, [isDarkMode]);
 
   const toggleTheme = useCallback(() => {
-    setIsDarkMode(prev => !prev);
+    setIsDarkMode((prev) => !prev);
   }, []);
 
   return (
-    <ThemeContext.Provider value={{ isDarkMode, toggleTheme }}>
-      {children}
-    </ThemeContext.Provider>
+    <ThemeContext.Provider value={{ isDarkMode, toggleTheme }}>{children}</ThemeContext.Provider>
   );
 }
 
 /**
  * Hook to access theme state from any component
- * 
+ *
  * Usage:
  *   const { isDarkMode, toggleTheme } = useTheme();
  */

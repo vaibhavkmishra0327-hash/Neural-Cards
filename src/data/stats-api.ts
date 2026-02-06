@@ -15,18 +15,20 @@ export interface UserStats {
 const createInitialStats = async (userId: string) => {
   const { data, error } = await supabase
     .from('user_stats')
-    .insert([{ 
-        user_id: userId, 
+    .insert([
+      {
+        user_id: userId,
         last_study_date: new Date().toISOString(),
         cards_learned_total: 0,
         current_streak: 0,
         daily_cards_completed: 0,
         daily_goal_target: 20,
-        xp: 0
-    }])
+        xp: 0,
+      },
+    ])
     .select()
     .single();
-  
+
   if (error) log.error('Error creating stats:', error);
   return data;
 };
@@ -58,15 +60,18 @@ export const getUserStats = async (userId: string): Promise<UserStats | null> =>
 
     // Agar kal nahi padha tha aur aaj bhi nahi -> Reset streak
     if (lastDate !== today && lastDate !== yesterdayStr && lastDate !== null) {
-       // Database mein update karo
-       await supabase.from('user_stats').update({ current_streak: 0, daily_cards_completed: 0 }).eq('user_id', userId);
-       // UI ke liye return karo
-       return { ...data, current_streak: 0, daily_cards_completed: 0 };
+      // Database mein update karo
+      await supabase
+        .from('user_stats')
+        .update({ current_streak: 0, daily_cards_completed: 0 })
+        .eq('user_id', userId);
+      // UI ke liye return karo
+      return { ...data, current_streak: 0, daily_cards_completed: 0 };
     }
-    
+
     // Agar naya din hai par streak zinda hai (kal padha tha), to sirf daily count 0 dikhao
     if (lastDate === yesterdayStr) {
-       return { ...data, daily_cards_completed: 0 };
+      return { ...data, daily_cards_completed: 0 };
     }
   }
 
@@ -74,7 +79,10 @@ export const getUserStats = async (userId: string): Promise<UserStats | null> =>
 };
 
 // Debounce map: userId -> { timeout, pendingCount }
-const pendingIncrements = new Map<string, { timeout: ReturnType<typeof setTimeout>; count: number }>();
+const pendingIncrements = new Map<
+  string,
+  { timeout: ReturnType<typeof setTimeout>; count: number }
+>();
 const DEBOUNCE_MS = 2000; // 2 seconds
 
 export const incrementProgress = (userId: string, cardsCount: number = 1) => {
@@ -112,8 +120,10 @@ async function flushIncrement(userId: string, cardsCount: number) {
   }
 
   const today = new Date().toDateString();
-  const lastDate = currentStats.last_study_date ? new Date(currentStats.last_study_date).toDateString() : '';
-  
+  const lastDate = currentStats.last_study_date
+    ? new Date(currentStats.last_study_date).toDateString()
+    : '';
+
   let newStreak = currentStats.current_streak || 0;
   let newDailyCount = currentStats.daily_cards_completed || 0;
 
@@ -133,13 +143,10 @@ async function flushIncrement(userId: string, cardsCount: number) {
     daily_cards_completed: newDailyCount + cardsCount,
     current_streak: newStreak,
     last_study_date: new Date().toISOString(),
-    xp: (currentStats.xp || 0) + (cardsCount * 10)
+    xp: (currentStats.xp || 0) + cardsCount * 10,
   };
 
-  const { error } = await supabase
-    .from('user_stats')
-    .update(updateData)
-    .eq('user_id', userId);
+  const { error } = await supabase.from('user_stats').update(updateData).eq('user_id', userId);
 
   if (error) {
     log.error('Stats update failed:', error);

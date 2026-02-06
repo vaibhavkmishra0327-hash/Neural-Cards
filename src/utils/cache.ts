@@ -1,6 +1,6 @@
 /**
  * Client-Side Cache Manager
- * 
+ *
  * Implements stale-while-revalidate caching strategy with TTL
  */
 
@@ -176,10 +176,10 @@ export const CacheKeys = {
  * Cache TTLs in minutes
  */
 export const CacheTTL = {
-  PROFILE: 60,        // 1 hour
-  PROGRESS: 5,        // 5 minutes
-  STATS: 10,          // 10 minutes
-  FLASHCARDS: 10,     // 10 minutes
-  ACHIEVEMENTS: 30,   // 30 minutes
-  STREAK: 5,          // 5 minutes
+  PROFILE: 60, // 1 hour
+  PROGRESS: 5, // 5 minutes
+  STATS: 10, // 10 minutes
+  FLASHCARDS: 10, // 10 minutes
+  ACHIEVEMENTS: 30, // 30 minutes
+  STREAK: 5, // 5 minutes
 } as const;
