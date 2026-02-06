@@ -1,258 +1,172 @@
-<div align="center">
+# NeuralCards 🧠
 
-# 🧠 NeuralCards
+> An AI/ML flashcard app I built to help people (and myself) actually learn machine learning properly.
 
-### Master AI & Machine Learning with Interactive Flashcards
+**Live → [neuralcards-app.netlify.app](https://neuralcards-app.netlify.app)**
 
 [![CI](https://github.com/vaibhavkmishra0327-hash/Neural-Cards/actions/workflows/ci.yml/badge.svg)](https://github.com/vaibhavkmishra0327-hash/Neural-Cards/actions)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.6-blue?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![React](https://img.shields.io/badge/React-18.3-61DAFB?logo=react&logoColor=white)](https://react.dev/)
-[![Vite](https://img.shields.io/badge/Vite-6.4-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
-[![Supabase](https://img.shields.io/badge/Supabase-Auth%20%26%20DB-3FCF8E?logo=supabase&logoColor=white)](https://supabase.com/)
 [![Netlify Status](https://api.netlify.com/api/v1/badges/693d0c97-fe56-46d2-9743-ffcd77135f35/deploy-status)](https://app.netlify.com/projects/neuralcards-app/deploys)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-
-**NeuralCards** is a full-stack educational platform that helps you learn AI, Machine Learning, Deep Learning, and Data Science through interactive flashcards, structured learning paths, and spaced repetition — all powered by a modern React + Supabase stack.
-
-[**🚀 Live Demo**](https://neuralcards-app.netlify.app) · [**✨ Features**](#-features) · [**🛠️ Tech Stack**](#%EF%B8%8F-tech-stack) · [**⚡ Quick Start**](#-quick-start)
-
-</div>
 
 ---
 
-## ✨ Features
+## What is this?
 
-### 🎴 Interactive Flashcards
-- **Flip-to-reveal** cards with smooth animations
-- **AI-generated** flashcard content via Groq API (proxied through secure Edge Functions)
-- Topic-based practice covering **50+ AI/ML subjects**
+I was studying AI/ML and realized there's no good flashcard app specifically for it. Anki is great but making cards is painful, and most learning platforms don't have active recall built in. So I built NeuralCards — it has interactive flashcards, structured learning paths, spaced repetition, and even AI-generated content through Groq.
 
-### 🗺️ Structured Learning Paths
-Seven curated paths take you from zero to interview-ready:
-
-| # | Path | Topics |
-|---|------|--------|
-| 1 | **Math for Machine Learning** | Linear Algebra, Calculus, Probability & Statistics |
-| 2 | **Python for AI** | NumPy, Pandas, Matplotlib, Scikit-learn |
-| 3 | **Machine Learning Fundamentals** | Regression, Classification, Clustering, SVMs |
-| 4 | **Deep Learning** | Neural Networks, CNNs, RNNs, Transformers |
-| 5 | **Modern AI** | GPT, BERT, Diffusion Models, Reinforcement Learning |
-| 6 | **MLOps & Deployment** | Docker, CI/CD, Model Serving, Monitoring |
-| 7 | **Interview Preparation** | System Design, Coding Challenges, ML Case Studies |
-
-### 🔁 Spaced Repetition
-- **SM-2 algorithm** for optimal memory retention
-- Intelligent card scheduling based on your performance
-- Progress persistence across sessions
-
-### 📊 Personal Dashboard
-- Track cards studied, accuracy rates, and streaks
-- View learning path completion percentages
-- Session history and performance analytics
-
-### 📝 AI/ML Blog
-- Curated articles on trending AI topics
-- In-depth technical posts on neural networks, transformers, and more
-
-### 🔐 Authentication & Security
-- OAuth login via **Google** and **GitHub** (Supabase Auth)
-- Protected routes — guests can browse but Practice, Learning Paths, Blog, and Dashboard require login
-- API keys secured via Supabase Edge Functions (never exposed to client)
-- CORS-restricted API endpoints
-
-### 🎨 Modern UI/UX
-- **Dark / Light mode** with system preference detection
-- Fully responsive (mobile, tablet, desktop)
-- Smooth page transitions powered by Framer Motion
-- Radix UI primitives + Tailwind CSS
-- Built-in topic search
+It's a full-stack React app with Supabase on the backend. You can sign in with Google/GitHub, practice flashcards across 50+ topics, follow 7 curated learning paths from math basics to interview prep, and track your progress on a personal dashboard.
 
 ---
 
-## 🛠️ Tech Stack
+## Features
 
-| Layer | Technology |
-|-------|-----------|
-| **Frontend** | React 18, TypeScript 5.6, Vite 6.4 |
-| **Styling** | Tailwind CSS 4, Radix UI, Framer Motion |
-| **Backend** | Supabase (PostgreSQL, Auth, Edge Functions) |
-| **AI** | Groq API (via secure Edge Function proxy) |
-| **Testing** | Vitest |
-| **CI/CD** | GitHub Actions |
-| **Deployment** | Netlify |
+**Flashcards** — Flip-to-reveal cards with smooth animations. The AI can generate new cards on any topic using Groq API (proxied through Edge Functions so the API key stays safe).
+
+**Learning Paths** — I put together 7 paths that cover everything:
+1. Math for ML (linear algebra, calculus, stats)
+2. Python for AI (numpy, pandas, sklearn)
+3. ML Fundamentals (regression, classification, clustering)
+4. Deep Learning (CNNs, RNNs, transformers)
+5. Modern AI (GPT, BERT, diffusion models, RL)
+6. MLOps & Deployment (Docker, CI/CD, monitoring)
+7. Interview Prep (system design, coding, case studies)
+
+**Spaced Repetition** — Uses the SM-2 algorithm to schedule cards based on how well you know them. Cards you struggle with show up more often.
+
+**Dashboard** — Track your study streaks, accuracy, cards studied, and path completion.
+
+**Blog** — Articles on AI topics like transformers, neural networks, etc.
+
+**Dark/Light Mode** — Switches with your system preference or manually.
+
+**Auth** — Google and GitHub OAuth through Supabase. Guests can browse around but need to sign in to actually practice or access the dashboard.
 
 ---
 
-## 📁 Project Structure
+## Tech Stack
+
+- **Frontend:** React 18 + TypeScript + Vite
+- **Styling:** Tailwind CSS, Radix UI, Framer Motion
+- **Backend:** Supabase (Postgres, Auth, Edge Functions)
+- **AI:** Groq API via Edge Function proxy
+- **Testing:** Vitest
+- **CI/CD:** GitHub Actions
+- **Hosting:** Netlify
+
+---
+
+## Project Structure
 
 ```
-neuralcards/
-├── public/                  # Static assets & favicon
-├── src/
-│   ├── components/          # React components
-│   │   ├── ui/              # Reusable UI primitives (Radix-based)
-│   │   ├── HomePage.tsx     # Landing page with feature showcase
-│   │   ├── PracticeHub.tsx  # Chapter selection for practice
-│   │   ├── FlashcardPractice.tsx  # Flashcard flip & study
-│   │   ├── LearningPathList.tsx   # All learning paths overview
-│   │   ├── LearningPathView.tsx   # Single path with node map
-│   │   ├── Dashboard.tsx    # User stats & progress tracking
-│   │   ├── BlogList.tsx     # Blog articles listing
-│   │   ├── AuthPage.tsx     # Login / Sign up (OAuth)
-│   │   ├── Header.tsx       # Navigation with auth-aware items
-│   │   └── ProtectedRoute.tsx # Route guard component
-│   ├── context/             # React Context (Auth, Theme)
-│   ├── data/                # API functions, course content, learning paths
-│   ├── hooks/               # Custom React hooks
-│   ├── types/               # TypeScript type definitions
-│   ├── utils/               # Helpers (cache, logger, spaced repetition)
-│   │   └── supabase/        # Supabase client configuration
-│   ├── supabase/functions/  # Edge Functions (Hono server, AI proxy)
-│   └── App.tsx              # Root component with routing
-├── .github/workflows/       # CI pipeline (lint, type-check, test, build)
-├── tailwind.config.js
-├── vite.config.ts
-└── package.json
+src/
+├── components/
+│   ├── ui/                  -- reusable UI components (radix-based)
+│   ├── HomePage.tsx         -- landing page
+│   ├── PracticeHub.tsx      -- topic/chapter selection
+│   ├── FlashcardPractice.tsx -- the actual flashcard study screen
+│   ├── LearningPathList.tsx -- all paths overview
+│   ├── LearningPathView.tsx -- single path with progress nodes
+│   ├── Dashboard.tsx        -- stats and progress tracking
+│   ├── BlogList.tsx         -- blog listing
+│   ├── AuthPage.tsx         -- login page (OAuth)
+│   ├── Header.tsx           -- nav bar (auth-aware)
+│   └── ProtectedRoute.tsx   -- redirects guests to login
+├── context/                 -- Auth and Theme context providers
+├── data/                    -- API calls, course content, learning paths
+├── hooks/                   -- custom hooks
+├── types/                   -- TypeScript types
+├── utils/                   -- cache, logger, spaced repetition logic
+│   └── supabase/            -- supabase client setup
+├── supabase/functions/      -- edge functions (hono server, AI proxy)
+└── App.tsx                  -- root component + routing
 ```
 
 ---
 
-## ⚡ Quick Start
+## Getting Started
 
-### Prerequisites
-
-- **Node.js** 20+
-- **npm** 10+
-- A [Supabase](https://supabase.com) project (free tier works)
-
-### 1. Clone the repository
+You need **Node.js 20+** and a [Supabase](https://supabase.com) project (free tier is fine).
 
 ```bash
+# clone it
 git clone https://github.com/vaibhavkmishra0327-hash/Neural-Cards.git
 cd Neural-Cards
-```
 
-### 2. Install dependencies
-
-```bash
+# install deps
 npm install
-```
 
-### 3. Configure environment variables
+# create .env file
+# VITE_SUPABASE_URL=your_url
+# VITE_SUPABASE_ANON_KEY=your_key
+# VITE_ADMIN_EMAIL=your_email
 
-Create a `.env` file in the project root:
-
-```env
-VITE_SUPABASE_URL=your_supabase_project_url
-VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-VITE_ADMIN_EMAIL=your_admin_email@example.com
-```
-
-### 4. Start the development server
-
-```bash
+# run it
 npm run dev
 ```
 
-Open **http://localhost:5173** in your browser and start learning!
+Should open at `http://localhost:5173`.
+
+### Other Commands
+
+```bash
+npm run build         # production build
+npm run preview       # preview the build locally
+npm run test:run      # run tests
+npm run type-check    # typescript check
+npm run format:check  # prettier check
+```
 
 ---
 
-## 🧪 Scripts
+## Deployment
 
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Start development server |
-| `npm run build` | Production build |
-| `npm run preview` | Preview production build |
-| `npm run test:run` | Run all tests |
-| `npm run type-check` | TypeScript type checking |
-| `npm run format:check` | Prettier format verification |
+The app is currently live on Netlify: **https://neuralcards-app.netlify.app**
 
----
+If you want to deploy your own:
 
-## 🚀 Deployment
+1. Fork this repo
+2. Go to [Netlify](https://app.netlify.com) → Add new site → Import from GitHub
+3. Set build command to `npm run build` and publish directory to `dist`
+4. Add your `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` as env variables
+5. Deploy
 
-### Live Site
+It also works on Vercel, Railway, or any static hosting — just deploy the `dist` folder.
 
-> **https://neuralcards-app.netlify.app**
-
-### Deploy to Netlify (Recommended — Free)
-
-1. Go to **[app.netlify.com](https://app.netlify.com)** and sign in with your GitHub account
-2. Click **"Add new site"** → **"Import an existing project"** → Select the **Neural-Cards** repository
-3. Netlify auto-detects Vite — configure:
-   - **Build command:** `npm run build`
-   - **Publish directory:** `dist`
-4. Add environment variables:
-   - `VITE_SUPABASE_URL`
-   - `VITE_SUPABASE_ANON_KEY`
-5. Click **Deploy site**
-6. Your app will be live at `https://your-site.netlify.app` ✅
-
-> **Note:** After deploying, add your Netlify URL to Supabase → Authentication → URL Configuration → Redirect URLs so OAuth login works on the live site.
-
-### Alternative Platforms
-
-| Platform | How |
-|----------|-----|
-| **Vercel** | Connect repo → auto-detects Vite → add env vars → deploy |
-| **GitHub Pages** | `npm run build` → deploy `dist/` with `gh-pages` |
-| **Railway** | Connect repo → add env vars → auto-deploy |
+> **Important:** After deploying, add your site URL to Supabase → Auth → URL Configuration → Redirect URLs, otherwise OAuth won't work on the live site.
 
 ---
 
-## 🔒 Security
+## Security Stuff
 
-- **No API keys in client code** — Groq AI requests are proxied through Supabase Edge Functions
-- **OAuth only** — no password storage; authentication handled by Google/GitHub via Supabase
-- **CORS restricted** — API endpoints only accept requests from allowed origins
-- **Protected routes** — content pages require authentication; unauthenticated users are redirected to login
-- **Dev-only logging** — `console.log` calls stripped in production builds
-
----
-
-## 📸 Preview
-
-| | |
-|---|---|
-| 🏠 **Home** — Beautiful landing page with feature highlights and CTAs | 🎴 **Practice** — Flip through AI/ML flashcards with smooth animations |
-| 🗺️ **Learning Paths** — Visual node-based maps tracking your progress | 📊 **Dashboard** — Personal stats, streaks, and completion tracking |
-| 🌙 **Dark Mode** — Full dark theme with system preference detection | 📱 **Responsive** — Works perfectly on mobile, tablet, and desktop |
+- API keys are never in the client bundle — Groq requests go through Supabase Edge Functions
+- Auth is OAuth only (Google/GitHub) — I don't store any passwords
+- CORS is locked down on API endpoints
+- Protected routes redirect to login if you're not signed in
+- Console logs are stripped in production builds
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
-Contributions are welcome! Here's how:
+If you want to contribute, feel free to fork and open a PR. The usual flow:
 
-1. **Fork** the repository
-2. Create a feature branch: `git checkout -b feature/amazing-feature`
-3. Commit your changes: `git commit -m 'Add amazing feature'`
-4. Push to the branch: `git push origin feature/amazing-feature`
-5. Open a **Pull Request**
+```bash
+git checkout -b feature/your-feature
+git commit -m "add your feature"
+git push origin feature/your-feature
+```
 
----
-
-## 📄 License
-
-This project is open source under the [MIT License](LICENSE).
+Then open a pull request. I'll review it.
 
 ---
 
-## 👤 Author
+## License
 
-**Vaibhav Mishra**
-- GitHub: [@vaibhavkmishra0327-hash](https://github.com/vaibhavkmishra0327-hash)
+MIT — do whatever you want with it.
 
 ---
 
-<div align="center">
+**Made by [Vaibhav Mishra](https://github.com/vaibhavkmishra0327-hash)**
 
-⭐ **Star this repo if you found it useful!** ⭐
-
-Built with ❤️ for the AI/ML learning community
-
-</div>
+If you found this helpful, a ⭐ on the repo would mean a lot!
 
 
