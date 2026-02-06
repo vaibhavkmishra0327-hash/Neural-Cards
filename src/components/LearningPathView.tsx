@@ -91,10 +91,7 @@ export function LearningPathView({ pathSlug, userId, onBack, onNodeClick }: Lear
           const isCurrent = node.status === 'unlocked';
 
           return (
-            <div
-              key={node.id}
-              className="w-full mb-12 md:mb-16 relative z-10"
-            >
+            <div key={node.id} className="w-full mb-12 md:mb-16 relative z-10">
               {/* Mobile Layout (single column, nodes on left) */}
               <div className="flex md:hidden items-center gap-4 pl-0">
                 {/* Node Button - Mobile */}
