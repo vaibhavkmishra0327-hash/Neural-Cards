@@ -9,11 +9,12 @@
 [![React](https://img.shields.io/badge/React-18.3-61DAFB?logo=react&logoColor=white)](https://react.dev/)
 [![Vite](https://img.shields.io/badge/Vite-6.4-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
 [![Supabase](https://img.shields.io/badge/Supabase-Auth%20%26%20DB-3FCF8E?logo=supabase&logoColor=white)](https://supabase.com/)
+[![Netlify Status](https://api.netlify.com/api/v1/badges/693d0c97-fe56-46d2-9743-ffcd77135f35/deploy-status)](https://app.netlify.com/projects/neuralcards-app/deploys)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 **NeuralCards** is a full-stack educational platform that helps you learn AI, Machine Learning, Deep Learning, and Data Science through interactive flashcards, structured learning paths, and spaced repetition — all powered by a modern React + Supabase stack.
 
-[**🚀 Live Demo**](#-deployment) · [**✨ Features**](#-features) · [**🛠️ Tech Stack**](#%EF%B8%8F-tech-stack) · [**⚡ Quick Start**](#-quick-start)
+[**🚀 Live Demo**](https://neuralcards-app.netlify.app) · [**✨ Features**](#-features) · [**🛠️ Tech Stack**](#%EF%B8%8F-tech-stack) · [**⚡ Quick Start**](#-quick-start)
 
 </div>
 
@@ -78,7 +79,7 @@ Seven curated paths take you from zero to interview-ready:
 | **AI** | Groq API (via secure Edge Function proxy) |
 | **Testing** | Vitest |
 | **CI/CD** | GitHub Actions |
-| **Deployment** | Vercel |
+| **Deployment** | Netlify |
 
 ---
 
@@ -172,23 +173,30 @@ Open **http://localhost:5173** in your browser and start learning!
 
 ## 🚀 Deployment
 
-### Deploy to Vercel (Recommended — Free)
+### Live Site
 
-1. Go to **[vercel.com](https://vercel.com)** and sign in with your GitHub account
-2. Click **"Add New Project"** → Import the **Neural-Cards** repository
-3. Vercel auto-detects Vite — just add your environment variables:
+> **https://neuralcards-app.netlify.app**
+
+### Deploy to Netlify (Recommended — Free)
+
+1. Go to **[app.netlify.com](https://app.netlify.com)** and sign in with your GitHub account
+2. Click **"Add new site"** → **"Import an existing project"** → Select the **Neural-Cards** repository
+3. Netlify auto-detects Vite — configure:
+   - **Build command:** `npm run build`
+   - **Publish directory:** `dist`
+4. Add environment variables:
    - `VITE_SUPABASE_URL`
    - `VITE_SUPABASE_ANON_KEY`
-4. Click **Deploy**
-5. Your app will be live at a URL like `https://neural-cards.vercel.app` ✅
+5. Click **Deploy site**
+6. Your app will be live at `https://your-site.netlify.app` ✅
 
-> **Note:** After deploying, add your Vercel URL to Supabase → Authentication → URL Configuration → Redirect URLs so OAuth login works on the live site.
+> **Note:** After deploying, add your Netlify URL to Supabase → Authentication → URL Configuration → Redirect URLs so OAuth login works on the live site.
 
 ### Alternative Platforms
 
 | Platform | How |
 |----------|-----|
-| **Netlify** | Connect repo → auto-detects Vite → add env vars → deploy |
+| **Vercel** | Connect repo → auto-detects Vite → add env vars → deploy |
 | **GitHub Pages** | `npm run build` → deploy `dist/` with `gh-pages` |
 | **Railway** | Connect repo → add env vars → auto-deploy |
 
