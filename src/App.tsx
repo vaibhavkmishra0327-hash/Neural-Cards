@@ -1,0 +1,309 @@
+import { useState, useEffect, lazy, Suspense, useCallback } from 'react';
+import { Routes, Route, useNavigate, useLocation, useParams } from 'react-router-dom';
+import { getFlashcardsByTopic, getAllFlashcards } from './data/api';
+import { Database } from './types/database.types';
+import { AnimatePresence, motion } from 'framer-motion';
+import { useAuth } from './context/AuthContext';
+
+// Layout Components (loaded eagerly - always visible)
+import { Header } from './components/Header';
+import { Footer } from './components/Footer';
+import { ErrorBoundary } from './components/ErrorBoundary';
+import { ProtectedRoute, AdminRoute } from './components/ProtectedRoute';
+
+// Lazy-loaded Page Components (code splitting)
+const HomePage = lazy(() => import('./components/HomePage').then(m => ({ default: m.HomePage })));
+const AboutPage = lazy(() => import('./components/AboutPage').then(m => ({ default: m.AboutPage })));
+const AdminPage = lazy(() => import('./components/AdminPage').then(m => ({ default: m.AdminPage })));
+const BlogList = lazy(() => import('./components/BlogList').then(m => ({ default: m.BlogList })));
+const BlogPost = lazy(() => import('./components/BlogPost').then(m => ({ default: m.BlogPost })));
+const FlashcardPractice = lazy(() => import('./components/FlashcardPractice').then(m => ({ default: m.FlashcardPractice })));
+const AuthPage = lazy(() => import('./components/AuthPage').then(m => ({ default: m.AuthPage })));
+const Dashboard = lazy(() => import('./components/Dashboard').then(m => ({ default: m.Dashboard })));
+const LearningPathView = lazy(() => import('./components/LearningPathView').then(m => ({ default: m.LearningPathView })));
+const LearningPathList = lazy(() => import('./components/LearningPathList').then(m => ({ default: m.LearningPathList })));
+const PracticeHub = lazy(() => import('./components/PracticeHub').then(m => ({ default: m.PracticeHub })));
+
+type Flashcard = Database['public']['Tables']['flashcards']['Row'];
+
+const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL || '';
+
+// Loading Spinner for lazy-loaded pages
+const PageLoader = () => (
+  <div className="flex items-center justify-center min-h-[60vh]">
+    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+  </div>
+);
+
+const PageTransition = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, y: -20 }}
+    transition={{ duration: 0.3, ease: "easeOut" }}
+    className={className}
+  >
+    {children}
+  </motion.div>
+);
+
+// Wrapper components that extract route params
+function PracticeWrapper({ practiceCards, currentTopicTitle, isLoadingCards, handleStartPractice }: {
+  practiceCards: Flashcard[];
+  currentTopicTitle: string;
+  isLoadingCards: boolean;
+  handleStartPractice: (slug: string, title: string) => void;
+}) {
+  const { slug } = useParams();
+  const navigate = useNavigate();
+  
+  useEffect(() => {
+    if (slug && practiceCards.length === 0 && !isLoadingCards) {
+      const title = slug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+      handleStartPractice(slug, title);
+    }
+  }, [slug]);
+
+  if (isLoadingCards) return <PageLoader />;
+  
+  return (
+    <PageTransition key="practice">
+      <Suspense fallback={<PageLoader />}>
+        <FlashcardPractice 
+          topicTitle={currentTopicTitle} 
+          flashcards={practiceCards} 
+          onExit={() => navigate('/')} 
+          onComplete={() => {}} 
+        />
+      </Suspense>
+    </PageTransition>
+  );
+}
+
+function PathsWrapper({ user }: { user: User | null }) {
+  const { pathSlug } = useParams();
+  const navigate = useNavigate();
+
+  if (pathSlug) {
+    return (
+      <PageTransition key="path-view">
+        <Suspense fallback={<PageLoader />}>
+          <LearningPathView
+            pathSlug={pathSlug}
+            userId={user?.id || ''}
+            onBack={() => navigate('/paths')}
+            onNodeClick={(slug) => navigate(`/practice/${slug}`)}
+          />
+        </Suspense>
+      </PageTransition>
+    );
+  }
+
+  return (
+    <PageTransition key="path-list">
+      <Suspense fallback={<PageLoader />}>
+        <LearningPathList
+          onPathSelect={(slug) => {
+            navigate(`/paths/${slug}`);
+            window.scrollTo(0, 0);
+          }}
+        />
+      </Suspense>
+    </PageTransition>
+  );
+}
+
+function App() {
+  const { user, signOut } = useAuth();
+  const [currentTopicTitle, setCurrentTopicTitle] = useState('');
+  const [practiceCards, setPracticeCards] = useState<Flashcard[]>([]);
+  const [isLoadingCards, setIsLoadingCards] = useState(false);
+  
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Universal navigate handler for components that still use onNavigate pattern
+  const handleNavigate = useCallback((page: string, data?: Record<string, string>) => {
+    if (page === 'admin') {
+      if (!user || user.email?.toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
+        alert("⛔ Access Denied! Admins only.");
+        return;
+      }
+    }
+
+    const routeMap: Record<string, string> = {
+      'home': '/',
+      'blog': '/blog',
+      'about': '/about',
+      'auth': '/auth',
+      'dashboard': '/dashboard',
+      'admin': '/admin',
+      'paths': '/paths',
+    };
+
+    if (page === 'paths' && data?.selectedPath) {
+      navigate(`/paths/${data.selectedPath}`);
+    } else if (page === 'blog-post' && data?.slug) {
+      navigate(`/blog/${data.slug}`);
+    } else if (page === 'all-practice') {
+      navigate('/practice');
+    } else if (page === 'practice' && data?.slug) {
+      handleStartPractice(data.slug, data.title || 'Practice');
+    } else {
+      navigate(routeMap[page] || '/');
+    }
+    window.scrollTo(0, 0);
+  }, [user, navigate]);
+
+  const handleStartPractice = useCallback(async (topicSlug: string, topicTitle: string) => {
+    setIsLoadingCards(true);
+    setCurrentTopicTitle(topicTitle);
+    const cards = await getFlashcardsByTopic(topicSlug);
+    setPracticeCards(cards as Flashcard[]);
+    setIsLoadingCards(false);
+    navigate(`/practice/${topicSlug}`);
+  }, [navigate]);
+
+  const handleStartAllPractice = useCallback(async () => {
+    setIsLoadingCards(true);
+    setCurrentTopicTitle('All Flashcards Practice');
+    const cards = await getAllFlashcards();
+    setPracticeCards(cards as Flashcard[]);
+    setIsLoadingCards(false);
+    navigate('/practice/all');
+  }, [navigate]);
+
+  const handleSignOut = useCallback(async () => {
+    await signOut();
+    navigate('/');
+  }, [signOut, navigate]);
+
+  // Derive currentPage from location for Header active state
+  const getCurrentPage = (): string => {
+    const path = location.pathname;
+    if (path === '/') return 'home';
+    if (path === '/practice') return 'all-practice';
+    if (path.startsWith('/practice/')) return 'practice';
+    if (path.startsWith('/paths')) return 'paths';
+    if (path.startsWith('/blog')) return 'blog';
+    if (path.startsWith('/about')) return 'about';
+    if (path.startsWith('/auth')) return 'auth';
+    if (path.startsWith('/dashboard')) return 'dashboard';
+    if (path.startsWith('/admin')) return 'admin';
+    return 'home';
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-[#0a0a0a] text-slate-900 dark:text-white flex flex-col font-sans">
+      <Header 
+        currentPage={getCurrentPage()} 
+        isAuthenticated={!!user}
+        onNavigate={handleNavigate}
+        userEmail={user?.email} 
+      />
+
+      <main id="main-content" className="flex-grow relative" role="main" aria-label="Page content">
+        <ErrorBoundary>
+        <Suspense fallback={<PageLoader />}>
+          <AnimatePresence mode="wait">
+            <Routes location={location} key={location.pathname}>
+              <Route path="/" element={
+                <PageTransition key="home">
+                  <HomePage onNavigate={handleNavigate} isAuthenticated={!!user} />
+                </PageTransition>
+              } />
+
+              <Route path="/about" element={
+                <PageTransition key="about"><AboutPage /></PageTransition>
+              } />
+
+              <Route path="/admin" element={
+                <AdminRoute user={user}>
+                  <PageTransition key="admin"><AdminPage /></PageTransition>
+                </AdminRoute>
+              } />
+
+              <Route path="/paths" element={<PathsWrapper user={user} />} />
+              <Route path="/paths/:pathSlug" element={<PathsWrapper user={user} />} />
+
+              <Route path="/blog" element={
+                <PageTransition key="blog-list">
+                  <BlogList onNavigate={handleNavigate} />
+                </PageTransition>
+              } />
+
+              <Route path="/blog/:slug" element={
+                <BlogPostWrapper />
+              } />
+
+              <Route path="/auth" element={
+                <PageTransition key="auth">
+                  <AuthPage onAuthenticated={() => navigate('/')} onNavigate={handleNavigate} />
+                </PageTransition>
+              } />
+
+              <Route path="/practice" element={
+                <PageTransition key="practice-hub">
+                  <Suspense fallback={<PageLoader />}>
+                    <PracticeHub onChapterClick={(slug, title) => handleStartPractice(slug, title)} />
+                  </Suspense>
+                </PageTransition>
+              } />
+
+              <Route path="/practice/:slug" element={
+                <PracticeWrapper 
+                  practiceCards={practiceCards}
+                  currentTopicTitle={currentTopicTitle}
+                  isLoadingCards={isLoadingCards}
+                  handleStartPractice={handleStartPractice}
+                />
+              } />
+
+              <Route path="/dashboard" element={
+                <ProtectedRoute user={user} redirectTo="/auth">
+                  <PageTransition key="dashboard">
+                    <Dashboard user={user!} onNavigate={handleNavigate} onSignOut={handleSignOut} />
+                  </PageTransition>
+                </ProtectedRoute>
+              } />
+
+              {/* 404 fallback */}
+              <Route path="*" element={
+                <PageTransition key="404">
+                  <div className="flex items-center justify-center min-h-[60vh] text-center">
+                    <div>
+                      <h1 className="text-6xl font-bold text-purple-600 mb-4">404</h1>
+                      <p className="text-xl text-muted-foreground mb-6">Page not found</p>
+                      <button onClick={() => navigate('/')} className="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+                        Go Home
+                      </button>
+                    </div>
+                  </div>
+                </PageTransition>
+              } />
+            </Routes>
+          </AnimatePresence>
+        </Suspense>
+        </ErrorBoundary>
+      </main>
+
+      {location.pathname === '/' && <Footer onNavigate={handleNavigate} />}
+    </div>
+  );
+}
+
+// Small wrapper for blog post route
+function BlogPostWrapper() {
+  const { slug } = useParams();
+  const navigate = useNavigate();
+  if (!slug) return null;
+  return (
+    <PageTransition key="blog-post">
+      <Suspense fallback={<PageLoader />}>
+        <BlogPost slug={slug} onBack={() => navigate('/blog')} />
+      </Suspense>
+    </PageTransition>
+  );
+}
+
+export default App;

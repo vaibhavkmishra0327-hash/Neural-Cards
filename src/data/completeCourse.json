@@ -1,0 +1,167 @@
+{
+  "course": {
+    "title": "Complete Machine Learning, Deep Learning & AI Mastery Course",
+    "subtitle": "From Zero to Advanced: Master AI with Science-Backed Spaced Repetition",
+    "version": "2026.1",
+    "lastUpdated": "2026-02-01",
+    "description": "Industry-level comprehensive course covering Math for ML, Python for AI, Machine Learning, Deep Learning, Modern AI & LLMs, MLOps, and Interview Preparation. Designed for deep conceptual clarity and long-term retention.",
+    "totalHours": 450,
+    "totalTopics": 180,
+    "totalFlashcards": 2500,
+    "difficulty": "Zero to Advanced",
+    "seo": {
+      "metaTitle": "Complete Machine Learning & AI Course 2026 - Free Interactive Learning",
+      "metaDescription": "Master Machine Learning, Deep Learning, and AI from scratch. 450+ hours, 2500+ flashcards, science-backed spaced repetition. Perfect for beginners to advanced learners.",
+      "keywords": [
+        "machine learning course",
+        "deep learning tutorial",
+        "artificial intelligence learning",
+        "AI course free",
+        "learn machine learning from scratch",
+        "deep learning for beginners",
+        "AI interview preparation",
+        "MLOps tutorial",
+        "neural networks course",
+        "python for machine learning"
+      ]
+    }
+  },
+  "tracks": [
+    {
+      "id": "track-1-math-ml",
+      "title": "Math for Machine Learning",
+      "icon": "📐",
+      "description": "Master the mathematical foundations essential for understanding ML algorithms: Linear Algebra, Calculus, Probability, and Statistics.",
+      "order": 1,
+      "estimatedHours": 60,
+      "difficulty": "Beginner to Intermediate",
+      "prerequisites": "High school mathematics",
+      "learningObjectives": [
+        "Understand vectors, matrices, and tensor operations",
+        "Master derivatives, gradients, and optimization",
+        "Apply probability theory and statistical inference",
+        "Solve real ML problems using mathematical concepts"
+      ],
+      "modules": [
+        {
+          "id": "module-1-1",
+          "title": "Linear Algebra Fundamentals",
+          "order": 1,
+          "topics": [
+            {
+              "id": "topic-1-1-1",
+              "title": "Vectors and Vector Spaces",
+              "slug": "vectors-vector-spaces",
+              "difficulty": "Beginner",
+              "estimatedMinutes": 45,
+              "seo": {
+                "metaTitle": "What are Vectors in Machine Learning? Complete Guide 2026",
+                "metaDescription": "Learn vectors and vector spaces for ML. Understand what vectors are, why they matter in AI, with examples, code, and real-world applications.",
+                "keywords": ["vectors in machine learning", "what is a vector", "vector space", "linear algebra for ML"]
+              },
+              "content": {
+                "concept": "A vector is an ordered collection of numbers that represents magnitude and direction in space. In machine learning, vectors are the fundamental data structure used to represent features, weights, and data points. A vector space is a collection of vectors that can be added together and multiplied by scalars while following specific mathematical rules.",
+                "why": "Vectors are essential in ML because: (1) They represent data - each data point is a vector of features, (2) They enable efficient computation - operations on vectors are optimized in modern hardware, (3) They allow geometric interpretation - helping us visualize and understand ML algorithms, (4) They form the basis for understanding more complex structures like matrices and tensors.",
+                "intuition": "Think of a vector like a GPS coordinate with extra dimensions. Just as (latitude, longitude) pinpoints a location on Earth, a vector [height, weight, age] represents a person in 3D 'feature space'. In ML, we often work with hundreds or thousands of dimensions, where each dimension represents a different feature of our data.",
+                "keyFormulas": [
+                  {
+                    "name": "Vector Addition",
+                    "formula": "v + w = [v₁ + w₁, v₂ + w₂, ..., vₙ + wₙ]",
+                    "explanation": "Add corresponding components element-wise"
+                  },
+                  {
+                    "name": "Scalar Multiplication",
+                    "formula": "c·v = [c·v₁, c·v₂, ..., c·vₙ]",
+                    "explanation": "Multiply each component by the scalar"
+                  },
+                  {
+                    "name": "Dot Product",
+                    "formula": "v·w = v₁w₁ + v₂w₂ + ... + vₙwₙ",
+                    "explanation": "Sum of element-wise products; measures similarity"
+                  },
+                  {
+                    "name": "Vector Magnitude (L2 Norm)",
+                    "formula": "||v|| = √(v₁² + v₂² + ... + vₙ²)",
+                    "explanation": "Length of the vector; Euclidean distance from origin"
+                  }
+                ],
+                "visualExplanation": "Visualize a 2D vector [3, 4] as an arrow starting from origin (0,0) and pointing to (3,4). The arrow's length is √(3²+4²)=5, representing magnitude. The arrow's direction shows orientation. When adding vectors, place them tip-to-tail; the result is the arrow from the first tail to the last tip. This geometric view extends to higher dimensions conceptually.",
+                "codeExample": {
+                  "language": "python",
+                  "code": "import numpy as np\n\n# Creating vectors\nv = np.array([3, 4])\nw = np.array([1, 2])\n\nprint(f\"Vector v: {v}\")\nprint(f\"Vector w: {w}\")\n\n# Vector addition\nv_plus_w = v + w\nprint(f\"\\nv + w = {v_plus_w}\")  # [4, 6]\n\n# Scalar multiplication\nscalar = 2\nscaled_v = scalar * v\nprint(f\"\\n2 * v = {scaled_v}\")  # [6, 8]\n\n# Dot product (measures similarity/projection)\ndot_product = np.dot(v, w)\nprint(f\"\\nv · w = {dot_product}\")  # 3*1 + 4*2 = 11\n\n# Vector magnitude (length)\nmagnitude_v = np.linalg.norm(v)\nprint(f\"\\n||v|| = {magnitude_v:.2f}\")  # 5.0\n\n# Unit vector (normalized - length 1)\nunit_v = v / magnitude_v\nprint(f\"\\nUnit vector: {unit_v}\")\nprint(f\"Magnitude of unit vector: {np.linalg.norm(unit_v):.2f}\")  # 1.0\n\n# Real ML example: Computing similarity between documents\ndoc1_features = np.array([2, 3, 1])  # Word frequencies\ndoc2_features = np.array([1, 2, 3])\n\n# Cosine similarity (used in recommendation systems)\ncos_sim = np.dot(doc1_features, doc2_features) / (np.linalg.norm(doc1_features) * np.linalg.norm(doc2_features))\nprint(f\"\\nDocument similarity: {cos_sim:.3f}\")  # Ranges from -1 to 1",
+                  "explanation": "This code demonstrates fundamental vector operations used daily in ML: addition for combining features, scalar multiplication for scaling, dot products for computing similarity, and normalization for standardization. The document similarity example shows real-world application in recommendation systems."
+                },
+                "commonMistakes": [
+                  {
+                    "mistake": "Confusing vector shape: row vs column vectors",
+                    "why": "In numpy, [1,2,3] is 1D. For true column vector use [[1],[2],[3]] or reshape",
+                    "correction": "Always check shape with .shape and use reshape() when needed"
+                  },
+                  {
+                    "mistake": "Using lists instead of numpy arrays for vector math",
+                    "why": "[1,2] + [3,4] in Python concatenates to [1,2,3,4], not element-wise addition",
+                    "correction": "Use numpy arrays: np.array([1,2]) + np.array([3,4]) gives [4,6]"
+                  },
+                  {
+                    "mistake": "Forgetting to normalize vectors when computing cosine similarity",
+                    "why": "Dot product alone doesn't give similarity; must divide by magnitudes",
+                    "correction": "Use: np.dot(v,w) / (np.linalg.norm(v) * np.linalg.norm(w))"
+                  }
+                ],
+                "realWorldApplications": [
+                  {
+                    "application": "Recommendation Systems",
+                    "description": "Netflix/Amazon use vectors to represent users and items. Dot product measures preference similarity.",
+                    "example": "User vector [action:5, comedy:2, drama:3] · Movie vector [action:4, comedy:1, drama:5] = high score means recommend"
+                  },
+                  {
+                    "application": "Image Classification",
+                    "description": "Each image is flattened into a vector. A 28×28 image becomes a 784-dimensional vector.",
+                    "example": "MNIST digit images are 784-D vectors fed to neural networks"
+                  },
+                  {
+                    "application": "Natural Language Processing",
+                    "description": "Words and sentences are embedded as vectors (Word2Vec, BERT). Similar words have similar vectors.",
+                    "example": "vector('king') - vector('man') + vector('woman') ≈ vector('queen')"
+                  }
+                ],
+                "interviewQuestions": [
+                  {
+                    "question": "What is the geometric interpretation of the dot product?",
+                    "answer": "The dot product v·w equals ||v|| × ||w|| × cos(θ), where θ is the angle between vectors. It measures how much one vector projects onto another. When dot product is positive, vectors point in similar directions; negative means opposite; zero means perpendicular.",
+                    "difficulty": "Intermediate"
+                  },
+                  {
+                    "question": "Why do we normalize feature vectors in machine learning?",
+                    "answer": "Normalization ensures features are on the same scale, preventing features with larger ranges from dominating. For example, 'salary' (0-200k) would overwhelm 'age' (0-100) without normalization. It also makes distance metrics like Euclidean distance meaningful and speeds up gradient descent convergence.",
+                    "difficulty": "Intermediate"
+                  },
+                  {
+                    "question": "How is the L1 norm different from L2 norm, and when to use each?",
+                    "answer": "L1 norm (Manhattan): sum of absolute values |v₁|+|v₂|+...; creates sparse solutions. L2 norm (Euclidean): sqrt of sum of squares; penalizes large values more. Use L1 for feature selection (Lasso), L2 for weight decay (Ridge). L2 is differentiable at zero, L1 is not.",
+                    "difficulty": "Advanced"
+                  }
+                ],
+                "seoFAQs": [
+                  {
+                    "question": "What is a vector in machine learning?",
+                    "answer": "In machine learning, a vector is an ordered array of numbers representing data points, features, or model parameters. Each element corresponds to a specific feature or dimension."
+                  },
+                  {
+                    "question": "Why are vectors important in AI?",
+                    "answer": "Vectors are fundamental to AI because they enable mathematical representation of data, efficient computation using linear algebra, and geometric interpretation of ML algorithms."
+                  },
+                  {
+                    "question": "What's the difference between a vector and a matrix?",
+                    "answer": "A vector is a 1-dimensional array of numbers, while a matrix is a 2-dimensional array. Vectors represent single data points or features; matrices represent multiple vectors or transformations."
+                  }
+                ],
+                "summary": "Vectors are the fundamental building blocks of ML, representing data as ordered collections of numbers. Key operations include addition, scalar multiplication, dot product (similarity), and magnitude calculation. Understanding vectors geometrically helps interpret ML algorithms. Always use numpy arrays for vector operations, normalize when comparing, and remember that most ML operations are vector/matrix operations under the hood."
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
