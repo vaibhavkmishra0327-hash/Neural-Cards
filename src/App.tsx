@@ -262,19 +262,42 @@ function App() {
                   }
                 />
 
-                <Route path="/paths" element={<PathsWrapper user={user} />} />
-                <Route path="/paths/:pathSlug" element={<PathsWrapper user={user} />} />
+                <Route
+                  path="/paths"
+                  element={
+                    <ProtectedRoute user={user} redirectTo="/auth">
+                      <PathsWrapper user={user} />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/paths/:pathSlug"
+                  element={
+                    <ProtectedRoute user={user} redirectTo="/auth">
+                      <PathsWrapper user={user} />
+                    </ProtectedRoute>
+                  }
+                />
 
                 <Route
                   path="/blog"
                   element={
-                    <PageTransition key="blog-list">
-                      <BlogList onNavigate={handleNavigate} />
-                    </PageTransition>
+                    <ProtectedRoute user={user} redirectTo="/auth">
+                      <PageTransition key="blog-list">
+                        <BlogList onNavigate={handleNavigate} />
+                      </PageTransition>
+                    </ProtectedRoute>
                   }
                 />
 
-                <Route path="/blog/:slug" element={<BlogPostWrapper />} />
+                <Route
+                  path="/blog/:slug"
+                  element={
+                    <ProtectedRoute user={user} redirectTo="/auth">
+                      <BlogPostWrapper />
+                    </ProtectedRoute>
+                  }
+                />
 
                 <Route
                   path="/auth"
@@ -288,25 +311,29 @@ function App() {
                 <Route
                   path="/practice"
                   element={
-                    <PageTransition key="practice-hub">
-                      <Suspense fallback={<PageLoader />}>
-                        <PracticeHub
-                          onChapterClick={(slug, title) => handleStartPractice(slug, title)}
-                        />
-                      </Suspense>
-                    </PageTransition>
+                    <ProtectedRoute user={user} redirectTo="/auth">
+                      <PageTransition key="practice-hub">
+                        <Suspense fallback={<PageLoader />}>
+                          <PracticeHub
+                            onChapterClick={(slug, title) => handleStartPractice(slug, title)}
+                          />
+                        </Suspense>
+                      </PageTransition>
+                    </ProtectedRoute>
                   }
                 />
 
                 <Route
                   path="/practice/:slug"
                   element={
-                    <PracticeWrapper
-                      practiceCards={practiceCards}
-                      currentTopicTitle={currentTopicTitle}
-                      isLoadingCards={isLoadingCards}
-                      handleStartPractice={handleStartPractice}
-                    />
+                    <ProtectedRoute user={user} redirectTo="/auth">
+                      <PracticeWrapper
+                        practiceCards={practiceCards}
+                        currentTopicTitle={currentTopicTitle}
+                        isLoadingCards={isLoadingCards}
+                        handleStartPractice={handleStartPractice}
+                      />
+                    </ProtectedRoute>
                   }
                 />
 
