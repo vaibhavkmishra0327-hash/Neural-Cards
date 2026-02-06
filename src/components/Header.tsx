@@ -145,35 +145,37 @@ export function Header({
 
           {/* Actions */}
           <div className="flex items-center gap-2">
-            {/* 👇 SEARCH BAR (Desktop) */}
-            <div className="relative hidden md:flex items-center">
-              <AnimatePresence>
-                {searchOpen && (
-                  <motion.input
-                    initial={{ width: 0, opacity: 0 }}
-                    animate={{ width: 200, opacity: 1 }}
-                    exit={{ width: 0, opacity: 0 }}
-                    transition={{ duration: 0.3 }}
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    onKeyDown={handleSearchSubmit}
-                    placeholder="Search topic..."
-                    className="bg-secondary/50 border border-border rounded-full px-4 py-1.5 text-sm outline-none focus:ring-2 focus:ring-purple-500 mr-2"
-                    autoFocus
-                  />
-                )}
-              </AnimatePresence>
-              <motion.button
-                onClick={() => setSearchOpen(!searchOpen)}
-                className={`p-2 rounded-full transition-colors ${searchOpen ? 'bg-purple-100 text-purple-600 dark:bg-purple-900/30' : 'text-muted-foreground hover:bg-muted'}`}
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                title="Search Topics"
-              >
-                <Search className="w-5 h-5" />
-              </motion.button>
-            </div>
+            {/* 👇 SEARCH BAR (Desktop) - Only for authenticated users */}
+            {isAuthenticated && (
+              <div className="relative hidden md:flex items-center">
+                <AnimatePresence>
+                  {searchOpen && (
+                    <motion.input
+                      initial={{ width: 0, opacity: 0 }}
+                      animate={{ width: 200, opacity: 1 }}
+                      exit={{ width: 0, opacity: 0 }}
+                      transition={{ duration: 0.3 }}
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onKeyDown={handleSearchSubmit}
+                      placeholder="Search topic..."
+                      className="bg-secondary/50 border border-border rounded-full px-4 py-1.5 text-sm outline-none focus:ring-2 focus:ring-purple-500 mr-2"
+                      autoFocus
+                    />
+                  )}
+                </AnimatePresence>
+                <motion.button
+                  onClick={() => setSearchOpen(!searchOpen)}
+                  className={`p-2 rounded-full transition-colors ${searchOpen ? 'bg-purple-100 text-purple-600 dark:bg-purple-900/30' : 'text-muted-foreground hover:bg-muted'}`}
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  title="Search Topics"
+                >
+                  <Search className="w-5 h-5" />
+                </motion.button>
+              </div>
+            )}
 
             {/* Theme Toggle */}
             <motion.button
@@ -251,18 +253,20 @@ export function Header({
               exit={{ height: 0, opacity: 0 }}
             >
               <div className="flex flex-col gap-2 px-4 pb-4">
-                {/* Mobile Search */}
-                <div className="relative mb-2">
-                  <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                  <input
-                    type="text"
-                    placeholder="Search topics..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    onKeyDown={handleSearchSubmit}
-                    className="w-full bg-secondary/50 border border-border rounded-xl pl-9 pr-4 py-2 text-sm outline-none focus:ring-2 focus:ring-purple-500"
-                  />
-                </div>
+                {/* Mobile Search - Only for authenticated users */}
+                {isAuthenticated && (
+                  <div className="relative mb-2">
+                    <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <input
+                      type="text"
+                      placeholder="Search topics..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onKeyDown={handleSearchSubmit}
+                      className="w-full bg-secondary/50 border border-border rounded-xl pl-9 pr-4 py-2 text-sm outline-none focus:ring-2 focus:ring-purple-500"
+                    />
+                  </div>
+                )}
 
                 {navItems.map((item, index) => (
                   <motion.button
