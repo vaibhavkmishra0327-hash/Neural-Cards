@@ -138,7 +138,7 @@ export function LearningPathList({ onPathSelect }: LearningPathListProps) {
                   <span>{path.duration}</span>
                 </div>
 
-                <div className="flex items-center gap-1 text-sm font-medium text-blue-600 dark:text-purple-500 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">
+                <div className="flex items-center gap-1 text-sm font-medium text-blue-600 dark:text-purple-500 opacity-100 md:opacity-0 md:-translate-x-2 md:group-hover:opacity-100 md:group-hover:translate-x-0 transition-all duration-300">
                   <span>Start</span>
                   <ArrowRight className="w-4 h-4" />
                 </div>

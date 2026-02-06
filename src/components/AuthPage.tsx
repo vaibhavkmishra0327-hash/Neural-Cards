@@ -117,7 +117,7 @@ export function AuthPage({ onAuthenticated, onNavigate }: AuthPageProps) {
       {/* Main Card Container (Light/Dark Compatible) */}
       <div className="w-full max-w-5xl bg-white dark:bg-slate-900 rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row border border-gray-200 dark:border-slate-800 transition-colors duration-300">
         {/* Left Side: Artistic/Branding Section (Always Vibrant) */}
-        <div className="md:w-1/2 bg-gradient-to-br from-purple-600 to-blue-600 p-12 flex flex-col justify-between relative overflow-hidden text-white">
+        <div className="md:w-1/2 bg-gradient-to-br from-purple-600 to-blue-600 p-6 sm:p-8 md:p-12 flex flex-col justify-between relative overflow-hidden text-white">
           {/* Abstract Pattern Overlay */}
           <div className="absolute top-0 left-0 w-full h-full opacity-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white via-transparent to-transparent"></div>
 
@@ -129,7 +129,7 @@ export function AuthPage({ onAuthenticated, onNavigate }: AuthPageProps) {
               <ArrowLeft className="w-4 h-4" /> Back to Home
             </button>
 
-            <h2 className="text-4xl font-bold mb-4 drop-shadow-md">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 drop-shadow-md">
               {isLogin ? 'Welcome Back!' : 'Join the Revolution'}
             </h2>
             <p className="text-purple-100 text-lg leading-relaxed drop-shadow-sm">

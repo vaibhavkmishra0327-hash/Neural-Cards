@@ -131,7 +131,7 @@ export function PracticeHub({ onChapterClick }: PracticeHubProps) {
             </p>
 
             {/* Stats */}
-            <div className="flex items-center justify-center gap-8 mb-8">
+            <div className="flex items-center justify-center gap-4 sm:gap-8 mb-8">
               <div className="text-center">
                 <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
                   {topics.length}

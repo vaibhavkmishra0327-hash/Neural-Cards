@@ -69,7 +69,7 @@ export function Header({
 
   return (
     <motion.header
-      className="sticky top-0 z-50 w-full border-b border-border bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60"
+      className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur-md"
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{ duration: 0.5, type: 'spring' }}
@@ -247,7 +247,7 @@ export function Header({
         <AnimatePresence>
           {mobileMenuOpen && (
             <motion.div
-              className="md:hidden border-t border-border py-4 overflow-hidden bg-background/95 backdrop-blur-xl absolute top-16 left-0 right-0 shadow-xl"
+              className="md:hidden border-t border-border py-4 overflow-hidden bg-background backdrop-blur-xl absolute top-16 left-0 right-0 shadow-xl z-50"
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
@@ -272,10 +272,10 @@ export function Header({
                   <motion.button
                     key={item.id}
                     onClick={() => handleNavClick(item.id)}
-                    className={`text-left px-4 py-3 rounded-xl transition-colors ${
+                    className={`text-left px-4 py-3 rounded-xl transition-colors text-base ${
                       currentPage === item.id
-                        ? 'bg-purple-500/10 text-purple-600 font-semibold'
-                        : 'text-muted-foreground hover:bg-muted'
+                        ? 'bg-purple-500/10 text-purple-600 dark:text-purple-400 font-semibold'
+                        : 'text-foreground/80 hover:bg-muted hover:text-foreground'
                     }`}
                     initial={{ x: -20, opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}

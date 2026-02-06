@@ -62,7 +62,7 @@ export function Dashboard({ user, onNavigate, onSignOut }: DashboardProps) {
       {/* Header Section */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4">
         <div>
-          <h1 className="text-3xl font-bold flex items-center gap-3">
+          <h1 className="text-2xl sm:text-3xl font-bold flex flex-wrap items-center gap-2 sm:gap-3">
             Welcome back,{' '}
             <span className="bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent">
               {user?.email?.split('@')[0] || 'Learner'}
