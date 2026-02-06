@@ -2,6 +2,7 @@
       "name": "neuralcards",
       "version": "1.0.0",
       "private": true,
+      "type": "module",
       "dependencies": {
             "@google/generative-ai": "^0.24.1",
             "@jsr/supabase__supabase-js": "^2.49.8",
