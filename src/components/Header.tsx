@@ -34,15 +34,13 @@ export function Header({
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const allNavItems = [
-    { id: 'home', label: 'Home', requiresAuth: false },
-    { id: 'all-practice', label: 'Practice', icon: BookOpen, requiresAuth: true },
-    { id: 'paths', label: 'Learning Paths', requiresAuth: true },
-    { id: 'blog', label: 'Blog', requiresAuth: true },
-    { id: 'about', label: 'About', requiresAuth: false },
+  const navItems = [
+    { id: 'home', label: 'Home' },
+    { id: 'all-practice', label: 'Practice', icon: BookOpen },
+    { id: 'paths', label: 'Learning Paths' },
+    { id: 'blog', label: 'Blog' },
+    { id: 'about', label: 'About' },
   ];
-
-  const navItems = allNavItems.filter((item) => !item.requiresAuth || isAuthenticated);
 
   const handleNavClick = (pageId: string) => {
     if (onNavigate) onNavigate(pageId);
