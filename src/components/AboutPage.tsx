@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Brain, Zap, Target, Github } from 'lucide-react'; // Twitter hata diya
+import { Brain, Zap, Target, Github, Linkedin } from 'lucide-react';
 
 export function AboutPage() {
   return (
@@ -69,7 +69,6 @@ export function AboutPage() {
           CSS, and Supabase.
         </p>
         <div className="flex justify-center gap-4">
-          {/* 👇 GitHub Link Updated */}
           <a
             href="https://github.com/vaibhavkmishra0327-hash"
             target="_blank"
@@ -77,7 +76,16 @@ export function AboutPage() {
             className="flex items-center gap-2 px-6 py-3 bg-zinc-900 dark:bg-white text-white dark:text-black rounded-full font-medium hover:opacity-90 transition-opacity"
           >
             <Github className="w-5 h-5" />
-            GitHub Profile
+            GitHub
+          </a>
+          <a
+            href="https://www.linkedin.com/in/vaibhav-kumar-mishra-084049357"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-full font-medium hover:opacity-90 transition-opacity"
+          >
+            <Linkedin className="w-5 h-5" />
+            LinkedIn
           </a>
         </div>
       </div>

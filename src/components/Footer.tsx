@@ -1,4 +1,4 @@
-import { Brain, Twitter, Github, Linkedin, Mail, Heart } from 'lucide-react';
+import { Brain, Github, Linkedin, Mail, Heart } from 'lucide-react';
 
 interface FooterProps {
   onNavigate?: (page: string) => void;
@@ -52,14 +52,16 @@ export function Footer({ onNavigate }: FooterProps) {
 
             {/* Social Links */}
             <div className="flex gap-4 pt-2">
-              <SocialLink href="#" icon={<Twitter className="h-5 w-5" />} />
               <SocialLink
                 href="https://github.com/vaibhavkmishra0327-hash"
                 icon={<Github className="h-5 w-5" />}
               />
-              <SocialLink href="#" icon={<Linkedin className="h-5 w-5" />} />
               <SocialLink
-                href="mailto:contact@neuralcards.com"
+                href="https://www.linkedin.com/in/vaibhav-kumar-mishra-084049357"
+                icon={<Linkedin className="h-5 w-5" />}
+              />
+              <SocialLink
+                href="mailto:vaibhavkmishra0327@gmail.com"
                 icon={<Mail className="h-5 w-5" />}
               />
             </div>
