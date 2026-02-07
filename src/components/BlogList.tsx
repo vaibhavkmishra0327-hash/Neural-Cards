@@ -57,17 +57,17 @@ export function BlogList({ onNavigate }: BlogListProps) {
           title: 'Tech Blog & AI Insights | NeuralCards',
           description:
             'Deep dives into AI, Machine Learning, Deep Learning and Software Engineering concepts. AI-generated articles curated for learners.',
-          canonical: 'https://neuralcards-app.netlify.app/blog',
+          canonical: 'https://neural-cards.vercel.app/blog',
           schema: {
             '@context': 'https://schema.org',
             '@type': 'Blog',
             name: 'NeuralCards Tech Blog',
             description: 'Deep dives into AI, Machine Learning, and Software Engineering concepts.',
-            url: 'https://neuralcards-app.netlify.app/blog',
+            url: 'https://neural-cards.vercel.app/blog',
             publisher: {
               '@type': 'Organization',
               name: 'NeuralCards',
-              url: 'https://neuralcards-app.netlify.app',
+              url: 'https://neural-cards.vercel.app',
             },
           },
         }}

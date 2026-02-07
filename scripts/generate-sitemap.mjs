@@ -33,7 +33,7 @@ const SUPABASE_URL =
   process.env.VITE_SUPABASE_URL || 'https://umifkcactdapufybaecy.supabase.co';
 const SUPABASE_ANON_KEY = process.env.VITE_SUPABASE_ANON_KEY || '';
 
-const BASE_URL = 'https://neuralcards-app.netlify.app';
+const BASE_URL = 'https://neural-cards.vercel.app';
 const today = new Date().toISOString().split('T')[0];
 
 // Static routes

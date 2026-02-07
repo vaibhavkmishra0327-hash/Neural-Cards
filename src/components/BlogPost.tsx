@@ -75,7 +75,7 @@ export function BlogPost({ slug, onBack }: BlogPostProps) {
     );
   }
 
-  const postUrl = `https://neuralcards-app.netlify.app/blog/${slug}`;
+  const postUrl = `https://neural-cards.vercel.app/blog/${slug}`;
   const postDescription = post.content
     .replace(/[#*`\[\]]/g, '')
     .slice(0, 160)
@@ -113,7 +113,7 @@ export function BlogPost({ slug, onBack }: BlogPostProps) {
           title: `${post.title} | NeuralCards Blog`,
           description: postDescription,
           canonical: postUrl,
-          ogImage: `https://neuralcards-app.netlify.app/og-default.png`,
+          ogImage: `https://neural-cards.vercel.app/og-default.png`,
           schema: {
             '@context': 'https://schema.org',
             '@type': 'Article',
@@ -129,7 +129,7 @@ export function BlogPost({ slug, onBack }: BlogPostProps) {
             publisher: {
               '@type': 'Organization',
               name: 'NeuralCards',
-              url: 'https://neuralcards-app.netlify.app',
+              url: 'https://neural-cards.vercel.app',
             },
             mainEntityOfPage: {
               '@type': 'WebPage',

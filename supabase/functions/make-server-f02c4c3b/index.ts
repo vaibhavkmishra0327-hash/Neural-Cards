@@ -30,6 +30,7 @@ app.use(
       'https://neuralcards.com',
       'https://www.neuralcards.com',
       'https://neuralcards-app.netlify.app',
+      'https://neural-cards.vercel.app',
     ],
     allowHeaders: ['Content-Type', 'Authorization', 'apikey'],
     allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],

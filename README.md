@@ -2,10 +2,9 @@
 
 > An AI/ML flashcard app I built to help people (and myself) actually learn machine learning properly.
 
-**Live → [neuralcards-app.netlify.app](https://neuralcards-app.netlify.app)**
+**Live → [neural-cards.vercel.app](https://neural-cards.vercel.app)**
 
 [![CI](https://github.com/vaibhavkmishra0327-hash/Neural-Cards/actions/workflows/ci.yml/badge.svg)](https://github.com/vaibhavkmishra0327-hash/Neural-Cards/actions)
-[![Netlify Status](https://api.netlify.com/api/v1/badges/693d0c97-fe56-46d2-9743-ffcd77135f35/deploy-status)](https://app.netlify.com/projects/neuralcards-app/deploys)
 
 ---
 
