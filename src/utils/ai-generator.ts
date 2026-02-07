@@ -63,10 +63,17 @@ export const generateContentWithGroq = async (
   const { systemPrompt, userPrompt } = buildPrompts(topicName, type);
 
   try {
-    // Get user session for auth header
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
+    // Get a FRESH user session — getSession() can return expired tokens from memory
+    // refreshSession() forces a token refresh so Supabase gateway accepts the JWT
+    let session: { access_token: string } | null = null;
+
+    const { data: currentSession } = await supabase.auth.getSession();
+    if (currentSession?.session?.access_token) {
+      // Try refreshing to ensure the token is valid
+      const { data: refreshed } = await supabase.auth.refreshSession();
+      session = refreshed?.session ?? currentSession.session;
+    }
+
     if (!session?.access_token) {
       const msg = 'No auth session found. Please log in first.';
       log.error(msg);
