@@ -40,6 +40,7 @@ export type Database = {
           title: string;
           description: string | null;
           category: string;
+          learning_path: string | null;
           created_at: string;
         };
         Insert: {
@@ -48,6 +49,7 @@ export type Database = {
           title: string;
           description?: string | null;
           category: string;
+          learning_path?: string | null;
           created_at?: string;
         };
         Update: {
@@ -56,6 +58,7 @@ export type Database = {
           title?: string;
           description?: string | null;
           category?: string;
+          learning_path?: string | null;
           created_at?: string;
         };
         Relationships: [];

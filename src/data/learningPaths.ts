@@ -213,6 +213,6 @@ export const getLearningPath = async (slug: string) => {
 
 // Mock function progress ke liye
 export const completeNode = async (nodeId: string, _userId: string) => {
-  console.log('Completed:', nodeId);
+  console.warn('Completed:', nodeId);
   return Promise.resolve();
 };

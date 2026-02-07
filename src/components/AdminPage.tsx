@@ -136,15 +136,13 @@ export function AdminPage() {
           .replace(/[^a-z0-9-]/g, '');
 
     // 1. Save Topic Metadata
-    const topicInsert: Record<string, string> = {
+    const topicInsert = {
       title: topic,
       slug: topicSlug,
-      category: 'AI/ML',
+      category: 'AI/ML' as const,
       description: contentType === 'blog' ? 'Detailed Blog Post' : `Flashcards for ${topic}`,
+      ...(selectedPath && contentType === 'flashcard' ? { learning_path: selectedPath } : {}),
     };
-    if (selectedPath && contentType === 'flashcard') {
-      topicInsert.learning_path = selectedPath;
-    }
 
     const { data: topicData, error: topicError } = await supabaseClient
       .from('topics')
