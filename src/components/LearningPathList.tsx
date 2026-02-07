@@ -6,6 +6,7 @@ import {
   Brain,
   Zap,
   Rocket,
+  Briefcase,
   ArrowRight,
   Clock,
   BookOpen,
@@ -73,6 +74,16 @@ export function LearningPathList({ onPathSelect }: LearningPathListProps) {
       duration: '~45 hours',
       icon: <Rocket className="w-8 h-8 text-orange-500" />,
       color: 'border-orange-500/20 bg-orange-500/5',
+    },
+    {
+      id: 'interview-prep',
+      title: 'Interview Preparation',
+      description:
+        'Ace ML/AI interviews with curated questions, coding challenges & system design.',
+      topicsCount: '7 Topics',
+      duration: '~35 hours',
+      icon: <Briefcase className="w-8 h-8 text-rose-500" />,
+      color: 'border-rose-500/20 bg-rose-500/5',
     },
   ];
 

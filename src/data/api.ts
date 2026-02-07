@@ -1,6 +1,7 @@
 import { supabase } from '../utils/supabase/client';
 import { Database } from '../types/database.types';
 import { learningPaths } from './learningPaths';
+import { localFlashcardDB } from './flashcardContent';
 import { log } from '../utils/logger';
 
 type Topic = Database['public']['Tables']['topics']['Row'];
@@ -19,36 +20,44 @@ export const getTopics = async () => {
   return data;
 };
 
-// 2. Flashcards fetch karna
+// 2. Flashcards fetch karna (with local fallback)
 export const getFlashcardsByTopic = async (slug: string) => {
   log.info('Fetching topic for slug:', slug);
 
-  // Step A: Topic ID nikalo
-  const { data: topicData, error: topicError } = await supabase
-    .from('topics')
-    .select('*')
-    .eq('slug', slug)
-    .single();
+  try {
+    // Step A: Topic ID nikalo from Supabase
+    const { data: topicData, error: topicError } = await supabase
+      .from('topics')
+      .select('*')
+      .eq('slug', slug)
+      .single();
 
-  const topic = topicData as Topic | null;
+    const topic = topicData as Topic | null;
 
-  if (topicError || !topic) {
-    log.warn('Topic not found in DB:', slug);
-    return [];
+    if (!topicError && topic) {
+      // Step B: Flashcards from Supabase
+      const { data: cards, error } = await supabase
+        .from('flashcards')
+        .select('*')
+        .eq('topic_id', topic.id);
+
+      if (!error && cards && cards.length > 0) {
+        return cards;
+      }
+    }
+  } catch (err) {
+    log.warn('Supabase fetch failed, using local data:', err);
   }
 
-  // Step B: Flashcards mangwao
-  const { data: cards, error } = await supabase
-    .from('flashcards')
-    .select('*')
-    .eq('topic_id', topic.id);
-
-  if (error) {
-    log.error('Error fetching cards:', error);
-    return [];
+  // Step C: Fallback to local flashcard DB
+  const localCards = localFlashcardDB[slug];
+  if (localCards && localCards.length > 0) {
+    log.info('Using local flashcards for:', slug, `(${localCards.length} cards)`);
+    return localCards;
   }
 
-  return cards;
+  log.warn('No flashcards found for slug:', slug);
+  return [];
 };
 
 // 3. ALL Flashcards fetch karna (for Practice Session)
