@@ -182,7 +182,7 @@ export function AdminPage() {
         slug: topicSlug,
         content: generatedBlog,
         is_published: true,
-        author: 'AI Admin',
+        author: 'Vaibhav Kumar Mishra',
       });
 
       if (error) setStatus(`❌ Error saving blog: ${error.message}`);

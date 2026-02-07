@@ -124,7 +124,7 @@ export function BlogPost({ slug, onBack }: BlogPostProps) {
             dateModified: post.updated_at || post.created_at,
             author: {
               '@type': 'Person',
-              name: post.author || 'NeuralCards AI',
+              name: post.author || 'Vaibhav Kumar Mishra',
             },
             publisher: {
               '@type': 'Organization',
@@ -178,7 +178,7 @@ export function BlogPost({ slug, onBack }: BlogPostProps) {
                   AI
                 </div>
                 <div>
-                  <p className="text-sm font-bold text-foreground">{post.author || 'AI Admin'}</p>
+                  <p className="text-sm font-bold text-foreground">{post.author || 'Vaibhav Kumar Mishra'}</p>
                   <p className="text-xs text-muted-foreground">Technical Writer</p>
                 </div>
               </div>

@@ -155,7 +155,7 @@ export function BlogList({ onNavigate }: BlogListProps) {
                         <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-blue-500 to-purple-500 flex items-center justify-center text-[10px] text-white">
                           AI
                         </div>
-                        {blog.author || 'AI Admin'}
+                        {blog.author || 'Vaibhav Kumar Mishra'}
                       </div>
                       <span className="text-sm font-bold text-purple-600 dark:text-purple-400 flex items-center gap-1 group-hover:translate-x-1 transition-transform">
                         Read Article <ArrowRight className="w-4 h-4" />
