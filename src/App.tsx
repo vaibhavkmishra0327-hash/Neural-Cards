@@ -374,9 +374,10 @@ function App() {
         </ErrorBoundary>
       </main>
 
-      {['/', '/about', '/paths', '/blog', '/practice'].includes(location.pathname) && (
+      {['/', '/about', '/paths', '/blog', '/practice'].includes(location.pathname) ||
+      location.pathname.startsWith('/blog/') ? (
         <Footer onNavigate={handleNavigate} />
-      )}
+      ) : null}
     </div>
   );
 }

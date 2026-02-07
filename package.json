@@ -85,6 +85,7 @@
       },
       "scripts": {
             "dev": "vite",
+            "prebuild": "node scripts/generate-sitemap.mjs",
             "build": "tsc --noEmit && vite build",
             "preview": "vite preview",
             "test": "vitest",
