@@ -184,18 +184,16 @@ export const getLearningPath = async (slug: string) => {
         }));
 
   // 4. Topics array ko "Nodes" me convert karo
-  const nodes = topicList.map(
-    (t: { slug: string; title: string }, index: number) => ({
-      id: t.slug,
-      topic_slug: t.slug,
-      title: t.title,
-      description: 'Tap to start learning',
-      status: index === 0 ? 'unlocked' : 'locked',
-      step_order: index + 1,
-      position_x: index % 2 === 0 ? 100 : 300,
-      position_y: (index + 1) * 160,
-    })
-  );
+  const nodes = topicList.map((t: { slug: string; title: string }, index: number) => ({
+    id: t.slug,
+    topic_slug: t.slug,
+    title: t.title,
+    description: 'Tap to start learning',
+    status: index === 0 ? 'unlocked' : 'locked',
+    step_order: index + 1,
+    position_x: index % 2 === 0 ? 100 : 300,
+    position_y: (index + 1) * 160,
+  }));
 
   if (error) {
     console.warn('Failed to fetch topics from DB, using fallback:', error.message);
