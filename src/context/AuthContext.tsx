@@ -13,7 +13,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL || '';
+const ADMIN_EMAIL = (import.meta.env.VITE_ADMIN_EMAIL || '').trim();
 
 interface AuthProviderProps {
   children: ReactNode;

@@ -3,7 +3,7 @@ import { Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import type { User } from '@supabase/supabase-js';
 
-const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL || '';
+const ADMIN_EMAIL = (import.meta.env.VITE_ADMIN_EMAIL || '').trim();
 
 // Loading spinner while auth state resolves
 const AuthLoader = () => (

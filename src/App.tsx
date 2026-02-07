@@ -41,7 +41,7 @@ const PracticeHub = lazy(() =>
 
 type Flashcard = Database['public']['Tables']['flashcards']['Row'];
 
-const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL || '';
+const ADMIN_EMAIL = (import.meta.env.VITE_ADMIN_EMAIL || '').trim();
 
 // Loading Spinner for lazy-loaded pages
 const PageLoader = () => (
