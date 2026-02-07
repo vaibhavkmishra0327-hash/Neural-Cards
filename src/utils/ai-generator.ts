@@ -87,8 +87,8 @@ export const generateContentWithGroq = async (
       {
         method: 'POST',
         headers: {
-          'apikey': publicAnonKey,
-          'Authorization': `Bearer ${token}`,
+          apikey: publicAnonKey,
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ systemPrompt, userPrompt, type }),
