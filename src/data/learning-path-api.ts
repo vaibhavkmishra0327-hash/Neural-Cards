@@ -98,9 +98,17 @@ export const getLearningPath = async (
       .eq('path_id', pathData.id)
       .order('step_order', { ascending: true });
 
-    // If no nodes in Supabase, fall back to local
-    if (nodesError || !nodesData || nodesData.length === 0) {
-      log.warn('No nodes in Supabase for path, using local data:', pathSlug);
+    // Check if local data has more nodes than Supabase
+    const localPath = learningPaths.find((p) => p.id === pathSlug);
+    const localNodeCount = localPath?.topics.length ?? 0;
+    const supabaseNodeCount = nodesData?.length ?? 0;
+
+    // Fall back to local if Supabase has fewer nodes or errored
+    if (nodesError || !nodesData || supabaseNodeCount === 0 || supabaseNodeCount < localNodeCount) {
+      log.warn(
+        `Supabase has ${supabaseNodeCount} nodes, local has ${localNodeCount} — using local:`,
+        pathSlug
+      );
       return getLocalLearningPath(pathSlug, userId);
     }
 
