@@ -29,6 +29,7 @@ app.use(
     origin: [
       'https://neuralcards.com',
       'https://www.neuralcards.com',
+      'https://neuralcards-app.netlify.app',
       'http://localhost:5173',
       'http://localhost:3000',
     ],
