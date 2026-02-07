@@ -89,7 +89,7 @@ export function LearningPathList({ onPathSelect }: LearningPathListProps) {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-[#0a0a0a] text-slate-900 dark:text-white pt-24 pb-20">
-      <div className="container mx-auto px-4 max-w-6xl">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-6xl">
         {/* Header Section */}
         <div className="text-center mb-16">
           <motion.h1

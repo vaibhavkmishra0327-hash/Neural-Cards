@@ -227,7 +227,7 @@ export function HomePage({ onNavigate, isAuthenticated = false }: HomePageProps)
 
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <motion.div
-            className="grid md:grid-cols-4 gap-8 text-center"
+            className="grid sm:grid-cols-2 md:grid-cols-4 gap-8 text-center"
             variants={containerVariants}
             initial="hidden"
             whileInView="visible"
@@ -246,7 +246,7 @@ export function HomePage({ onNavigate, isAuthenticated = false }: HomePageProps)
         <section className="py-20">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <motion.div
-              className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950 dark:to-purple-950 rounded-2xl p-12 text-center relative overflow-hidden"
+              className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950 dark:to-purple-950 rounded-2xl p-6 sm:p-8 md:p-12 text-center relative overflow-hidden"
               initial={{ opacity: 0, scale: 0.9 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}

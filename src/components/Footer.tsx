@@ -31,7 +31,7 @@ export function Footer({ onNavigate }: FooterProps) {
   return (
     <footer className="bg-white dark:bg-[#0a0a0a] border-t border-gray-200 dark:border-gray-800 transition-colors duration-300">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid md:grid-cols-4 gap-8 mb-12">
+        <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-8 mb-12">
           {/* 1. Brand Section */}
           <div className="md:col-span-1 space-y-4">
             <div
