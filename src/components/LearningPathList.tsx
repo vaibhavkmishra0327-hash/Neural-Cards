@@ -40,7 +40,7 @@ export function LearningPathList({ onPathSelect }: LearningPathListProps) {
       color: 'border-green-500/20 bg-green-500/5',
     },
     {
-      id: 'ml-fundamentals', // Slug match
+      id: 'machine-learning', // Slug match with learningPaths.ts
       title: 'Machine Learning Fundamentals',
       description: 'From linear regression to ensemble methods - complete ML foundations.',
       topicsCount: '12 Topics',

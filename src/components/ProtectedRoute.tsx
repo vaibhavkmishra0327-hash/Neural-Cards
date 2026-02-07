@@ -1,8 +1,16 @@
 import { ReactNode } from 'react';
 import { Navigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import type { User } from '@supabase/supabase-js';
 
 const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL || '';
+
+// Loading spinner while auth state resolves
+const AuthLoader = () => (
+  <div className="flex items-center justify-center min-h-[60vh]">
+    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+  </div>
+);
 
 interface ProtectedRouteProps {
   user: User | null;
@@ -17,9 +25,16 @@ interface AdminRouteProps {
 
 /**
  * ProtectedRoute - Requires authentication
- * Redirects to /auth if user is not logged in
+ * Shows spinner while auth loads, then redirects if not logged in
  */
 export function ProtectedRoute({ user, children, redirectTo = '/auth' }: ProtectedRouteProps) {
+  const { isLoading } = useAuth();
+
+  // Wait for auth to resolve before deciding
+  if (isLoading) {
+    return <AuthLoader />;
+  }
+
   if (!user) {
     return <Navigate to={redirectTo} replace />;
   }
@@ -37,6 +52,12 @@ export function ProtectedRoute({ user, children, redirectTo = '/auth' }: Protect
  * - Database role checks
  */
 export function AdminRoute({ user, children }: AdminRouteProps) {
+  const { isLoading } = useAuth();
+
+  if (isLoading) {
+    return <AuthLoader />;
+  }
+
   if (!user) {
     return <Navigate to="/auth" replace />;
   }
