@@ -66,9 +66,12 @@ export function AdminPage() {
     setLoading(true);
     setStatus('🧠 AI is thinking... (Groq is fast!)');
 
-    const result = await generateContentWithGroq(topic, contentType);
+    const { data: result, error } = await generateContentWithGroq(topic, contentType);
 
-    if (result) {
+    if (error) {
+      setStatus(`❌ ${error}`);
+      console.error('Generation failed:', error);
+    } else if (result) {
       if (contentType === 'flashcard') {
         setGeneratedCards(result as any[]);
         setStatus(`✅ Generated ${(result as any[]).length} cards!`);
@@ -77,7 +80,7 @@ export function AdminPage() {
         setStatus(`✅ Generated Blog Post! Review below.`);
       }
     } else {
-      setStatus('❌ Failed to generate. Try again.');
+      setStatus('❌ No content generated. Try again.');
     }
     setLoading(false);
   };

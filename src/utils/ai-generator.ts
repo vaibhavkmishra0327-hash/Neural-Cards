@@ -57,7 +57,7 @@ function buildPrompts(topicName: string, type: 'flashcard' | 'blog') {
 export const generateContentWithGroq = async (
   topicName: string,
   type: 'flashcard' | 'blog' = 'flashcard'
-) => {
+): Promise<{ data: any; error: string | null }> => {
   log.info(`Requesting AI content for: ${topicName} [Type: ${type}]`);
 
   const { systemPrompt, userPrompt } = buildPrompts(topicName, type);
@@ -68,9 +68,12 @@ export const generateContentWithGroq = async (
       data: { session },
     } = await supabase.auth.getSession();
     if (!session?.access_token) {
-      log.error('No auth session found for AI generation');
-      return type === 'flashcard' ? [] : '';
+      const msg = 'No auth session found. Please log in first.';
+      log.error(msg);
+      return { data: null, error: msg };
     }
+
+    log.info(`Calling Edge Function with token: ${session.access_token.substring(0, 20)}...`);
 
     // Call Edge Function (API key stays server-side)
     const response = await fetch(
@@ -86,9 +89,17 @@ export const generateContentWithGroq = async (
     );
 
     if (!response.ok) {
-      const errText = await response.text();
-      log.error('AI generation edge function error:', errText);
-      return type === 'flashcard' ? [] : '';
+      let errText = '';
+      try {
+        const errJson = await response.json();
+        errText = errJson.error || JSON.stringify(errJson);
+      } catch {
+        errText = await response.text();
+      }
+      const msg = `Edge Function error (${response.status}): ${errText}`;
+      log.error(msg);
+      console.error('AI Generation Error:', msg);
+      return { data: null, error: msg };
     }
 
     const data = await response.json();
@@ -107,17 +118,19 @@ export const generateContentWithGroq = async (
       try {
         const json = JSON.parse(cleanText);
         log.info(`Cards generated: ${json.length}`);
-        return json;
+        return { data: json, error: null };
       } catch {
-        log.error('JSON parse failed for AI flashcard response');
-        return [];
+        log.error('JSON parse failed. Raw response:', text.substring(0, 200));
+        return { data: null, error: 'AI returned invalid JSON. Try again.' };
       }
     } else {
       log.info('Blog content generated successfully');
-      return text;
+      return { data: text, error: null };
     }
   } catch (error) {
-    log.error('AI generation failed:', error);
-    return type === 'flashcard' ? [] : '';
+    const msg = `AI generation failed: ${error instanceof Error ? error.message : String(error)}`;
+    log.error(msg);
+    console.error(msg);
+    return { data: null, error: msg };
   }
 };
