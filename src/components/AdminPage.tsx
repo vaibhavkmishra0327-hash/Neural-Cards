@@ -28,10 +28,6 @@ export function AdminPage() {
 
   const supabaseClient = supabase;
 
-  useEffect(() => {
-    checkMissingTopics();
-  }, []);
-
   const checkMissingTopics = async () => {
     try {
       const { data: nodes } = await supabaseClient
@@ -60,6 +56,10 @@ export function AdminPage() {
       log.error('Error checking topics:', error);
     }
   };
+
+  useEffect(() => {
+    checkMissingTopics();
+  }, []);
 
   const handleGenerate = async () => {
     if (!topic) return;

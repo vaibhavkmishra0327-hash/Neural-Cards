@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   BookOpen,
@@ -35,8 +35,7 @@ export function Dashboard({ user, onNavigate, onSignOut }: DashboardProps) {
   const [topics, setTopics] = useState<Topic[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // Data load karne ka function
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     if (user?.id) {
       setLoading(true);
 
@@ -50,11 +49,11 @@ export function Dashboard({ user, onNavigate, onSignOut }: DashboardProps) {
 
       setLoading(false);
     }
-  };
+  }, [user]);
 
   useEffect(() => {
     loadData();
-  }, [user]);
+  }, [loadData]);
 
   const displayStats = stats || {
     current_streak: 0,
@@ -195,7 +194,6 @@ export function Dashboard({ user, onNavigate, onSignOut }: DashboardProps) {
               </p>
             </div>
           </div>
-          {/* eslint-disable-next-line react/forbid-dom-props */}
           <div
             className="absolute bottom-0 left-0 h-1.5 bg-gradient-to-r from-purple-500 to-pink-500 transition-all duration-1000"
             style={{ width: `${dailyPercent}%` }}

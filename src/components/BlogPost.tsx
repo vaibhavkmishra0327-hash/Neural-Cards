@@ -18,11 +18,6 @@ export function BlogPost({ slug, onBack }: BlogPostProps) {
   const [post, setPost] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchPost();
-    window.scrollTo(0, 0);
-  }, [slug]);
-
   const fetchPost = async () => {
     setLoading(true);
     const { data, error } = await supabase.from('blogs').select('*').eq('slug', slug).single();
@@ -34,6 +29,11 @@ export function BlogPost({ slug, onBack }: BlogPostProps) {
     }
     setLoading(false);
   };
+
+  useEffect(() => {
+    fetchPost();
+    window.scrollTo(0, 0);
+  }, [slug]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -77,7 +77,7 @@ export function BlogPost({ slug, onBack }: BlogPostProps) {
 
   const postUrl = `https://neural-cards.vercel.app/blog/${slug}`;
   const postDescription = post.content
-    .replace(/[#*`\[\]]/g, '')
+    .replace(/[#*`[\]]/g, '')
     .slice(0, 160)
     .trim();
 
@@ -178,7 +178,9 @@ export function BlogPost({ slug, onBack }: BlogPostProps) {
                   AI
                 </div>
                 <div>
-                  <p className="text-sm font-bold text-foreground">{post.author || 'Vaibhav Kumar Mishra'}</p>
+                  <p className="text-sm font-bold text-foreground">
+                    {post.author || 'Vaibhav Kumar Mishra'}
+                  </p>
                   <p className="text-xs text-muted-foreground">Technical Writer</p>
                 </div>
               </div>
@@ -194,43 +196,38 @@ export function BlogPost({ slug, onBack }: BlogPostProps) {
 
             <ReactMarkdown
               components={{
-                h1: ({ node, ...props }) => (
+                h1: ({ ...props }) => (
                   <h1
                     className="text-3xl font-bold mt-12 mb-6 text-purple-600 dark:text-purple-400"
                     {...props}
                   />
                 ),
-                h2: ({ node, ...props }) => (
+                h2: ({ ...props }) => (
                   <h2
                     className="text-2xl font-bold mt-10 mb-4 border-l-4 border-purple-500 pl-4"
                     {...props}
                   />
                 ),
-                h3: ({ node, ...props }) => (
-                  <h3 className="text-xl font-bold mt-8 mb-3" {...props} />
-                ),
-                p: ({ node, ...props }) => (
+                h3: ({ ...props }) => <h3 className="text-xl font-bold mt-8 mb-3" {...props} />,
+                p: ({ ...props }) => (
                   <p className="text-lg leading-relaxed mb-6 text-muted-foreground" {...props} />
                 ),
                 // Note: 'li' warning might still show in some strict linters because it's defined in isolation,
                 // but it's 100% valid ReactMarkdown usage. It renders inside ul/ol at runtime.
-                ul: ({ node, ...props }) => (
+                ul: ({ ...props }) => (
                   <ul className="list-disc list-inside space-y-2 mb-6 ml-4" {...props} />
                 ),
-                ol: ({ node, ...props }) => (
+                ol: ({ ...props }) => (
                   <ol className="list-decimal list-inside space-y-2 mb-6 ml-4" {...props} />
                 ),
-                // eslint-disable-next-line jsx-a11y/no-redundant-roles
-                li: ({ node, ...props }) => (
-                  <li className="text-lg text-muted-foreground" {...props} />
-                ),
-                blockquote: ({ node, ...props }) => (
+                li: ({ ...props }) => <li className="text-lg text-muted-foreground" {...props} />,
+                blockquote: ({ ...props }) => (
                   <blockquote
                     className="border-l-4 border-purple-500 bg-purple-50 dark:bg-purple-900/10 p-4 rounded-r-lg italic text-lg my-8"
                     {...props}
                   />
                 ),
-                code: ({ node, ...props }) => {
+                code: ({ ...props }) => {
                   const isBlock = String(props.className).includes('language-');
                   return isBlock ? (
                     <div className="bg-slate-900 text-slate-100 p-4 rounded-xl overflow-x-auto my-6 font-mono text-sm shadow-xl border border-slate-800">

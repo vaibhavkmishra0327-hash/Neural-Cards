@@ -13,11 +13,6 @@ export function BlogList({ onNavigate }: BlogListProps) {
   const [blogs, setBlogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // 👇 Page load hote hi Blogs fetch karo
-  useEffect(() => {
-    fetchBlogs();
-  }, []);
-
   const fetchBlogs = async () => {
     setLoading(true);
     // Sirf published blogs dikhao, latest pehle
@@ -34,6 +29,11 @@ export function BlogList({ onNavigate }: BlogListProps) {
     }
     setLoading(false);
   };
+
+  // \ud83d\udc47 Page load hote hi Blogs fetch karo
+  useEffect(() => {
+    fetchBlogs();
+  }, []);
 
   // Helper to calculate reading time (approx)
   const getReadingTime = (content: string) => {

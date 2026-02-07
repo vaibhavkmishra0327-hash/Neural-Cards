@@ -15,16 +15,16 @@ export function LearningPathView({ pathSlug, userId, onBack, onNodeClick }: Lear
   const [path, setPath] = useState<LearningPath | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadPath();
-  }, [pathSlug]);
-
   const loadPath = async () => {
     setLoading(true);
     const data = await getLearningPath(pathSlug, userId);
     setPath(data);
     setLoading(false);
   };
+
+  useEffect(() => {
+    loadPath();
+  }, [pathSlug]);
 
   if (loading) {
     return (
@@ -68,7 +68,6 @@ export function LearningPathView({ pathSlug, userId, onBack, onNodeClick }: Lear
 
         {/* Progress Bar */}
         <div className="w-full bg-muted h-3 rounded-full overflow-hidden">
-          {/* eslint-disable-next-line react/forbid-dom-props */}
           <div
             className="bg-green-500 h-full transition-all duration-1000 ease-out"
             style={{ width: `${progressPercent}%` }}

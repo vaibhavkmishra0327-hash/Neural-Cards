@@ -578,8 +578,6 @@ app.get('/make-server-f02c4c3b/flashcards/due/:topicId', async (c) => {
       return c.json({ error: 'Unauthorized' }, 401);
     }
 
-    const topicId = c.req.param('topicId');
-
     // Get all flashcard states for this user
     const allStates = await kv.getByPrefix(`user:${user.id}:flashcard:`);
 

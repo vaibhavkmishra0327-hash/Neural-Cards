@@ -162,7 +162,6 @@ export const FlashcardPractice = memo(function FlashcardPractice({
             </div>
           </div>
           <div className="mt-3 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-            {/* eslint-disable-next-line react/forbid-dom-props */}
             <div
               className="h-full bg-gradient-to-r from-purple-600 to-pink-600 transition-all duration-300 ease-out"
               style={{ width: `${progress}%` }}

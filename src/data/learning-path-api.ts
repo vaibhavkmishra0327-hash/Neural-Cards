@@ -20,7 +20,7 @@ const getLocalLearningPath = async (
   if (!path) return null;
 
   // Try to get user progress from Supabase
-  let completedSlugs: Set<string> = new Set();
+  const completedSlugs: Set<string> = new Set();
   try {
     const { data: progressData } = await supabase
       .from('user_path_progress')

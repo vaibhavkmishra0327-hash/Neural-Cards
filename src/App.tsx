@@ -152,6 +152,18 @@ function App() {
   const location = useLocation();
 
   // Universal navigate handler for components that still use onNavigate pattern
+  const handleStartPractice = useCallback(
+    async (topicSlug: string, topicTitle: string) => {
+      setIsLoadingCards(true);
+      setCurrentTopicTitle(topicTitle);
+      const cards = await getFlashcardsByTopic(topicSlug);
+      setPracticeCards(cards as Flashcard[]);
+      setIsLoadingCards(false);
+      navigate(`/practice/${topicSlug}`);
+    },
+    [navigate]
+  );
+
   const handleNavigate = useCallback(
     (page: string, data?: Record<string, string>) => {
       if (page === 'admin') {
@@ -184,19 +196,7 @@ function App() {
       }
       window.scrollTo(0, 0);
     },
-    [user, navigate]
-  );
-
-  const handleStartPractice = useCallback(
-    async (topicSlug: string, topicTitle: string) => {
-      setIsLoadingCards(true);
-      setCurrentTopicTitle(topicTitle);
-      const cards = await getFlashcardsByTopic(topicSlug);
-      setPracticeCards(cards as Flashcard[]);
-      setIsLoadingCards(false);
-      navigate(`/practice/${topicSlug}`);
-    },
-    [navigate]
+    [user, navigate, handleStartPractice]
   );
 
   const handleSignOut = useCallback(async () => {
