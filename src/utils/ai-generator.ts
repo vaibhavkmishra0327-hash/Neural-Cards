@@ -63,33 +63,32 @@ export const generateContentWithGroq = async (
   const { systemPrompt, userPrompt } = buildPrompts(topicName, type);
 
   try {
-    // Get a FRESH user session — getSession() can return expired tokens from memory
-    // refreshSession() forces a token refresh so Supabase gateway accepts the JWT
-    let session: { access_token: string } | null = null;
+    // Get a FRESH user session
+    const { data: refreshed } = await supabase.auth.refreshSession();
+    let token = refreshed?.session?.access_token;
 
-    const { data: currentSession } = await supabase.auth.getSession();
-    if (currentSession?.session?.access_token) {
-      // Try refreshing to ensure the token is valid
-      const { data: refreshed } = await supabase.auth.refreshSession();
-      session = refreshed?.session ?? currentSession.session;
+    if (!token) {
+      const { data: current } = await supabase.auth.getSession();
+      token = current?.session?.access_token;
     }
 
-    if (!session?.access_token) {
+    if (!token) {
       const msg = 'No auth session found. Please log in first.';
       log.error(msg);
       return { data: null, error: msg };
     }
 
-    // Call Edge Function (API key stays server-side)
-    // apikey header: lets Supabase API gateway pass the request through
-    // Authorization header: user JWT for Edge Function's own admin check
+    // Call Edge Function via raw fetch
+    // Both apikey + Authorization are needed:
+    //   apikey → Supabase API gateway authentication
+    //   Authorization → Edge Function's own admin check
     const response = await fetch(
       `https://${projectId}.supabase.co/functions/v1/make-server-f02c4c3b/generate-ai`,
       {
         method: 'POST',
         headers: {
-          apikey: publicAnonKey,
-          Authorization: `Bearer ${session.access_token}`,
+          'apikey': publicAnonKey,
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ systemPrompt, userPrompt, type }),
