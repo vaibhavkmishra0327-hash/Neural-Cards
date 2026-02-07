@@ -197,14 +197,14 @@ export function AdminPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-12 max-w-4xl">
-      <h1 className="text-3xl font-bold mb-8 flex items-center gap-2">
+    <div className="container mx-auto px-3 sm:px-4 py-6 sm:py-12 max-w-4xl">
+      <h1 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 flex items-center gap-2">
         <Wand2 className="text-purple-600 dark:text-purple-400" />
         Admin Content Generator
       </h1>
 
       {/* Mode Switcher */}
-      <div className="flex gap-4 mb-8 bg-gray-100 dark:bg-zinc-800 p-2 rounded-lg w-fit">
+      <div className="flex gap-2 sm:gap-4 mb-6 sm:mb-8 bg-gray-100 dark:bg-zinc-800 p-1.5 sm:p-2 rounded-lg w-fit">
         <button
           onClick={() => setContentType('flashcard')}
           className={`px-4 py-2 rounded-md flex items-center gap-2 font-medium transition-all ${contentType === 'flashcard' ? 'bg-white dark:bg-zinc-700 shadow-sm text-purple-600' : 'text-gray-500'}`}
@@ -247,14 +247,14 @@ export function AdminPage() {
       )}
 
       {/* Input Section */}
-      <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm mb-8">
+      <div className="bg-white dark:bg-zinc-900 p-4 sm:p-6 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm mb-6 sm:mb-8">
         <label
           htmlFor="topic-input"
           className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300"
         >
           {contentType === 'flashcard' ? 'Topic for Flashcards' : 'Blog Title'}
         </label>
-        <div className="flex gap-4">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
           <input
             id="topic-input" // 👈 Added ID for Accessibility
             type="text"
@@ -271,7 +271,7 @@ export function AdminPage() {
           <button
             onClick={handleGenerate}
             disabled={loading}
-            className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-semibold flex items-center gap-2 disabled:opacity-50 transition-colors"
+            className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-semibold flex items-center justify-center gap-2 disabled:opacity-50 transition-colors w-full sm:w-auto"
           >
             {loading ? (
               'Generating...'
@@ -312,18 +312,18 @@ export function AdminPage() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.9 }}
-                  className="p-4 bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm relative group"
+                  className="p-3 sm:p-4 bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm relative group"
                 >
                   <button
                     onClick={() => deleteCard(idx)}
-                    className="absolute top-4 right-4 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="absolute top-2 right-2 sm:top-4 sm:right-4 text-gray-400 hover:text-red-500 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
                     aria-label="Delete card" // 👈 Added Aria Label
                     title="Delete Card"
                   >
                     <Trash2 className="w-5 h-5" />
                   </button>
 
-                  <div className="grid md:grid-cols-2 gap-4 mr-8">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 mr-0 sm:mr-8">
                     <div>
                       <label
                         htmlFor={`question-${idx}`}
@@ -383,7 +383,7 @@ export function AdminPage() {
       {(generatedCards.length > 0 || generatedBlog) && (
         <button
           onClick={handleSaveToDB}
-          className="w-full bg-green-600 hover:bg-green-700 text-white py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transition-all sticky bottom-8"
+          className="w-full bg-green-600 hover:bg-green-700 text-white py-3 sm:py-4 rounded-xl font-bold text-base sm:text-lg flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transition-all sticky bottom-4 sm:bottom-8"
         >
           <Save className="w-5 h-5" />
           {contentType === 'flashcard' ? 'Publish Cards' : 'Publish Blog Post'}

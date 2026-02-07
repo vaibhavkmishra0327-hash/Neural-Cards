@@ -1,5 +1,5 @@
 import { supabase } from './supabase/client';
-import { projectId } from './supabase/info';
+import { projectId, publicAnonKey } from './supabase/info';
 import { log } from './logger';
 
 /**
@@ -81,11 +81,14 @@ export const generateContentWithGroq = async (
     }
 
     // Call Edge Function (API key stays server-side)
+    // apikey header: lets Supabase API gateway pass the request through
+    // Authorization header: user JWT for Edge Function's own admin check
     const response = await fetch(
       `https://${projectId}.supabase.co/functions/v1/make-server-f02c4c3b/generate-ai`,
       {
         method: 'POST',
         headers: {
+          apikey: publicAnonKey,
           Authorization: `Bearer ${session.access_token}`,
           'Content-Type': 'application/json',
         },
