@@ -1,4 +1,5 @@
 import { LearningPath } from '../types';
+import { supabase } from '../utils/supabase/client';
 
 // 👇 1. TUMHARA DATA (Ye same rahega)
 export const learningPaths: LearningPath[] = [
@@ -156,31 +157,55 @@ const formatTitle = (slug: string) => {
     .join(' ');
 };
 
-// Main Function jo App use karta hai
+// Main Function — now fetches topics DYNAMICALLY from database
 export const getLearningPath = async (slug: string) => {
-  // 1. Path dhoondo (e.g. math-for-ml)
+  // 1. Path dhoondo (metadata still from config — title, icon, color etc.)
   const path = learningPaths.find((p) => p.id === slug);
 
   if (!path) return null;
 
-  // 2. Topics array ko "Nodes" me convert karo
-  const nodes = path.topics.map((topicSlug, index) => ({
-    id: topicSlug, // Node ki ID
-    topic_slug: topicSlug, // 🔥 YAHI Database se match karega
-    title: formatTitle(topicSlug), // Sundar naam display ke liye
-    description: 'Tap to start learning',
-    status: index === 0 ? 'unlocked' : 'locked', // Logic: Pehla khula, baaki band
-    step_order: index + 1,
-    // Zig-Zag Design Logic
-    position_x: index % 2 === 0 ? 100 : 300,
-    position_y: (index + 1) * 160,
-  }));
+  // 2. Fetch topics from DB where learning_path matches this path's id
+  const { data: dbTopics, error } = await supabase
+    .from('topics')
+    .select('slug, title')
+    .eq('learning_path', slug)
+    .order('created_at', { ascending: true });
 
-  // 3. Formatted data return karo
+  // 3. Use DB topics if available, otherwise fall back to hardcoded list
+  const topicList =
+    dbTopics && dbTopics.length > 0
+      ? dbTopics.map((t: { slug: string; title: string }) => ({
+          slug: t.slug,
+          title: t.title,
+        }))
+      : path.topics.map((topicSlug) => ({
+          slug: topicSlug,
+          title: formatTitle(topicSlug),
+        }));
+
+  // 4. Topics array ko "Nodes" me convert karo
+  const nodes = topicList.map(
+    (t: { slug: string; title: string }, index: number) => ({
+      id: t.slug,
+      topic_slug: t.slug,
+      title: t.title,
+      description: 'Tap to start learning',
+      status: index === 0 ? 'unlocked' : 'locked',
+      step_order: index + 1,
+      position_x: index % 2 === 0 ? 100 : 300,
+      position_y: (index + 1) * 160,
+    })
+  );
+
+  if (error) {
+    console.warn('Failed to fetch topics from DB, using fallback:', error.message);
+  }
+
+  // 5. Formatted data return karo
   return {
     ...path,
-    slug: path.id, // App slug dhundta hai
-    nodes: nodes, // Ab nodes available hain!
+    slug: path.id,
+    nodes: nodes,
     total_nodes: nodes.length,
     completed_nodes: 0,
   };

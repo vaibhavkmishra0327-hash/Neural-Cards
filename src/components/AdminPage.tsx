@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react';
 import { generateContentWithGroq } from '../utils/ai-generator';
 import { supabase } from '../utils/supabase/client';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Wand2, Save, Trash2, Plus, AlertCircle, FileText, Layers } from 'lucide-react';
+import { Wand2, Save, Trash2, Plus, AlertCircle, FileText, Layers, MapPin } from 'lucide-react';
 import { log } from '../utils/logger';
+import { learningPaths } from '../data/learningPaths';
 
 // Types
 type PendingTopic = {
@@ -14,10 +15,16 @@ type PendingTopic = {
 
 type ContentType = 'flashcard' | 'blog';
 
+const PATH_OPTIONS = [
+  { value: '', label: 'None (Practice Hub only)' },
+  ...learningPaths.map((p) => ({ value: p.id, label: `${p.icon} ${p.title}` })),
+];
+
 export function AdminPage() {
   const [topic, setTopic] = useState('');
   const [loading, setLoading] = useState(false);
   const [contentType, setContentType] = useState<ContentType>('flashcard');
+  const [selectedPath, setSelectedPath] = useState('');
 
   // Data States
   const [generatedCards, setGeneratedCards] = useState<any[]>([]);
@@ -129,16 +136,19 @@ export function AdminPage() {
           .replace(/[^a-z0-9-]/g, '');
 
     // 1. Save Topic Metadata
+    const topicInsert: Record<string, string> = {
+      title: topic,
+      slug: topicSlug,
+      category: 'AI/ML',
+      description: contentType === 'blog' ? 'Detailed Blog Post' : `Flashcards for ${topic}`,
+    };
+    if (selectedPath && contentType === 'flashcard') {
+      topicInsert.learning_path = selectedPath;
+    }
+
     const { data: topicData, error: topicError } = await supabaseClient
       .from('topics')
-      .insert([
-        {
-          title: topic,
-          slug: topicSlug,
-          category: 'AI/ML',
-          description: contentType === 'blog' ? 'Detailed Blog Post' : `Flashcards for ${topic}`,
-        },
-      ])
+      .insert([topicInsert])
       .select()
       .single();
 
@@ -193,6 +203,7 @@ export function AdminPage() {
     }
 
     setTopic('');
+    setSelectedPath('');
     checkMissingTopics();
   };
 
@@ -268,6 +279,26 @@ export function AdminPage() {
             title="Topic Input" // 👈 Added Title
             className="flex-1 p-3 rounded-lg bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 outline-none focus:ring-2 focus:ring-purple-500 text-foreground"
           />
+
+          {/* Learning Path Selector (only for flashcards) */}
+          {contentType === 'flashcard' && (
+            <div className="flex items-center gap-2">
+              <MapPin className="w-4 h-4 text-purple-500 shrink-0" />
+              <select
+                id="path-select"
+                value={selectedPath}
+                onChange={(e) => setSelectedPath(e.target.value)}
+                title="Assign to Learning Path"
+                className="p-3 rounded-lg bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 outline-none focus:ring-2 focus:ring-purple-500 text-foreground text-sm"
+              >
+                {PATH_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
           <button
             onClick={handleGenerate}
             disabled={loading}
