@@ -84,32 +84,34 @@ export function Footer({ onNavigate }: FooterProps) {
             </ul>
           </div>
 
-          {/* 3. Resources (Static / External) */}
+          {/* 3. Resources (Internal Nav) */}
           <div>
             <h3 className="font-bold text-gray-900 dark:text-white mb-4">Resources</h3>
             <ul className="space-y-3 text-sm">
               <li>
-                <a
-                  href="#"
-                  className="text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
+                <button
+                  onClick={(e) => handleNavClick(e, 'blog')}
+                  className="text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors text-left"
                 >
-                  Documentation
-                </a>
+                  AI Blog
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={(e) => handleNavClick(e, 'all-practice')}
+                  className="text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors text-left"
+                >
+                  Practice Hub
+                </button>
               </li>
               <li>
                 <a
-                  href="#"
+                  href="https://github.com/vaibhavkmishra0327-hash/Neural-Cards"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
                 >
-                  API Status
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  className="text-gray-500 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
-                >
-                  Community
+                  GitHub Repo
                 </a>
               </li>
             </ul>
@@ -140,11 +142,17 @@ export function Footer({ onNavigate }: FooterProps) {
             <Heart className="h-3 w-3 text-red-500 fill-current" /> by Vaibhav.
           </div>
           <div className="flex gap-6">
-            <a href="#" className="hover:text-gray-900 dark:hover:text-white transition-colors">
-              Privacy Policy
-            </a>
-            <a href="#" className="hover:text-gray-900 dark:hover:text-white transition-colors">
-              Terms of Service
+            <button
+              onClick={(e) => handleNavClick(e, 'about')}
+              className="hover:text-gray-900 dark:hover:text-white transition-colors"
+            >
+              About Us
+            </button>
+            <a
+              href="mailto:vaibhavkmishra0327@gmail.com"
+              className="hover:text-gray-900 dark:hover:text-white transition-colors"
+            >
+              Contact
             </a>
           </div>
         </div>

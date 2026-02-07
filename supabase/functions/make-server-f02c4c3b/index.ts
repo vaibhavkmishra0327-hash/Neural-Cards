@@ -30,8 +30,6 @@ app.use(
       'https://neuralcards.com',
       'https://www.neuralcards.com',
       'https://neuralcards-app.netlify.app',
-      'http://localhost:5173',
-      'http://localhost:3000',
     ],
     allowHeaders: ['Content-Type', 'Authorization'],
     allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],

@@ -73,8 +73,6 @@ export const generateContentWithGroq = async (
       return { data: null, error: msg };
     }
 
-    log.info(`Calling Edge Function with token: ${session.access_token.substring(0, 20)}...`);
-
     // Call Edge Function (API key stays server-side)
     const response = await fetch(
       `https://${projectId}.supabase.co/functions/v1/make-server-f02c4c3b/generate-ai`,

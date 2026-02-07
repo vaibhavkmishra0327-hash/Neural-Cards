@@ -265,37 +265,35 @@ function App() {
                 <Route
                   path="/paths"
                   element={
-                    <ProtectedRoute user={user} redirectTo="/auth">
+                    <PageTransition key="path-list">
                       <PathsWrapper user={user} />
-                    </ProtectedRoute>
+                    </PageTransition>
                   }
                 />
                 <Route
                   path="/paths/:pathSlug"
                   element={
-                    <ProtectedRoute user={user} redirectTo="/auth">
+                    <PageTransition key="path-view">
                       <PathsWrapper user={user} />
-                    </ProtectedRoute>
+                    </PageTransition>
                   }
                 />
 
                 <Route
                   path="/blog"
                   element={
-                    <ProtectedRoute user={user} redirectTo="/auth">
-                      <PageTransition key="blog-list">
-                        <BlogList onNavigate={handleNavigate} />
-                      </PageTransition>
-                    </ProtectedRoute>
+                    <PageTransition key="blog-list">
+                      <BlogList onNavigate={handleNavigate} />
+                    </PageTransition>
                   }
                 />
 
                 <Route
                   path="/blog/:slug"
                   element={
-                    <ProtectedRoute user={user} redirectTo="/auth">
+                    <PageTransition key="blog-post">
                       <BlogPostWrapper />
-                    </ProtectedRoute>
+                    </PageTransition>
                   }
                 />
 
@@ -311,15 +309,13 @@ function App() {
                 <Route
                   path="/practice"
                   element={
-                    <ProtectedRoute user={user} redirectTo="/auth">
-                      <PageTransition key="practice-hub">
-                        <Suspense fallback={<PageLoader />}>
-                          <PracticeHub
-                            onChapterClick={(slug, title) => handleStartPractice(slug, title)}
-                          />
-                        </Suspense>
-                      </PageTransition>
-                    </ProtectedRoute>
+                    <PageTransition key="practice-hub">
+                      <Suspense fallback={<PageLoader />}>
+                        <PracticeHub
+                          onChapterClick={(slug, title) => handleStartPractice(slug, title)}
+                        />
+                      </Suspense>
+                    </PageTransition>
                   }
                 />
 
@@ -378,7 +374,9 @@ function App() {
         </ErrorBoundary>
       </main>
 
-      {location.pathname === '/' && <Footer onNavigate={handleNavigate} />}
+      {['/', '/about', '/paths', '/blog', '/practice'].includes(location.pathname) && (
+        <Footer onNavigate={handleNavigate} />
+      )}
     </div>
   );
 }
