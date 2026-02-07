@@ -72,8 +72,8 @@ export function Dashboard({ user, onNavigate, onSignOut }: DashboardProps) {
   // Motivational messages based on progress
   const getMotivation = () => {
     if (displayStats.current_streak >= 7) return '🔥 Unstoppable! Keep that streak alive!';
-    if (displayStats.cards_learned_total >= 50) return '🚀 You\'re making incredible progress!';
-    if (dailyPercent >= 100) return '🎉 Daily goal crushed! You\'re on fire!';
+    if (displayStats.cards_learned_total >= 50) return "🚀 You're making incredible progress!";
+    if (dailyPercent >= 100) return "🎉 Daily goal crushed! You're on fire!";
     if (dailyPercent >= 50) return '💪 Halfway to your daily goal. Keep pushing!';
     return '✨ Every card you learn builds your AI expertise!';
   };
@@ -318,7 +318,9 @@ export function Dashboard({ user, onNavigate, onSignOut }: DashboardProps) {
               >
                 <div className="flex justify-between items-start mb-4">
                   <div className="p-3 bg-gray-50 dark:bg-zinc-800 rounded-xl group-hover:bg-purple-100 dark:group-hover:bg-purple-900/30 transition-colors">
-                    <span className="text-2xl">{['🤖', '📐', '🐍', '🧠', '⚡', '🚀'][index % 6]}</span>
+                    <span className="text-2xl">
+                      {['🤖', '📐', '🐍', '🧠', '⚡', '🚀'][index % 6]}
+                    </span>
                   </div>
                   <span className="px-3 py-1 bg-gray-100 dark:bg-zinc-800 text-xs font-semibold rounded-full text-gray-600 dark:text-gray-300 uppercase tracking-wide">
                     {topic.category || 'General'}
