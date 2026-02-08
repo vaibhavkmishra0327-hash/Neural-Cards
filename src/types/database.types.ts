@@ -298,6 +298,7 @@ export type Database = {
           is_published: boolean;
           author: string;
           created_at: string;
+          topic_slug: string | null;
         };
         Insert: {
           id?: string;
@@ -307,6 +308,7 @@ export type Database = {
           is_published?: boolean;
           author?: string;
           created_at?: string;
+          topic_slug?: string | null;
         };
         Update: {
           id?: string;
@@ -316,6 +318,7 @@ export type Database = {
           is_published?: boolean;
           author?: string;
           created_at?: string;
+          topic_slug?: string | null;
         };
         Relationships: [];
       };

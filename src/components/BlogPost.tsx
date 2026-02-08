@@ -81,30 +81,8 @@ export function BlogPost({ slug, onBack }: BlogPostProps) {
     .slice(0, 160)
     .trim();
 
-  // Try to extract a topic slug from the blog title for CTA linking
-  const inferTopicSlug = (title: string): string | undefined => {
-    const lower = title.toLowerCase();
-    const topicMap: Record<string, string> = {
-      'neural network': 'neural-networks',
-      'machine learning': 'machine-learning',
-      'deep learning': 'deep-learning',
-      python: 'python-basics',
-      javascript: 'javascript-fundamentals',
-      react: 'react-fundamentals',
-      'data structure': 'data-structures',
-      algorithm: 'algorithms',
-      'spaced repetition': 'spaced-repetition',
-      nlp: 'natural-language-processing',
-      'computer vision': 'computer-vision',
-      transformer: 'transformers',
-    };
-    for (const [keyword, topicSlug] of Object.entries(topicMap)) {
-      if (lower.includes(keyword)) return topicSlug;
-    }
-    return undefined;
-  };
-
-  const relatedTopicSlug = inferTopicSlug(post.title);
+  // Use DB-driven topic_slug (set via Supabase dashboard or when creating blogs)
+  const relatedTopicSlug: string | undefined = post.topic_slug || undefined;
 
   return (
     <>

@@ -48,7 +48,7 @@ export default async function handler(req: Request) {
 
         const { data: post } = await supabase
           .from('blogs')
-          .select('title, content, author, created_at, updated_at')
+          .select('title, content, author, created_at, updated_at, topic_slug')
           .eq('slug', slug)
           .single();
 
