@@ -416,15 +416,29 @@ function UserHero({
   sessionData?: any;
   isLoading?: boolean;
 }) {
+  // Default fallback when sessionData is null (no progress or fetch failed)
+  const firstPath = learningPaths[0];
+  const defaultSession = {
+    hasProgress: false,
+    pathTitle: firstPath?.title || 'AI Fundamentals',
+    pathId: firstPath?.id || 'math-for-ml',
+    topicSlug: firstPath?.topics?.[0] || 'vectors-matrices',
+    nextChapter: 'Chapter 1: ' + (firstPath?.topics?.[0]?.split('-').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') || 'Getting Started'),
+    progress: 0,
+    icon: firstPath?.icon || '🚀',
+  };
+
+  const displaySession = sessionData || defaultSession;
+
   // Logic to handle "Resume" click
   const handleResume = () => {
-    if (onNavigate && sessionData) {
-      if (sessionData.hasProgress) {
+    if (onNavigate) {
+      if (displaySession.hasProgress) {
         // Go to specific topic to continue
-        onNavigate('practice', { slug: sessionData.topicSlug, title: sessionData.topicTitle });
+        onNavigate('practice', { slug: displaySession.topicSlug, title: displaySession.topicTitle });
       } else {
         // Start from beginning
-        onNavigate('paths', { selectedPath: sessionData.pathId });
+        onNavigate('paths', { selectedPath: displaySession.pathId });
       }
     }
   };
@@ -468,7 +482,7 @@ function UserHero({
               <p className="text-lg text-slate-300 mb-8 max-w-lg leading-relaxed">
                 {isLoading
                   ? 'Syncing your progress...'
-                  : sessionData?.hasProgress
+                  : displaySession.hasProgress
                     ? 'Your brain is ready for another session. Continue where you left off.'
                     : "Your journey to mastering AI starts today. Let's begin with the fundamentals."}
               </p>
@@ -507,24 +521,24 @@ function UserHero({
                   <div className="flex items-center justify-between mb-6">
                     <h3 className="text-slate-300 text-xs font-bold uppercase tracking-widest flex items-center gap-2">
                       <Clock className="w-4 h-4" />{' '}
-                      {sessionData?.hasProgress ? 'Last Session' : 'Recommended Start'}
+                      {displaySession.hasProgress ? 'Last Session' : 'Recommended Start'}
                     </h3>
                     <span className="px-2 py-1 bg-blue-600/20 text-blue-200 text-xs rounded font-mono">
-                      {sessionData?.hasProgress ? 'In Progress' : 'New'}
+                      {displaySession.hasProgress ? 'In Progress' : 'New'}
                     </span>
                   </div>
 
                   {/* Suggested Content Card (Dynamic Data Injected Here) */}
                   <div className="flex items-start gap-4 mb-6">
                     <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-2xl shadow-lg shrink-0">
-                      {sessionData?.icon || '🚀'}
+                      {displaySession.icon || '🚀'}
                     </div>
                     <div>
                       <h4 className="text-lg font-bold text-white mb-1">
-                        {sessionData?.pathTitle || 'Loading...'}
+                        {displaySession.pathTitle}
                       </h4>
                       <p className="text-slate-400 text-sm">
-                        {sessionData?.nextChapter || 'Start your journey'}
+                        {displaySession.nextChapter}
                       </p>
 
                       {/* Mini Progress Bar */}
@@ -533,12 +547,12 @@ function UserHero({
                           <motion.div
                             className="h-full bg-blue-400 rounded-full shadow-[0_0_10px_rgba(96,165,250,0.5)]"
                             initial={{ width: 0 }}
-                            animate={{ width: `${sessionData?.progress || 0}%` }}
+                            animate={{ width: `${displaySession.progress || 0}%` }}
                             transition={{ duration: 1 }}
                           />
                         </div>
                         <span className="text-xs text-blue-300 font-medium">
-                          {sessionData?.progress || 0}%
+                          {displaySession.progress || 0}%
                         </span>
                       </div>
                     </div>
@@ -551,7 +565,7 @@ function UserHero({
                     whileTap={{ scale: 0.98 }}
                   >
                     <Play className="w-4 h-4 fill-current" />
-                    {sessionData?.hasProgress ? 'Resume Learning' : 'Start First Lesson'}
+                    {displaySession.hasProgress ? 'Resume Learning' : 'Start First Lesson'}
                   </motion.button>
                 </>
               )}
