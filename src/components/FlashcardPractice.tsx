@@ -20,6 +20,7 @@ type Flashcard = Database['public']['Tables']['flashcards']['Row'] & {
 
 interface FlashcardPracticeProps {
   topicTitle: string;
+  topicSlug?: string;
   flashcards: Flashcard[];
   onExit?: () => void;
   onComplete?: () => void;
@@ -28,6 +29,7 @@ interface FlashcardPracticeProps {
 
 export const FlashcardPractice = memo(function FlashcardPractice({
   topicTitle,
+  topicSlug,
   flashcards,
   onExit,
   onComplete,
@@ -54,7 +56,7 @@ export const FlashcardPractice = memo(function FlashcardPractice({
     // 1. Background DB Update
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (user) {
-        incrementProgress(user.id, 1);
+        incrementProgress(user.id, 1, topicSlug);
       }
     });
 

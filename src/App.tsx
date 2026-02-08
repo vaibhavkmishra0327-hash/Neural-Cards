@@ -100,6 +100,7 @@ function PracticeWrapper({
       <Suspense fallback={<PageLoader />}>
         <FlashcardPractice
           topicTitle={currentTopicTitle}
+          topicSlug={slug}
           flashcards={practiceCards}
           onExit={() => navigate('/')}
           onComplete={() => {}}

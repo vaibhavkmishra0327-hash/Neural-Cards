@@ -265,6 +265,7 @@ export type Database = {
           current_streak: number;
           last_study_date: string | null;
           xp: number;
+          last_topic_slug: string | null;
         };
         Insert: {
           user_id: string;
@@ -274,6 +275,7 @@ export type Database = {
           current_streak?: number;
           last_study_date?: string | null;
           xp?: number;
+          last_topic_slug?: string | null;
         };
         Update: {
           user_id?: string;
@@ -283,6 +285,7 @@ export type Database = {
           current_streak?: number;
           last_study_date?: string | null;
           xp?: number;
+          last_topic_slug?: string | null;
         };
         Relationships: [];
       };

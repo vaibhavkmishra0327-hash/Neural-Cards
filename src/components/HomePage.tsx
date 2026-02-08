@@ -16,15 +16,28 @@ import { useState, useEffect } from 'react';
 import { getUserProgress } from '../data/api';
 import { supabase } from '../utils/supabase/client';
 import { SEOHead } from './SEOHead';
+import type { LearningPath } from '../types';
+
+// Session progress data returned by getUserProgress
+interface SessionData {
+  hasProgress: boolean;
+  pathTitle: string;
+  pathId: string;
+  topicTitle: string;
+  topicSlug: string;
+  nextChapter: string;
+  progress: number;
+  icon: string;
+}
 
 interface HomePageProps {
-  onNavigate?: (page: string, data?: any) => void;
+  onNavigate?: (page: string, data?: Record<string, string>) => void;
   isAuthenticated?: boolean;
 }
 
 export function HomePage({ onNavigate, isAuthenticated = false }: HomePageProps) {
   // 👇 State for Real User Session Data
-  const [lastSession, setLastSession] = useState<any>(null);
+  const [lastSession, setLastSession] = useState<SessionData | null>(null);
   const [loadingSession, setLoadingSession] = useState(false);
 
   // 👇 Fetch Real Data on Mount
@@ -412,18 +425,24 @@ function UserHero({
   sessionData,
   isLoading,
 }: {
-  onNavigate?: (page: string, data?: any) => void;
-  sessionData?: any;
+  onNavigate?: (page: string, data?: Record<string, string>) => void;
+  sessionData?: SessionData | null;
   isLoading?: boolean;
 }) {
   // Default fallback when sessionData is null (no progress or fetch failed)
   const firstPath = learningPaths[0];
-  const defaultSession = {
+  const firstTopicFormatted =
+    firstPath?.topics?.[0]
+      ?.split('-')
+      .map((w: string) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(' ') || 'Getting Started';
+  const defaultSession: SessionData = {
     hasProgress: false,
     pathTitle: firstPath?.title || 'AI Fundamentals',
     pathId: firstPath?.id || 'math-for-ml',
+    topicTitle: firstTopicFormatted,
     topicSlug: firstPath?.topics?.[0] || 'vectors-matrices',
-    nextChapter: 'Chapter 1: ' + (firstPath?.topics?.[0]?.split('-').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') || 'Getting Started'),
+    nextChapter: 'Chapter 1: ' + firstTopicFormatted,
     progress: 0,
     icon: firstPath?.icon || '🚀',
   };
@@ -435,7 +454,10 @@ function UserHero({
     if (onNavigate) {
       if (displaySession.hasProgress) {
         // Go to specific topic to continue
-        onNavigate('practice', { slug: displaySession.topicSlug, title: displaySession.topicTitle });
+        onNavigate('practice', {
+          slug: displaySession.topicSlug,
+          title: displaySession.topicTitle,
+        });
       } else {
         // Start from beginning
         onNavigate('paths', { selectedPath: displaySession.pathId });
@@ -537,9 +559,7 @@ function UserHero({
                       <h4 className="text-lg font-bold text-white mb-1">
                         {displaySession.pathTitle}
                       </h4>
-                      <p className="text-slate-400 text-sm">
-                        {displaySession.nextChapter}
-                      </p>
+                      <p className="text-slate-400 text-sm">{displaySession.nextChapter}</p>
 
                       {/* Mini Progress Bar */}
                       <div className="mt-3 flex items-center gap-3">
@@ -630,7 +650,7 @@ function FeatureCard({ icon, title, description, delay = 0 }: FeatureCardProps) 
 }
 
 interface LearningPathCardProps {
-  path: any;
+  path: LearningPath;
   onClick: () => void;
   delay?: number;
 }

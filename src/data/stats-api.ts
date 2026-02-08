@@ -9,6 +9,7 @@ export interface UserStats {
   current_streak: number;
   xp: number;
   last_study_date: string | null;
+  last_topic_slug: string | null;
 }
 
 // Helper: Stats create karne ke liye
@@ -81,30 +82,36 @@ export const getUserStats = async (userId: string): Promise<UserStats | null> =>
 // Debounce map: userId -> { timeout, pendingCount }
 const pendingIncrements = new Map<
   string,
-  { timeout: ReturnType<typeof setTimeout>; count: number }
+  { timeout: ReturnType<typeof setTimeout>; count: number; topicSlug?: string }
 >();
 const DEBOUNCE_MS = 2000; // 2 seconds
 
-export const incrementProgress = (userId: string, cardsCount: number = 1) => {
+export const incrementProgress = (userId: string, cardsCount: number = 1, topicSlug?: string) => {
   const existing = pendingIncrements.get(userId);
 
   if (existing) {
     // Accumulate count and reset timer
     clearTimeout(existing.timeout);
     existing.count += cardsCount;
+    if (topicSlug) existing.topicSlug = topicSlug;
   } else {
-    pendingIncrements.set(userId, { timeout: setTimeout(() => {}, 0), count: cardsCount });
+    pendingIncrements.set(userId, {
+      timeout: setTimeout(() => {}, 0),
+      count: cardsCount,
+      topicSlug,
+    });
   }
 
   const entry = pendingIncrements.get(userId)!;
   entry.timeout = setTimeout(() => {
     const totalCount = entry.count;
+    const lastSlug = entry.topicSlug;
     pendingIncrements.delete(userId);
-    flushIncrement(userId, totalCount);
+    flushIncrement(userId, totalCount, lastSlug);
   }, DEBOUNCE_MS);
 };
 
-async function flushIncrement(userId: string, cardsCount: number) {
+async function flushIncrement(userId: string, cardsCount: number, topicSlug?: string) {
   log.info(`Flushing progress increment for ${userId}: +${cardsCount} cards`);
 
   let { data: currentStats } = await supabase
@@ -138,13 +145,18 @@ async function flushIncrement(userId: string, cardsCount: number) {
     }
   }
 
-  const updateData = {
+  const updateData: Record<string, unknown> = {
     cards_learned_total: (currentStats.cards_learned_total || 0) + cardsCount,
     daily_cards_completed: newDailyCount + cardsCount,
     current_streak: newStreak,
     last_study_date: new Date().toISOString(),
     xp: (currentStats.xp || 0) + cardsCount * 10,
   };
+
+  // Save which topic the user last studied
+  if (topicSlug) {
+    updateData.last_topic_slug = topicSlug;
+  }
 
   const { error } = await supabase.from('user_stats').update(updateData).eq('user_id', userId);
 

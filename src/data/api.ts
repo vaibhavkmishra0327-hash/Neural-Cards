@@ -118,7 +118,7 @@ export const getSuggestedTopics = async () => {
 // 👇 4. NEW: USER KI REAL PROGRESS NIKALNA (Fixed)
 export const getUserProgress = async (userId: string) => {
   try {
-    // A. User ka last completed topic nikalo
+    // A. User ka last completed topic nikalo (learning path progress)
     const { data } = await supabase
       .from('user_path_progress')
       .select('node_id, completed_at')
@@ -129,10 +129,42 @@ export const getUserProgress = async (userId: string) => {
 
     const progressData = data ?? [];
 
-    // B. Agar user bilkul naya hai (No progress)
+    // B. Also check user_stats for last studied topic (from Practice Hub)
+    const { data: statsData } = await supabase
+      .from('user_stats')
+      .select('last_topic_slug')
+      .eq('user_id', userId)
+      .single();
+
+    const lastPracticedSlug = statsData?.last_topic_slug;
+
+    // C. If no path progress but user has practiced a topic from Practice Hub
+    if ((!progressData || progressData.length === 0) && lastPracticedSlug) {
+      // Find which path this topic belongs to
+      let practicePath = null;
+      for (const path of learningPaths) {
+        if (path.topics?.includes(lastPracticedSlug)) {
+          practicePath = path;
+          break;
+        }
+      }
+
+      return {
+        hasProgress: true,
+        pathTitle: practicePath?.title || 'Continue Practicing',
+        pathId: practicePath?.id || learningPaths[0].id,
+        topicTitle: formatTitle(lastPracticedSlug),
+        topicSlug: lastPracticedSlug,
+        nextChapter: 'Last studied: ' + formatTitle(lastPracticedSlug),
+        progress: 10,
+        icon: practicePath?.icon || '🧠',
+      };
+    }
+
+    // D. Brand new user (no progress at all)
     if (!progressData || progressData.length === 0) {
-      const firstPath = learningPaths[0]; // Math for ML
-      const firstTopic = firstPath.topics[0]; // Vectors Matrices
+      const firstPath = learningPaths[0];
+      const firstTopic = firstPath.topics[0];
 
       return {
         hasProgress: false,
@@ -146,11 +178,10 @@ export const getUserProgress = async (userId: string) => {
       };
     }
 
-    // C. Agar purana khiladi hai -> Next Topic calculate karo
-    // 👇 Ab yahan error nahi aayega
+    // E. Returning user with path progress -> Next Topic calculate karo
     const lastTopicSlug = progressData[0].node_id;
 
-    // 1. Pata lagao ye slug kis Path mein hai
+    // 1. Find which Path this slug belongs to
     let foundPath = null;
     let foundIndex = -1;
 
