@@ -1,7 +1,9 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { RotateCcw, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '../utils/supabase/client';
+import { log } from '../utils/logger';
 
 interface DemoCard {
   front: string;
@@ -39,9 +41,49 @@ export function MiniFlashcardDemo({
 }: MiniFlashcardDemoProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
+  const [fetchedCards, setFetchedCards] = useState<DemoCard[] | null>(null);
   const navigate = useNavigate();
 
-  const currentCard = cards[currentIndex];
+  // Auto-fetch related flashcards from DB when topicSlug is provided
+  useEffect(() => {
+    if (!topicSlug) return;
+
+    const fetchRelatedCards = async () => {
+      try {
+        const { data: topic } = await supabase
+          .from('topics')
+          .select('id')
+          .eq('slug', topicSlug)
+          .single();
+
+        if (!topic) return;
+
+        const { data: flashcards } = await supabase
+          .from('flashcards')
+          .select('front_content, back_content')
+          .eq('topic_id', topic.id)
+          .limit(5);
+
+        if (flashcards && flashcards.length > 0) {
+          setFetchedCards(
+            flashcards.map((fc) => ({
+              front: fc.front_content,
+              back: fc.back_content,
+            }))
+          );
+          setCurrentIndex(0);
+          setIsFlipped(false);
+        }
+      } catch (err) {
+        log.warn('Failed to fetch related flashcards, using defaults', err);
+      }
+    };
+
+    fetchRelatedCards();
+  }, [topicSlug]);
+
+  const displayCards = fetchedCards || cards;
+  const currentCard = displayCards[currentIndex];
 
   const handleFlip = useCallback(() => {
     setIsFlipped((prev) => !prev);
@@ -50,16 +92,16 @@ export function MiniFlashcardDemo({
   const handleNext = useCallback(() => {
     setIsFlipped(false);
     setTimeout(() => {
-      setCurrentIndex((prev) => (prev + 1) % cards.length);
+      setCurrentIndex((prev) => (prev + 1) % displayCards.length);
     }, 150);
-  }, [cards.length]);
+  }, [displayCards.length]);
 
   const handlePrev = useCallback(() => {
     setIsFlipped(false);
     setTimeout(() => {
-      setCurrentIndex((prev) => (prev - 1 + cards.length) % cards.length);
+      setCurrentIndex((prev) => (prev - 1 + displayCards.length) % displayCards.length);
     }, 150);
-  }, [cards.length]);
+  }, [displayCards.length]);
 
   return (
     <div className="my-12 p-6 md:p-8 bg-gradient-to-br from-purple-50 via-white to-blue-50 dark:from-purple-900/20 dark:via-zinc-900 dark:to-blue-900/20 rounded-2xl border border-purple-200 dark:border-purple-800/50">
@@ -71,7 +113,7 @@ export function MiniFlashcardDemo({
         <div>
           <h3 className="font-bold text-lg text-foreground">{title}</h3>
           <p className="text-sm text-muted-foreground">
-            Click the card to flip • {cards.length} cards
+            Click the card to flip • {displayCards.length} cards
           </p>
         </div>
       </div>
@@ -119,7 +161,7 @@ export function MiniFlashcardDemo({
           </button>
 
           <span className="text-sm font-mono text-muted-foreground">
-            {currentIndex + 1} / {cards.length}
+            {currentIndex + 1} / {displayCards.length}
           </span>
 
           <button
