@@ -33,7 +33,8 @@ export function TopicPage({
   const seoContent = {
     title: topic.metaTitle,
     description: topic.metaDescription,
-    canonical: `https://neuralcards.com/learn/${topic.slug}`,
+    canonical: `https://neural-cards.vercel.app/topics/${topic.slug}`,
+    ogImage: `https://neural-cards.vercel.app/api/og?title=${encodeURIComponent(topic.title)}&type=topic`,
     schema: {
       '@context': 'https://schema.org',
       '@type': 'Course',

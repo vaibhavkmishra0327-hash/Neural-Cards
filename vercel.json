@@ -3,6 +3,28 @@
   "outputDirectory": "dist",
   "framework": "vite",
   "rewrites": [
+    {
+      "source": "/blog/:slug",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": "(?i).*(facebookexternalhit|LinkedInBot|Twitterbot|Slackbot|WhatsApp|TelegramBot|redditbot|Pinterest|Discordbot|Googlebot|bingbot).*"
+        }
+      ],
+      "destination": "/api/meta?path=/blog/:slug"
+    },
+    {
+      "source": "/topics/:slug",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": "(?i).*(facebookexternalhit|LinkedInBot|Twitterbot|Slackbot|WhatsApp|TelegramBot|redditbot|Pinterest|Discordbot|Googlebot|bingbot).*"
+        }
+      ],
+      "destination": "/api/meta?path=/topics/:slug"
+    },
     { "source": "/(.*)", "destination": "/index.html" }
   ],
   "headers": [

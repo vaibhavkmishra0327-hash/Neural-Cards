@@ -58,6 +58,8 @@ export function BlogList({ onNavigate }: BlogListProps) {
           description:
             'Deep dives into AI, Machine Learning, Deep Learning and Software Engineering concepts. AI-generated articles curated for learners.',
           canonical: 'https://neural-cards.vercel.app/blog',
+          ogImage:
+            'https://neural-cards.vercel.app/api/og?title=Tech%20Blog%20%26%20AI%20Insights&type=blog',
           schema: {
             '@context': 'https://schema.org',
             '@type': 'Blog',

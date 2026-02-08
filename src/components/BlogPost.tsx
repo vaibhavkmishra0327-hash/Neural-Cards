@@ -113,7 +113,7 @@ export function BlogPost({ slug, onBack }: BlogPostProps) {
           title: `${post.title} | NeuralCards Blog`,
           description: postDescription,
           canonical: postUrl,
-          ogImage: `https://neural-cards.vercel.app/og-default.png`,
+          ogImage: `https://neural-cards.vercel.app/api/og?title=${encodeURIComponent(post.title)}&author=${encodeURIComponent(post.author || 'Vaibhav Kumar Mishra')}&type=blog`,
           schema: {
             '@context': 'https://schema.org',
             '@type': 'Article',
