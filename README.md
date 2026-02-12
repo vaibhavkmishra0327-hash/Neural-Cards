@@ -49,7 +49,7 @@ It's a full-stack React app with Supabase on the backend. You can sign in with G
 - **AI:** Groq API via Edge Function proxy
 - **Testing:** Vitest
 - **CI/CD:** GitHub Actions
-- **Hosting:** Netlify
+- **Hosting:** Vercal
 
 ---
 
