@@ -29,7 +29,6 @@ app.use(
     origin: [
       'https://neuralcards.com',
       'https://www.neuralcards.com',
-      'https://neuralcards-app.netlify.app',
       'https://neural-cards.vercel.app',
     ],
     allowHeaders: ['Content-Type', 'Authorization', 'apikey'],
@@ -38,6 +37,44 @@ app.use(
     maxAge: 600,
   })
 );
+
+// ====================
+// RATE LIMITING
+// ====================
+const rateLimitStore = new Map<string, { count: number; resetAt: number }>();
+
+function rateLimit(limit: number, windowMs: number) {
+  return async (c: any, next: any) => {
+    const ip = c.req.header('x-forwarded-for') || c.req.header('cf-connecting-ip') || 'unknown';
+    const key = `${ip}:${c.req.path}`;
+    const now = Date.now();
+    const record = rateLimitStore.get(key);
+
+    if (record && now < record.resetAt) {
+      if (record.count >= limit) {
+        return c.json({ error: 'Too many requests. Please try again later.' }, 429);
+      }
+      record.count++;
+    } else {
+      rateLimitStore.set(key, { count: 1, resetAt: now + windowMs });
+    }
+
+    // Clean up expired entries periodically
+    if (rateLimitStore.size > 10000) {
+      for (const [k, v] of rateLimitStore) {
+        if (now > v.resetAt) rateLimitStore.delete(k);
+      }
+    }
+
+    await next();
+  };
+}
+
+// Strict rate limit for sensitive endpoints (5 req/min)
+app.use('/make-server-f02c4c3b/auth/*', rateLimit(5, 60_000));
+app.use('/make-server-f02c4c3b/generate-ai', rateLimit(5, 60_000));
+// General rate limit for all other endpoints (60 req/min)
+app.use('/make-server-f02c4c3b/*', rateLimit(60, 60_000));
 
 // Health check endpoint
 app.get('/make-server-f02c4c3b/health', (c) => {
@@ -167,7 +204,11 @@ app.get('/make-server-f02c4c3b/user/profile', async (c) => {
       });
     }
 
-    return c.json({ profile });
+    // Compute admin status server-side (never expose admin email to client)
+    const adminEmail = Deno.env.get('ADMIN_EMAIL') || '';
+    const isAdmin = !!(user.email && adminEmail && user.email.toLowerCase() === adminEmail.toLowerCase());
+
+    return c.json({ profile, isAdmin });
   } catch (error) {
     console.log('Get profile error:', error);
     return c.json({ error: 'Failed to get profile' }, 500);
@@ -187,14 +228,27 @@ app.put('/make-server-f02c4c3b/user/profile', async (c) => {
       return c.json({ error: 'Unauthorized' }, 401);
     }
 
-    const updates = await c.req.json();
+    const body = await c.req.json();
     const currentProfile = await kv.get(`user:${user.id}`);
 
     if (!currentProfile) {
       return c.json({ error: 'Profile not found' }, 404);
     }
 
-    const updatedProfile = { ...currentProfile, ...updates };
+    // Whitelist allowed fields to prevent mass assignment
+    const allowedFields: Record<string, any> = {};
+    if (typeof body.name === 'string' && body.name.trim().length > 0 && body.name.trim().length <= 100) {
+      allowedFields.name = body.name.trim();
+    }
+    if (typeof body.dailyGoal === 'number' && body.dailyGoal >= 1 && body.dailyGoal <= 500) {
+      allowedFields.dailyGoal = Math.floor(body.dailyGoal);
+    }
+
+    if (Object.keys(allowedFields).length === 0) {
+      return c.json({ error: 'No valid fields to update' }, 400);
+    }
+
+    const updatedProfile = { ...currentProfile, ...allowedFields };
     await kv.set(`user:${user.id}`, updatedProfile);
 
     return c.json({ profile: updatedProfile });

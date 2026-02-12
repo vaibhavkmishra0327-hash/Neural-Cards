@@ -3,8 +3,6 @@ import { Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import type { User } from '@supabase/supabase-js';
 
-const ADMIN_EMAIL = (import.meta.env.VITE_ADMIN_EMAIL || '').trim();
-
 // Loading spinner while auth state resolves
 const AuthLoader = () => (
   <div className="flex items-center justify-center min-h-[60vh]">
@@ -42,17 +40,15 @@ export function ProtectedRoute({ user, children, redirectTo = '/auth' }: Protect
 }
 
 /**
- * AdminRoute - Requires authentication + admin email
+ * AdminRoute - Requires authentication + admin role (checked server-side)
  * Redirects to home with denied access if not an admin
  *
  * NOTE: This is a client-side guard for UX only.
- * Real authorization MUST be enforced server-side via:
- * - Supabase RLS policies
- * - Edge function middleware
- * - Database role checks
+ * Real authorization is enforced server-side via the edge function
+ * which checks ADMIN_EMAIL env var on the server.
  */
 export function AdminRoute({ user, children }: AdminRouteProps) {
-  const { isLoading } = useAuth();
+  const { isLoading, isAdmin } = useAuth();
 
   if (isLoading) {
     return <AuthLoader />;
@@ -61,8 +57,6 @@ export function AdminRoute({ user, children }: AdminRouteProps) {
   if (!user) {
     return <Navigate to="/auth" replace />;
   }
-
-  const isAdmin = user.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
 
   if (!isAdmin) {
     return (

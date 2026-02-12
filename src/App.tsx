@@ -41,7 +41,6 @@ const PracticeHub = lazy(() =>
 
 type Flashcard = Database['public']['Tables']['flashcards']['Row'];
 
-const ADMIN_EMAIL = (import.meta.env.VITE_ADMIN_EMAIL || '').trim();
 
 // Loading Spinner for lazy-loaded pages
 const PageLoader = () => (
@@ -144,7 +143,7 @@ function PathsWrapper({ user }: { user: User | null }) {
 }
 
 function App() {
-  const { user, signOut } = useAuth();
+  const { user, isAdmin, signOut } = useAuth();
   const [currentTopicTitle, setCurrentTopicTitle] = useState('');
   const [practiceCards, setPracticeCards] = useState<Flashcard[]>([]);
   const [isLoadingCards, setIsLoadingCards] = useState(false);
@@ -168,7 +167,7 @@ function App() {
   const handleNavigate = useCallback(
     (page: string, data?: Record<string, string>) => {
       if (page === 'admin') {
-        if (!user || user.email?.toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
+        if (!user || !isAdmin) {
           alert('⛔ Access Denied! Admins only.');
           return;
         }
@@ -197,7 +196,7 @@ function App() {
       }
       window.scrollTo(0, 0);
     },
-    [user, navigate, handleStartPractice]
+    [user, isAdmin, navigate, handleStartPractice]
   );
 
   const handleSignOut = useCallback(async () => {
@@ -225,8 +224,8 @@ function App() {
       <Header
         currentPage={getCurrentPage()}
         isAuthenticated={!!user}
+        isAdmin={isAdmin}
         onNavigate={handleNavigate}
-        userEmail={user?.email}
       />
 
       <main id="main-content" className="flex-grow relative" role="main" aria-label="Page content">

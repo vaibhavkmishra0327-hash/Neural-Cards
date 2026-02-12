@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { supabase } from '../utils/supabase/client';
+import { projectId, publicAnonKey } from '../utils/supabase/info';
 import type { User, Session } from '@supabase/supabase-js';
 
 interface AuthContextType {
@@ -13,8 +14,6 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const ADMIN_EMAIL = (import.meta.env.VITE_ADMIN_EMAIL || '').trim();
-
 interface AuthProviderProps {
   children: ReactNode;
 }
@@ -23,12 +22,39 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  // Fetch admin status from server (admin email checked server-side only)
+  const fetchAdminStatus = useCallback(async (accessToken: string) => {
+    try {
+      const res = await fetch(
+        `https://${projectId}.supabase.co/functions/v1/make-server-f02c4c3b/user/profile`,
+        {
+          headers: {
+            apikey: publicAnonKey,
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+      if (res.ok) {
+        const data = await res.json();
+        setIsAdmin(data.isAdmin === true);
+      } else {
+        setIsAdmin(false);
+      }
+    } catch {
+      setIsAdmin(false);
+    }
+  }, []);
 
   useEffect(() => {
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
+      if (session?.access_token) {
+        fetchAdminStatus(session.access_token);
+      }
       setIsLoading(false);
     });
 
@@ -38,19 +64,23 @@ export function AuthProvider({ children }: AuthProviderProps) {
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
+      if (session?.access_token) {
+        fetchAdminStatus(session.access_token);
+      } else {
+        setIsAdmin(false);
+      }
       setIsLoading(false);
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [fetchAdminStatus]);
 
   const signOut = useCallback(async () => {
     await supabase.auth.signOut();
     setUser(null);
     setSession(null);
+    setIsAdmin(false);
   }, []);
-
-  const isAdmin = user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
 
   const value: AuthContextType = {
     user,
@@ -68,7 +98,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
  * Hook to access auth state from any component
  *
  * Usage:
- *   const { user, isAuthenticated, signOut } = useAuth();
+ *   const { user, isAuthenticated, isAdmin, signOut } = useAuth();
  */
 export function useAuth(): AuthContextType {
   const context = useContext(AuthContext);

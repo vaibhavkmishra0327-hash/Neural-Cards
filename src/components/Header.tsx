@@ -17,15 +17,15 @@ import { useTheme } from '../context/ThemeContext';
 interface HeaderProps {
   currentPage?: string;
   isAuthenticated?: boolean;
-  onNavigate?: (page: string, data?: any) => void; // 👈 Updated type to accept data
-  userEmail?: string;
+  isAdmin?: boolean;
+  onNavigate?: (page: string, data?: any) => void;
 }
 
 export function Header({
   currentPage = 'home',
   isAuthenticated = false,
+  isAdmin = false,
   onNavigate,
-  userEmail,
 }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { isDarkMode, toggleTheme } = useTheme();
@@ -65,7 +65,6 @@ export function Header({
     }
   };
 
-  const ADMIN_EMAIL = (import.meta.env.VITE_ADMIN_EMAIL || '').trim();
 
   return (
     <motion.header
@@ -127,7 +126,7 @@ export function Header({
               </motion.button>
             ))}
 
-            {userEmail?.toLowerCase() === ADMIN_EMAIL.toLowerCase() && (
+            {isAdmin && (
               <motion.button
                 onClick={() => handleNavClick('admin')}
                 className={`text-sm font-bold flex items-center gap-1 transition-colors px-3 py-1 rounded-full border ${
@@ -285,7 +284,7 @@ export function Header({
                   </motion.button>
                 ))}
 
-                {userEmail?.toLowerCase() === ADMIN_EMAIL.toLowerCase() && (
+                {isAdmin && (
                   <motion.button
                     onClick={() => handleNavClick('admin')}
                     className="text-left px-4 py-3 rounded-xl text-red-500 hover:bg-red-500/10 flex items-center gap-2"
