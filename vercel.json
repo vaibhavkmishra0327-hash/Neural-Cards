@@ -9,7 +9,7 @@
         {
           "type": "header",
           "key": "user-agent",
-          "value": "(?i).*(facebookexternalhit|LinkedInBot|Twitterbot|Slackbot|WhatsApp|TelegramBot|redditbot|Pinterest|Discordbot|Googlebot|bingbot).*"
+          "value": "(?i).*(facebookexternalhit|LinkedInBot|Twitterbot|Slackbot|WhatsApp|TelegramBot|redditbot|Pinterest|Discordbot).*"
         }
       ],
       "destination": "/api/meta?path=/blog/:slug"
@@ -20,7 +20,7 @@
         {
           "type": "header",
           "key": "user-agent",
-          "value": "(?i).*(facebookexternalhit|LinkedInBot|Twitterbot|Slackbot|WhatsApp|TelegramBot|redditbot|Pinterest|Discordbot|Googlebot|bingbot).*"
+          "value": "(?i).*(facebookexternalhit|LinkedInBot|Twitterbot|Slackbot|WhatsApp|TelegramBot|redditbot|Pinterest|Discordbot).*"
         }
       ],
       "destination": "/api/meta?path=/topics/:slug"

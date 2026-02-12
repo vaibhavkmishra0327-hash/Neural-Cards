@@ -111,8 +111,7 @@ export default async function handler(req: Request) {
   <meta name="twitter:description" content="${escapeHtml(description)}" />
   <meta name="twitter:image" content="${ogImage}" />
 
-  <!-- Redirect real users to the SPA (bots won't follow this) -->
-  <meta http-equiv="refresh" content="0;url=${canonical}" />
+  <meta name="robots" content="noindex, follow" />
 </head>
 <body>
   <h1>${escapeHtml(title)}</h1>
