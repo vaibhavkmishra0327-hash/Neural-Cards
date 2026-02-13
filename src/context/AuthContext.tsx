@@ -29,35 +29,52 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const ADMIN_EMAIL_FALLBACK = (import.meta.env.VITE_ADMIN_EMAIL || '').trim().toLowerCase();
 
   // Fetch admin status from server, with client-side fallback
-  const fetchAdminStatus = useCallback(async (accessToken: string, userEmail?: string) => {
-    try {
-      const res = await fetch(
-        `https://${projectId}.supabase.co/functions/v1/make-server-f02c4c3b/user/profile`,
-        {
-          headers: {
-            apikey: publicAnonKey,
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
-      if (res.ok) {
-        const data = await res.json();
-        if (typeof data.isAdmin === 'boolean') {
-          // Server returned isAdmin — use it (edge function is up to date)
-          setIsAdmin(data.isAdmin);
+  const fetchAdminStatus = useCallback(
+    async (accessToken: string, userEmail?: string) => {
+      try {
+        const res = await fetch(
+          `https://${projectId}.supabase.co/functions/v1/make-server-f02c4c3b/user/profile`,
+          {
+            headers: {
+              apikey: publicAnonKey,
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+        );
+        if (res.ok) {
+          const data = await res.json();
+          if (typeof data.isAdmin === 'boolean') {
+            // Server returned isAdmin — use it (edge function is up to date)
+            setIsAdmin(data.isAdmin);
+          } else {
+            // Server didn't return isAdmin — fallback to client-side check
+            setIsAdmin(
+              !!(
+                userEmail &&
+                ADMIN_EMAIL_FALLBACK &&
+                userEmail.toLowerCase() === ADMIN_EMAIL_FALLBACK
+              )
+            );
+          }
         } else {
-          // Server didn't return isAdmin — fallback to client-side check
-          setIsAdmin(!!(userEmail && ADMIN_EMAIL_FALLBACK && userEmail.toLowerCase() === ADMIN_EMAIL_FALLBACK));
+          // Request failed — fallback to client-side check
+          setIsAdmin(
+            !!(
+              userEmail &&
+              ADMIN_EMAIL_FALLBACK &&
+              userEmail.toLowerCase() === ADMIN_EMAIL_FALLBACK
+            )
+          );
         }
-      } else {
-        // Request failed — fallback to client-side check
-        setIsAdmin(!!(userEmail && ADMIN_EMAIL_FALLBACK && userEmail.toLowerCase() === ADMIN_EMAIL_FALLBACK));
+      } catch {
+        // Network error — fallback to client-side check
+        setIsAdmin(
+          !!(userEmail && ADMIN_EMAIL_FALLBACK && userEmail.toLowerCase() === ADMIN_EMAIL_FALLBACK)
+        );
       }
-    } catch {
-      // Network error — fallback to client-side check
-      setIsAdmin(!!(userEmail && ADMIN_EMAIL_FALLBACK && userEmail.toLowerCase() === ADMIN_EMAIL_FALLBACK));
-    }
-  }, [ADMIN_EMAIL_FALLBACK]);
+    },
+    [ADMIN_EMAIL_FALLBACK]
+  );
 
   useEffect(() => {
     // Get initial session

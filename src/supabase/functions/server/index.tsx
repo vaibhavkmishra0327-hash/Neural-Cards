@@ -206,7 +206,11 @@ app.get('/make-server-f02c4c3b/user/profile', async (c) => {
 
     // Compute admin status server-side (never expose admin email to client)
     const adminEmail = Deno.env.get('ADMIN_EMAIL') || '';
-    const isAdmin = !!(user.email && adminEmail && user.email.toLowerCase() === adminEmail.toLowerCase());
+    const isAdmin = !!(
+      user.email &&
+      adminEmail &&
+      user.email.toLowerCase() === adminEmail.toLowerCase()
+    );
 
     return c.json({ profile, isAdmin });
   } catch (error) {
@@ -237,7 +241,11 @@ app.put('/make-server-f02c4c3b/user/profile', async (c) => {
 
     // Whitelist allowed fields to prevent mass assignment
     const allowedFields: Record<string, any> = {};
-    if (typeof body.name === 'string' && body.name.trim().length > 0 && body.name.trim().length <= 100) {
+    if (
+      typeof body.name === 'string' &&
+      body.name.trim().length > 0 &&
+      body.name.trim().length <= 100
+    ) {
       allowedFields.name = body.name.trim();
     }
     if (typeof body.dailyGoal === 'number' && body.dailyGoal >= 1 && body.dailyGoal <= 500) {

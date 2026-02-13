@@ -65,7 +65,6 @@ export function Header({
     }
   };
 
-
   return (
     <motion.header
       className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur-md"

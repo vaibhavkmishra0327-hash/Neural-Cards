@@ -41,7 +41,6 @@ const PracticeHub = lazy(() =>
 
 type Flashcard = Database['public']['Tables']['flashcards']['Row'];
 
-
 // Loading Spinner for lazy-loaded pages
 const PageLoader = () => (
   <div className="flex items-center justify-center min-h-[60vh]">
