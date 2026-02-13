@@ -24,8 +24,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
 
-  // Fetch admin status from server (admin email checked server-side only)
-  const fetchAdminStatus = useCallback(async (accessToken: string) => {
+  // Client-side fallback for admin check (used until edge function is redeployed)
+  // TODO: Remove this fallback once the edge function is deployed with isAdmin support
+  const ADMIN_EMAIL_FALLBACK = (import.meta.env.VITE_ADMIN_EMAIL || '').trim().toLowerCase();
+
+  // Fetch admin status from server, with client-side fallback
+  const fetchAdminStatus = useCallback(async (accessToken: string, userEmail?: string) => {
     try {
       const res = await fetch(
         `https://${projectId}.supabase.co/functions/v1/make-server-f02c4c3b/user/profile`,
@@ -38,14 +42,22 @@ export function AuthProvider({ children }: AuthProviderProps) {
       );
       if (res.ok) {
         const data = await res.json();
-        setIsAdmin(data.isAdmin === true);
+        if (typeof data.isAdmin === 'boolean') {
+          // Server returned isAdmin — use it (edge function is up to date)
+          setIsAdmin(data.isAdmin);
+        } else {
+          // Server didn't return isAdmin — fallback to client-side check
+          setIsAdmin(!!(userEmail && ADMIN_EMAIL_FALLBACK && userEmail.toLowerCase() === ADMIN_EMAIL_FALLBACK));
+        }
       } else {
-        setIsAdmin(false);
+        // Request failed — fallback to client-side check
+        setIsAdmin(!!(userEmail && ADMIN_EMAIL_FALLBACK && userEmail.toLowerCase() === ADMIN_EMAIL_FALLBACK));
       }
     } catch {
-      setIsAdmin(false);
+      // Network error — fallback to client-side check
+      setIsAdmin(!!(userEmail && ADMIN_EMAIL_FALLBACK && userEmail.toLowerCase() === ADMIN_EMAIL_FALLBACK));
     }
-  }, []);
+  }, [ADMIN_EMAIL_FALLBACK]);
 
   useEffect(() => {
     // Get initial session
@@ -53,7 +65,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.access_token) {
-        fetchAdminStatus(session.access_token);
+        fetchAdminStatus(session.access_token, session.user?.email);
       }
       setIsLoading(false);
     });
@@ -65,7 +77,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.access_token) {
-        fetchAdminStatus(session.access_token);
+        fetchAdminStatus(session.access_token, session.user?.email);
       } else {
         setIsAdmin(false);
       }
