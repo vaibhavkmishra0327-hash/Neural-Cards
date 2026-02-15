@@ -17,6 +17,35 @@ export const config = {
 
 const SITE_URL = 'https://neural-cards.vercel.app';
 
+/** Keyword-to-Unsplash cover image mapping for OG images */
+const OG_COVER_MAP: { keywords: string[]; url: string }[] = [
+  { keywords: ['neural network', 'deep learning', 'deep dive', 'perceptron', 'backpropagation'], url: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=1200&h=630&fit=crop&crop=center' },
+  { keywords: ['rnn', 'recurrent', 'lstm', 'sequence', 'time series'], url: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1200&h=630&fit=crop&crop=center' },
+  { keywords: ['cnn', 'convolutional', 'computer vision', 'image recognition'], url: 'https://images.unsplash.com/photo-1561557944-6e7860d1a7eb?w=1200&h=630&fit=crop&crop=center' },
+  { keywords: ['linear algebra', 'matrix', 'vector', 'eigenvalue', 'eigenvector', 'pca'], url: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=1200&h=630&fit=crop&crop=center' },
+  { keywords: ['nlp', 'natural language', 'text', 'language model', 'sentiment'], url: 'https://images.unsplash.com/photo-1456324504439-367cee3b3c32?w=1200&h=630&fit=crop&crop=center' },
+  { keywords: ['transformer', 'attention', 'bert', 'gpt', 'llm', 'large language'], url: 'https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=1200&h=630&fit=crop&crop=center' },
+  { keywords: ['python', 'programming', 'code', 'software', 'algorithm'], url: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=1200&h=630&fit=crop&crop=center' },
+  { keywords: ['reinforcement', 'reward', 'agent', 'policy', 'q-learning'], url: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=1200&h=630&fit=crop&crop=center' },
+  { keywords: ['data science', 'analytics', 'visualization', 'statistics', 'dataset'], url: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1200&h=630&fit=crop&crop=center' },
+  { keywords: ['machine learning', 'ml', 'model', 'training', 'supervised', 'classification', 'regression'], url: 'https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=1200&h=630&fit=crop&crop=center' },
+  { keywords: ['gan', 'generative', 'diffusion', 'image generation'], url: 'https://images.unsplash.com/photo-1547954575-855750c57bd3?w=1200&h=630&fit=crop&crop=center' },
+  { keywords: ['cloud', 'deploy', 'infrastructure', 'aws', 'docker', 'kubernetes'], url: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1200&h=630&fit=crop&crop=center' },
+  { keywords: ['probability', 'bayes', 'distribution', 'calculus', 'gradient descent'], url: 'https://images.unsplash.com/photo-1509228468518-180dd4864904?w=1200&h=630&fit=crop&crop=center' },
+];
+
+const DEFAULT_OG_COVER = 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=1200&h=630&fit=crop&crop=center';
+
+function getCoverForTitle(title: string): string {
+  const lower = title.toLowerCase();
+  for (const entry of OG_COVER_MAP) {
+    for (const kw of entry.keywords) {
+      if (lower.includes(kw)) return entry.url;
+    }
+  }
+  return DEFAULT_OG_COVER;
+}
+
 export default async function handler(req: Request) {
   const url = new URL(req.url);
   const path = url.searchParams.get('path') || '/';
@@ -59,7 +88,8 @@ export default async function handler(req: Request) {
             .slice(0, 160)
             .trim();
           author = post.author || 'Vaibhav Kumar Mishra';
-          ogImage = `${SITE_URL}/api/og?title=${encodeURIComponent(post.title)}&author=${encodeURIComponent(author)}&type=blog`;
+          const cover = encodeURIComponent(getCoverForTitle(post.title));
+          ogImage = `${SITE_URL}/api/og?title=${encodeURIComponent(post.title)}&author=${encodeURIComponent(author)}&type=blog&cover=${cover}`;
           canonical = `${SITE_URL}/blog/${slug}`;
           publishedTime = post.created_at || '';
           type = 'article';

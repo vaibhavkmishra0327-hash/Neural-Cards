@@ -10,6 +10,7 @@ export default async function handler(req: Request) {
   const title = searchParams.get('title') || 'NeuralCards';
   const author = searchParams.get('author') || 'Vaibhav Kumar Mishra';
   const type = searchParams.get('type') || 'blog'; // blog | topic | default
+  const cover = searchParams.get('cover') || ''; // Optional cover image URL
 
   // Dynamic emoji based on type
   const emoji = type === 'topic' ? '🧠' : type === 'blog' ? '📝' : '🚀';
@@ -22,11 +23,45 @@ export default async function handler(req: Request) {
           width: '100%',
           display: 'flex',
           flexDirection: 'column',
-          backgroundImage: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%)',
+          backgroundImage: cover
+            ? 'none'
+            : 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%)',
           padding: '60px',
           fontFamily: 'sans-serif',
+          position: 'relative',
+          overflow: 'hidden',
         }}
       >
+        {/* Cover image background */}
+        {cover && (
+          <img
+            src={cover}
+            alt=""
+            width={1200}
+            height={630}
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+            }}
+          />
+        )}
+        {/* Dark overlay for text readability when cover image is present */}
+        {cover && (
+          <div
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              background: 'linear-gradient(135deg, rgba(15,23,42,0.85) 0%, rgba(30,27,75,0.75) 50%, rgba(49,46,129,0.7) 100%)',
+            }}
+          />
+        )}
         {/* Top bar */}
         <div
           style={{
@@ -34,6 +69,8 @@ export default async function handler(req: Request) {
             alignItems: 'center',
             justifyContent: 'space-between',
             marginBottom: '40px',
+            position: 'relative',
+            zIndex: 1,
           }}
         >
           <div
@@ -90,6 +127,8 @@ export default async function handler(req: Request) {
             flexDirection: 'column',
             flex: 1,
             justifyContent: 'center',
+            position: 'relative',
+            zIndex: 1,
           }}
         >
           <h1
@@ -114,6 +153,8 @@ export default async function handler(req: Request) {
             alignItems: 'center',
             justifyContent: 'space-between',
             marginTop: '40px',
+            position: 'relative',
+            zIndex: 1,
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
