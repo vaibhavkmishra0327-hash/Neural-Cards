@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { BookOpen, ChevronRight, Layers, Search, Sparkles } from 'lucide-react';
+import { BookOpen, ChevronRight, Layers, Search, Sparkles, FileText, ArrowRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { getTopicsWithCardCount } from '../data/api';
+import { cheatSheets } from '../data/cheatSheets';
 import { Database } from '../types/database.types';
 import { log } from '../utils/logger';
 
@@ -198,6 +200,31 @@ export function PracticeHub({ onChapterClick }: PracticeHubProps) {
         </div>
       </div>
 
+      {/* Cheat Sheets Banner */}
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 mt-8">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          className="relative overflow-hidden rounded-2xl border border-orange-200 dark:border-orange-800/30 bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-950/30 dark:to-amber-950/20 p-6"
+        >
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="p-3 rounded-xl bg-orange-100 dark:bg-orange-900/40">
+                <FileText className="w-6 h-6 text-orange-600 dark:text-orange-400" />
+              </div>
+              <div>
+                <h3 className="font-bold text-gray-900 dark:text-white text-lg">Quick Reference Cheat Sheets</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  {cheatSheets.length} printable cheat sheets for Python, NumPy, ML, Deep Learning & more
+                </p>
+              </div>
+            </div>
+            <CheatSheetButton />
+          </div>
+        </motion.div>
+      </div>
+
       {/* Chapter Cards */}
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 pb-16">
         {loading ? (
@@ -310,6 +337,22 @@ export function PracticeHub({ onChapterClick }: PracticeHubProps) {
         )}
       </div>
     </div>
+  );
+}
+
+// Button component that uses useNavigate (must be inside Router)
+function CheatSheetButton() {
+  const navigate = useNavigate();
+  return (
+    <motion.button
+      onClick={() => { navigate('/cheatsheets'); window.scrollTo(0, 0); }}
+      className="flex-shrink-0 px-5 py-2.5 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-xl font-medium text-sm hover:from-orange-600 hover:to-amber-600 transition-all flex items-center gap-2 shadow-lg shadow-orange-500/20"
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
+    >
+      Browse Cheat Sheets
+      <ArrowRight className="w-4 h-4" />
+    </motion.button>
   );
 }
 

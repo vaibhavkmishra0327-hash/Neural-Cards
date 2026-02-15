@@ -9,7 +9,9 @@ import {
   Play,
   Clock,
   ArrowRight,
+  FileText,
 } from 'lucide-react';
+import { cheatSheets } from '../data/cheatSheets';
 import { learningPaths } from '../data/learningPaths';
 import { motion } from 'motion/react';
 import { useState, useEffect } from 'react';
@@ -250,6 +252,76 @@ export function HomePage({ onNavigate, isAuthenticated = false }: HomePageProps)
             <StatCard number="100+" label="Topics Covered" delay={0.1} />
             <StatCard number="7" label="Learning Paths" delay={0.2} />
             <StatCard number="3x" label="Better Retention" delay={0.3} />
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Cheat Sheets Section */}
+      <section className="py-20 bg-muted/30">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            className="text-center mb-12"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
+            <div className="inline-flex items-center gap-2 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 px-4 py-1.5 rounded-full text-sm font-medium mb-4">
+              <FileText className="w-4 h-4" />
+              Quick Reference
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Cheat Sheets</h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Concise, printable reference guides for every AI & ML topic. Pin them, bookmark them, love them.
+            </p>
+          </motion.div>
+
+          <motion.div
+            className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5"
+            variants={containerVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+          >
+            {cheatSheets.slice(0, 4).map((cs, index) => (
+              <motion.div
+                key={cs.id}
+                onClick={() => onNavigate && onNavigate('cheatsheets')}
+                className="group cursor-pointer bg-card border rounded-xl p-5 hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                whileHover={{ y: -8 }}
+              >
+                <span className="text-3xl mb-3 block">{cs.icon}</span>
+                <h3 className="font-bold text-lg mb-1 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
+                  {cs.title}
+                </h3>
+                <p className="text-sm text-muted-foreground line-clamp-2 mb-3">{cs.description}</p>
+                <div className="flex items-center gap-1 text-xs text-purple-600 dark:text-purple-400 font-medium">
+                  {cs.sections.length} sections · {cs.sections.reduce((s, sec) => s + sec.items.length, 0)} items
+                </div>
+              </motion.div>
+            ))}
+          </motion.div>
+
+          <motion.div
+            className="text-center mt-10"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+          >
+            <motion.button
+              onClick={() => onNavigate && onNavigate('cheatsheets')}
+              className="px-6 py-3 bg-gradient-to-r from-orange-500 to-pink-500 text-white rounded-lg hover:from-orange-600 hover:to-pink-600 transition-colors font-semibold inline-flex items-center gap-2"
+              whileHover={{ scale: 1.05, y: -3 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <FileText className="w-4 h-4" />
+              View All {cheatSheets.length} Cheat Sheets
+            </motion.button>
           </motion.div>
         </div>
       </section>
