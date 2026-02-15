@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Calendar, Clock, ArrowRight, BookOpen } from 'lucide-react';
 import { log } from '../utils/logger';
 import { SEOHead } from './SEOHead';
+import { getBlogCoverImage } from '../utils/blog-images';
 
 interface BlogListProps {
   onNavigate: (page: string, data?: any) => void;
@@ -125,11 +126,29 @@ export function BlogList({ onNavigate }: BlogListProps) {
                   className="group flex flex-col bg-card border border-border rounded-2xl overflow-hidden hover:shadow-2xl hover:shadow-purple-500/10 transition-all duration-300 cursor-pointer h-full"
                   onClick={() => onNavigate('blog-post', { slug: blog.slug })} // 👈 Action defined here
                 >
-                  {/* Image Placeholder or Real Image */}
-                  <div className="h-48 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-zinc-800 dark:to-zinc-900 flex items-center justify-center relative overflow-hidden">
-                    {/* Abstract Shapes for visual appeal */}
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/20 blur-[50px] rounded-full group-hover:bg-purple-500/30 transition-all" />
-                    <BookOpen className="w-12 h-12 text-muted-foreground/30" />
+                  {/* Cover Image */}
+                  <div className="h-48 relative overflow-hidden">
+                    <img
+                      src={getBlogCoverImage(blog.title, blog.cover_image).url}
+                      alt={getBlogCoverImage(blog.title, blog.cover_image).alt}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      loading="lazy"
+                      onError={(e) => {
+                        // Fallback to gradient placeholder on load failure
+                        const target = e.currentTarget;
+                        target.style.display = 'none';
+                        const fallback = target.parentElement?.querySelector(
+                          '.img-fallback'
+                        ) as HTMLElement;
+                        if (fallback) fallback.style.display = 'flex';
+                      }}
+                    />
+                    {/* Fallback gradient (hidden by default) */}
+                    <div className="img-fallback absolute inset-0 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-zinc-800 dark:to-zinc-900 items-center justify-center hidden">
+                      <BookOpen className="w-12 h-12 text-muted-foreground/30" />
+                    </div>
+                    {/* Gradient overlay for text readability */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   </div>
 
                   <div className="p-6 flex-1 flex flex-col">

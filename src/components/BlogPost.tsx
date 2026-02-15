@@ -8,6 +8,7 @@ import { SEOHead } from './SEOHead';
 import { SocialShare } from './SocialShare';
 import { MiniFlashcardDemo } from './MiniFlashcardDemo';
 import { BlogCTA } from './BlogCTA';
+import { getBlogCoverImage } from '../utils/blog-images';
 
 interface BlogPostProps {
   slug: string;
@@ -135,6 +136,17 @@ export function BlogPost({ slug, onBack }: BlogPostProps) {
 
           {/* Header */}
           <header className="mb-12 border-b border-border pb-12">
+            {/* Hero Cover Image */}
+            <div className="relative w-full h-56 sm:h-72 md:h-80 rounded-2xl overflow-hidden mb-8 shadow-lg">
+              <img
+                src={getBlogCoverImage(post.title, post.cover_image).url}
+                alt={getBlogCoverImage(post.title, post.cover_image).alt}
+                className="w-full h-full object-cover"
+                loading="eager"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+            </div>
+
             <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mb-6 font-mono">
               <span className="flex items-center gap-1.5 bg-secondary/50 px-3 py-1 rounded-full">
                 <Calendar className="w-3.5 h-3.5" />
