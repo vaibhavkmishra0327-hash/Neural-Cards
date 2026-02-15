@@ -272,7 +272,8 @@ export function HomePage({ onNavigate, isAuthenticated = false }: HomePageProps)
             </div>
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Cheat Sheets</h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Concise, printable reference guides for every AI & ML topic. Pin them, bookmark them, love them.
+              Concise, printable reference guides for every AI & ML topic. Pin them, bookmark them,
+              love them.
             </p>
           </motion.div>
 
@@ -300,7 +301,8 @@ export function HomePage({ onNavigate, isAuthenticated = false }: HomePageProps)
                 </h3>
                 <p className="text-sm text-muted-foreground line-clamp-2 mb-3">{cs.description}</p>
                 <div className="flex items-center gap-1 text-xs text-purple-600 dark:text-purple-400 font-medium">
-                  {cs.sections.length} sections · {cs.sections.reduce((s, sec) => s + sec.items.length, 0)} items
+                  {cs.sections.length} sections ·{' '}
+                  {cs.sections.reduce((s, sec) => s + sec.items.length, 0)} items
                 </div>
               </motion.div>
             ))}

@@ -1,6 +1,15 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Copy, Check, ChevronDown, ChevronRight, Lightbulb, FileText, Printer } from 'lucide-react';
+import {
+  ArrowLeft,
+  Copy,
+  Check,
+  ChevronDown,
+  ChevronRight,
+  Lightbulb,
+  FileText,
+  Printer,
+} from 'lucide-react';
 import { getCheatSheetBySlug } from '../data/cheatSheets';
 import { SEOHead } from './SEOHead';
 import type { CheatSheetItem } from '../types';

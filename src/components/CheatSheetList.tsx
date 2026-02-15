@@ -83,8 +83,8 @@ export function CheatSheetList({ onSelect }: CheatSheetListProps) {
           Cheat Sheets
         </h1>
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-          Concise, printable reference guides for every AI & ML topic. Pin them,
-          bookmark them, love them.
+          Concise, printable reference guides for every AI & ML topic. Pin them, bookmark them, love
+          them.
         </p>
       </motion.div>
 

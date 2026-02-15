@@ -1,6 +1,14 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { BookOpen, ChevronRight, Layers, Search, Sparkles, FileText, ArrowRight } from 'lucide-react';
+import {
+  BookOpen,
+  ChevronRight,
+  Layers,
+  Search,
+  Sparkles,
+  FileText,
+  ArrowRight,
+} from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { getTopicsWithCardCount } from '../data/api';
 import { cheatSheets } from '../data/cheatSheets';
@@ -214,9 +222,12 @@ export function PracticeHub({ onChapterClick }: PracticeHubProps) {
                 <FileText className="w-6 h-6 text-orange-600 dark:text-orange-400" />
               </div>
               <div>
-                <h3 className="font-bold text-gray-900 dark:text-white text-lg">Quick Reference Cheat Sheets</h3>
+                <h3 className="font-bold text-gray-900 dark:text-white text-lg">
+                  Quick Reference Cheat Sheets
+                </h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  {cheatSheets.length} printable cheat sheets for Python, NumPy, ML, Deep Learning & more
+                  {cheatSheets.length} printable cheat sheets for Python, NumPy, ML, Deep Learning &
+                  more
                 </p>
               </div>
             </div>
@@ -345,7 +356,10 @@ function CheatSheetButton() {
   const navigate = useNavigate();
   return (
     <motion.button
-      onClick={() => { navigate('/cheatsheets'); window.scrollTo(0, 0); }}
+      onClick={() => {
+        navigate('/cheatsheets');
+        window.scrollTo(0, 0);
+      }}
       className="flex-shrink-0 px-5 py-2.5 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-xl font-medium text-sm hover:from-orange-600 hover:to-amber-600 transition-all flex items-center gap-2 shadow-lg shadow-orange-500/20"
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}

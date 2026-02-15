@@ -409,7 +409,9 @@ function App() {
         </ErrorBoundary>
       </main>
 
-      {['/', '/about', '/paths', '/blog', '/practice', '/cheatsheets'].includes(location.pathname) ||
+      {['/', '/about', '/paths', '/blog', '/practice', '/cheatsheets'].includes(
+        location.pathname
+      ) ||
       location.pathname.startsWith('/blog/') ||
       location.pathname.startsWith('/cheatsheets/') ? (
         <Footer onNavigate={handleNavigate} />
@@ -437,9 +439,7 @@ function CheatSheetViewWrapper() {
   const { slug } = useParams();
   const navigate = useNavigate();
   if (!slug) return null;
-  return (
-    <CheatSheetView slug={slug} onBack={() => navigate('/cheatsheets')} />
-  );
+  return <CheatSheetView slug={slug} onBack={() => navigate('/cheatsheets')} />;
 }
 
 export default App;
