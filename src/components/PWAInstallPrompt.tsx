@@ -173,6 +173,8 @@ export function IOSInstallHint() {
             setShow(false);
             localStorage.setItem('ios-hint-dismissed', 'true');
           }}
+          title="Dismiss"
+          aria-label="Dismiss install hint"
           className="absolute top-2 right-2 w-6 h-6 flex items-center justify-center"
         >
           <X className="h-4 w-4 text-gray-400" />

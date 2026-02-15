@@ -351,6 +351,8 @@ export function FillBlankQuiz({
                     <button
                       onClick={handleSubmit}
                       disabled={userInput.trim() === ''}
+                      title="Submit answer"
+                      aria-label="Submit answer"
                       className="px-6 py-4 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                     >
                       <Send className="h-5 w-5" />

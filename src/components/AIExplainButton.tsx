@@ -147,6 +147,8 @@ Keep it concise and beginner-friendly.`;
                   </div>
                   <button
                     onClick={() => setIsOpen(false)}
+                    title="Close explanation"
+                    aria-label="Close explanation"
                     className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition"
                   >
                     <X className="h-5 w-5 text-gray-500" />
