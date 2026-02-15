@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="390" height="844" viewBox="0 0 390 844">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a0a0a"/>
+      <stop offset="100%" style="stop-color:#1a0a2e"/>
+    </linearGradient>
+  </defs>
+  <rect width="390" height="844" fill="url(#bg)"/>
+  <text x="195" y="380" dominant-baseline="middle" text-anchor="middle"
+    font-family="system-ui" font-weight="bold" font-size="36" fill="white">NeuralCards</text>
+  <text x="195" y="430" dominant-baseline="middle" text-anchor="middle"
+    font-family="system-ui" font-size="14" fill="#a78bfa">AI-Powered Flashcards</text>
+</svg>

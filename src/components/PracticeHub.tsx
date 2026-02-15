@@ -8,6 +8,7 @@ import {
   Sparkles,
   FileText,
   ArrowRight,
+  ListChecks,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { getTopicsWithCardCount } from '../data/api';
@@ -291,10 +292,7 @@ export function PracticeHub({ onChapterClick }: PracticeHubProps) {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95 }}
                         transition={{ delay: index * 0.05 }}
-                        onClick={() => onChapterClick(topic.slug, topic.title)}
-                        className={`group relative overflow-hidden rounded-2xl border ${style.border} bg-white dark:bg-gray-800/50 p-6 cursor-pointer transition-all duration-300 hover:shadow-xl hover:shadow-purple-500/10 hover:-translate-y-1 hover:border-purple-400/50`}
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
+                        className={`group relative overflow-hidden rounded-2xl border ${style.border} bg-white dark:bg-gray-800/50 p-6 transition-all duration-300 hover:shadow-xl hover:shadow-purple-500/10 hover:-translate-y-1 hover:border-purple-400/50`}
                       >
                         {/* Hover gradient overlay */}
                         <div
@@ -322,7 +320,7 @@ export function PracticeHub({ onChapterClick }: PracticeHubProps) {
                             </p>
                           )}
 
-                          {/* Footer: Card count + Arrow */}
+                          {/* Footer: Card count + Action Buttons */}
                           <div className="flex items-center justify-between mt-auto pt-3 border-t border-gray-100 dark:border-gray-700/50">
                             <div className="flex items-center gap-2">
                               <div
@@ -332,9 +330,20 @@ export function PracticeHub({ onChapterClick }: PracticeHubProps) {
                                 {topic.cardCount} {topic.cardCount === 1 ? 'card' : 'cards'}
                               </span>
                             </div>
-                            <div className="flex items-center gap-1 text-sm font-medium text-purple-600 dark:text-purple-400 opacity-0 group-hover:opacity-100 transition-opacity">
-                              Practice
-                              <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                            <div className="flex items-center gap-2">
+                              <TopicActionButton
+                                label="Practice"
+                                icon={<ChevronRight className="w-4 h-4" />}
+                                onClick={() => onChapterClick(topic.slug, topic.title)}
+                                variant="purple"
+                              />
+                              <TopicActionButton
+                                label="Quiz"
+                                icon={<ListChecks className="w-4 h-4" />}
+                                onClick={() => {}}
+                                variant="emerald"
+                                slug={topic.slug}
+                              />
                             </div>
                           </div>
                         </div>
@@ -348,6 +357,45 @@ export function PracticeHub({ onChapterClick }: PracticeHubProps) {
         )}
       </div>
     </div>
+  );
+}
+
+// Topic action button that uses useNavigate for quiz navigation
+function TopicActionButton({
+  label,
+  icon,
+  onClick,
+  variant,
+  slug,
+}: {
+  label: string;
+  icon: React.ReactNode;
+  onClick: () => void;
+  variant: 'purple' | 'emerald';
+  slug?: string;
+}) {
+  const navigate = useNavigate();
+  const colors =
+    variant === 'purple'
+      ? 'text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20'
+      : 'text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20';
+
+  return (
+    <button
+      onClick={(e) => {
+        e.stopPropagation();
+        if (slug && variant === 'emerald') {
+          navigate(`/quiz/${slug}`);
+          window.scrollTo(0, 0);
+        } else {
+          onClick();
+        }
+      }}
+      className={`flex items-center gap-1 text-sm font-medium ${colors} px-3 py-1.5 rounded-lg transition-all duration-200`}
+    >
+      {label}
+      {icon}
+    </button>
   );
 }
 

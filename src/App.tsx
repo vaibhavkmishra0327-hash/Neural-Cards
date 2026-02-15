@@ -44,6 +44,10 @@ const CheatSheetList = lazy(() =>
 const CheatSheetView = lazy(() =>
   import('./components/CheatSheetView').then((m) => ({ default: m.CheatSheetView }))
 );
+const QuizHub = lazy(() => import('./components/QuizHub').then((m) => ({ default: m.QuizHub })));
+
+// PWA Components
+import { PWAInstallPrompt, IOSInstallHint } from './components/PWAInstallPrompt';
 
 type Flashcard = Database['public']['Tables']['flashcards']['Row'];
 
@@ -194,6 +198,8 @@ function App() {
         navigate(`/blog/${data.slug}`);
       } else if (page === 'cheatsheets') {
         navigate('/cheatsheets');
+      } else if (page === 'quiz' && data?.slug) {
+        navigate(`/quiz/${data.slug}`);
       } else if (page === 'all-practice') {
         navigate('/practice');
       } else if (page === 'practice' && data?.slug) {
@@ -217,6 +223,7 @@ function App() {
     if (path === '/') return 'home';
     if (path === '/practice') return 'all-practice';
     if (path.startsWith('/practice/')) return 'practice';
+    if (path.startsWith('/quiz/')) return 'practice';
     if (path.startsWith('/cheatsheets')) return 'cheatsheets';
     if (path.startsWith('/paths')) return 'paths';
     if (path.startsWith('/blog')) return 'blog';
@@ -369,6 +376,19 @@ function App() {
                 />
 
                 <Route
+                  path="/quiz/:slug"
+                  element={
+                    <ProtectedRoute user={user} redirectTo="/auth">
+                      <PageTransition key="quiz-hub">
+                        <Suspense fallback={<PageLoader />}>
+                          <QuizHub />
+                        </Suspense>
+                      </PageTransition>
+                    </ProtectedRoute>
+                  }
+                />
+
+                <Route
                   path="/dashboard"
                   element={
                     <ProtectedRoute user={user} redirectTo="/auth">
@@ -416,6 +436,10 @@ function App() {
       location.pathname.startsWith('/cheatsheets/') ? (
         <Footer onNavigate={handleNavigate} />
       ) : null}
+
+      {/* PWA Install Prompt */}
+      <PWAInstallPrompt />
+      <IOSInstallHint />
     </div>
   );
 }

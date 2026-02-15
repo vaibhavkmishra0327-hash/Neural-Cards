@@ -20,3 +20,17 @@ createRoot(document.getElementById('root')!).render(
     </ErrorBoundary>
   </StrictMode>
 );
+
+// Register Service Worker for PWA
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker
+      .register('/sw.js')
+      .then(() => {
+        // SW registered successfully
+      })
+      .catch(() => {
+        // SW registration failed - app works without it
+      });
+  });
+}

@@ -12,6 +12,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Database } from '../types/database.types';
 import { incrementProgress } from '../data/stats-api';
 import { supabase } from '../utils/supabase/client';
+import { AIExplainButton } from './AIExplainButton';
 
 type Flashcard = Database['public']['Tables']['flashcards']['Row'] & {
   realWorldExample?: string;
@@ -251,8 +252,15 @@ export const FlashcardPractice = memo(function FlashcardPractice({
                           </div>
                         )}
                       </div>
-                      <div className="mt-6 text-center text-sm text-white/70">
-                        Rate your understanding below
+                      <div className="mt-6 flex items-center justify-between">
+                        <div onClick={(e) => e.stopPropagation()}>
+                          <AIExplainButton
+                            question={currentCard.front_content || ''}
+                            answer={currentCard.back_content || ''}
+                            topicTitle={topicTitle}
+                          />
+                        </div>
+                        <span className="text-sm text-white/70">Rate your understanding below</span>
                       </div>
                     </div>
                   </div>
