@@ -9,6 +9,7 @@ import {
   ShieldAlert,
   Search,
   BookOpen,
+  FileText,
 } from 'lucide-react';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -38,6 +39,7 @@ export function Header({
     { id: 'home', label: 'Home' },
     { id: 'all-practice', label: 'Practice', icon: BookOpen },
     { id: 'paths', label: 'Learning Paths' },
+    { id: 'cheatsheets', label: 'Cheat Sheets', icon: FileText },
     { id: 'blog', label: 'Blog' },
     { id: 'about', label: 'About' },
   ];

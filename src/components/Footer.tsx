@@ -25,6 +25,7 @@ export function Footer({ onNavigate }: FooterProps) {
   const companyLinks = [
     { label: 'About Us', page: 'about' },
     { label: 'Topics', page: 'all-practice' },
+    { label: 'Cheat Sheets', page: 'cheatsheets' },
     { label: 'Dashboard', page: 'dashboard' },
   ];
 

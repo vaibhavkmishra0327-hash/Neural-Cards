@@ -38,6 +38,12 @@ const LearningPathList = lazy(() =>
 const PracticeHub = lazy(() =>
   import('./components/PracticeHub').then((m) => ({ default: m.PracticeHub }))
 );
+const CheatSheetList = lazy(() =>
+  import('./components/CheatSheetList').then((m) => ({ default: m.CheatSheetList }))
+);
+const CheatSheetView = lazy(() =>
+  import('./components/CheatSheetView').then((m) => ({ default: m.CheatSheetView }))
+);
 
 type Flashcard = Database['public']['Tables']['flashcards']['Row'];
 
@@ -186,6 +192,8 @@ function App() {
         navigate(`/paths/${data.selectedPath}`);
       } else if (page === 'blog-post' && data?.slug) {
         navigate(`/blog/${data.slug}`);
+      } else if (page === 'cheatsheets') {
+        navigate('/cheatsheets');
       } else if (page === 'all-practice') {
         navigate('/practice');
       } else if (page === 'practice' && data?.slug) {
@@ -209,6 +217,7 @@ function App() {
     if (path === '/') return 'home';
     if (path === '/practice') return 'all-practice';
     if (path.startsWith('/practice/')) return 'practice';
+    if (path.startsWith('/cheatsheets')) return 'cheatsheets';
     if (path.startsWith('/paths')) return 'paths';
     if (path.startsWith('/blog')) return 'blog';
     if (path.startsWith('/about')) return 'about';
@@ -306,6 +315,33 @@ function App() {
                 />
 
                 <Route
+                  path="/cheatsheets"
+                  element={
+                    <PageTransition key="cheatsheet-list">
+                      <Suspense fallback={<PageLoader />}>
+                        <CheatSheetList
+                          onSelect={(slug) => {
+                            navigate(`/cheatsheets/${slug}`);
+                            window.scrollTo(0, 0);
+                          }}
+                        />
+                      </Suspense>
+                    </PageTransition>
+                  }
+                />
+
+                <Route
+                  path="/cheatsheets/:slug"
+                  element={
+                    <PageTransition key="cheatsheet-view">
+                      <Suspense fallback={<PageLoader />}>
+                        <CheatSheetViewWrapper />
+                      </Suspense>
+                    </PageTransition>
+                  }
+                />
+
+                <Route
                   path="/practice"
                   element={
                     <PageTransition key="practice-hub">
@@ -373,8 +409,9 @@ function App() {
         </ErrorBoundary>
       </main>
 
-      {['/', '/about', '/paths', '/blog', '/practice'].includes(location.pathname) ||
-      location.pathname.startsWith('/blog/') ? (
+      {['/', '/about', '/paths', '/blog', '/practice', '/cheatsheets'].includes(location.pathname) ||
+      location.pathname.startsWith('/blog/') ||
+      location.pathname.startsWith('/cheatsheets/') ? (
         <Footer onNavigate={handleNavigate} />
       ) : null}
     </div>
@@ -392,6 +429,16 @@ function BlogPostWrapper() {
         <BlogPost slug={slug} onBack={() => navigate('/blog')} />
       </Suspense>
     </PageTransition>
+  );
+}
+
+// Wrapper for cheat sheet detail view
+function CheatSheetViewWrapper() {
+  const { slug } = useParams();
+  const navigate = useNavigate();
+  if (!slug) return null;
+  return (
+    <CheatSheetView slug={slug} onBack={() => navigate('/cheatsheets')} />
   );
 }
 

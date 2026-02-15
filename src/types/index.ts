@@ -88,6 +88,31 @@ export interface FAQ {
   answer: string;
 }
 
+// Cheat Sheet types
+export interface CheatSheetItem {
+  term: string;
+  definition: string;
+  syntax?: string;
+  example?: string;
+  tip?: string;
+}
+
+export interface CheatSheetSection {
+  title: string;
+  items: CheatSheetItem[];
+}
+
+export interface CheatSheet {
+  id: string;
+  slug: string;
+  title: string;
+  description: string;
+  category: string;
+  icon: string;
+  color: string;
+  sections: CheatSheetSection[];
+}
+
 export interface SEOContent {
   title: string;
   description: string;
