@@ -8,7 +8,7 @@ import { SEOHead } from './SEOHead';
 import { SocialShare } from './SocialShare';
 import { MiniFlashcardDemo } from './MiniFlashcardDemo';
 import { BlogCTA } from './BlogCTA';
-import { getBlogCoverImage } from '../utils/blog-images';
+import { getBlogCoverImage, getStableBlogCoverImage } from '../utils/blog-images';
 
 interface BlogPostProps {
   slug: string;
@@ -81,6 +81,8 @@ export function BlogPost({ slug, onBack }: BlogPostProps) {
     .replace(/[#*`[\]]/g, '')
     .slice(0, 160)
     .trim();
+  const resolvedCover = getBlogCoverImage(post.title, post.cover_image);
+  const stableCover = getStableBlogCoverImage(post.title);
 
   // Use DB-driven topic_slug (set via Supabase dashboard or when creating blogs)
   const relatedTopicSlug: string | undefined = post.topic_slug || undefined;
@@ -92,7 +94,7 @@ export function BlogPost({ slug, onBack }: BlogPostProps) {
           title: `${post.title} | NeuralCards Blog`,
           description: postDescription,
           canonical: postUrl,
-          ogImage: `https://neural-cards.vercel.app/api/og?title=${encodeURIComponent(post.title)}&author=${encodeURIComponent(post.author || 'Vaibhav Kumar Mishra')}&type=blog&cover=${encodeURIComponent(getBlogCoverImage(post.title, post.cover_image).url)}`,
+          ogImage: `https://neural-cards.vercel.app/api/og?title=${encodeURIComponent(post.title)}&author=${encodeURIComponent(post.author || 'Vaibhav Kumar Mishra')}&type=blog&cover=${encodeURIComponent(stableCover.url)}`,
           schema: {
             '@context': 'https://schema.org',
             '@type': 'Article',
@@ -139,10 +141,18 @@ export function BlogPost({ slug, onBack }: BlogPostProps) {
             {/* Hero Cover Image */}
             <div className="relative w-full h-56 sm:h-72 md:h-80 rounded-2xl overflow-hidden mb-8 shadow-lg">
               <img
-                src={getBlogCoverImage(post.title, post.cover_image).url}
-                alt={getBlogCoverImage(post.title, post.cover_image).alt}
+                src={resolvedCover.url}
+                alt={resolvedCover.alt}
                 className="w-full h-full object-cover"
                 loading="eager"
+                onError={(e) => {
+                  const target = e.currentTarget;
+                  if (target.src !== stableCover.url) {
+                    target.src = stableCover.url;
+                    return;
+                  }
+                  target.style.display = 'none';
+                }}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
             </div>

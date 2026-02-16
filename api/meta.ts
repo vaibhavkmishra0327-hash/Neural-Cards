@@ -48,7 +48,7 @@ function getCoverForTitle(title: string): string {
 
 export default async function handler(req: Request) {
   const url = new URL(req.url);
-  const path = url.searchParams.get('path') || '/';
+  const path = normalizePath(url.searchParams.get('path') || '/');
 
   // Default meta (homepage / fallback)
   let title = 'NeuralCards — Master AI with Interactive Flashcards';
@@ -129,7 +129,7 @@ export default async function handler(req: Request) {
   <meta property="og:description" content="${escapeHtml(description)}" />
   <meta property="og:url" content="${canonical}" />
   <meta property="og:site_name" content="NeuralCards" />
-  <meta property="og:image" content="${ogImage}" />
+  <meta property="og:image" content="${escapeHtml(ogImage)}" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   ${type === 'article' ? `<meta property="article:author" content="${escapeHtml(author)}" />` : ''}
@@ -139,7 +139,7 @@ export default async function handler(req: Request) {
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="${escapeHtml(title)}" />
   <meta name="twitter:description" content="${escapeHtml(description)}" />
-  <meta name="twitter:image" content="${ogImage}" />
+  <meta name="twitter:image" content="${escapeHtml(ogImage)}" />
 
   <meta name="robots" content="noindex, follow" />
 </head>
@@ -166,4 +166,14 @@ function escapeHtml(str: string): string {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
+}
+
+function normalizePath(rawPath: string): string {
+  if (!rawPath) return '/';
+
+  const [pathname] = rawPath.split('?');
+  if (!pathname) return '/';
+
+  const withoutTrailing = pathname.length > 1 ? pathname.replace(/\/+$/, '') : pathname;
+  return withoutTrailing || '/';
 }

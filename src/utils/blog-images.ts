@@ -136,8 +136,8 @@ export function getBlogCoverImage(
   title: string,
   coverImageUrl?: string | null
 ): { url: string; alt: string } {
-  // If an explicit cover image URL is provided (from DB), use it
-  if (coverImageUrl) {
+  // Use explicit cover image only when it's a stable public URL
+  if (isStablePublicImageUrl(coverImageUrl)) {
     return { url: coverImageUrl, alt: title };
   }
 
@@ -156,6 +156,35 @@ export function getBlogCoverImage(
   const hash = simpleHash(title);
   const fallback = FALLBACK_IMAGES[hash % FALLBACK_IMAGES.length];
   return fallback;
+}
+
+/**
+ * Get a deterministic cover image based only on title keywords/hash.
+ * Useful for SEO/OG so social crawlers don't depend on expiring URLs.
+ */
+export function getStableBlogCoverImage(title: string): { url: string; alt: string } {
+  return getBlogCoverImage(title, null);
+}
+
+function isStablePublicImageUrl(value?: string | null): value is string {
+  if (!value) return false;
+
+  try {
+    const parsed = new URL(value);
+    const isHttp = parsed.protocol === 'http:' || parsed.protocol === 'https:';
+    if (!isHttp) return false;
+
+    const expiringKeys = ['token', 'expires', 'exp', 'signature', 'x-amz-signature', 'x-amz-expires'];
+    for (const key of expiringKeys) {
+      if (parsed.searchParams.has(key)) {
+        return false;
+      }
+    }
+
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 /** Simple string hash for deterministic fallback selection */
