@@ -1,6 +1,14 @@
 import { supabase } from '../utils/supabase/client';
 import { log } from '../utils/logger';
 
+// ── Weekly Activity Types ─────────────────────────────────
+export interface DayActivity {
+  date: string;
+  dayLabel: string;
+  sessionCount: number;
+  isToday: boolean;
+}
+
 export interface UserStats {
   user_id: string;
   cards_learned_total: number;
@@ -165,4 +173,113 @@ async function flushIncrement(userId: string, cardsCount: number, topicSlug?: st
   } else {
     log.info('Stats updated successfully');
   }
+
+  // Record study session for activity tracking
+  const todayDate = new Date().toISOString().split('T')[0];
+  if (lastDate !== today) {
+    supabase
+      .from('study_sessions')
+      .insert({ user_id: userId, studied_on: todayDate })
+      .then(({ error: sessErr }) => {
+        if (sessErr) log.warn('Study session insert skipped:', sessErr.message);
+      });
+  }
 }
+
+// ── Extended Stats Functions ──────────────────────────────
+
+export const getWeeklyActivity = async (userId: string): Promise<DayActivity[]> => {
+  const days: DayActivity[] = [];
+  const today = new Date();
+  const todayStr = today.toISOString().split('T')[0];
+
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    const dateStr = d.toISOString().split('T')[0];
+    days.push({
+      date: dateStr,
+      dayLabel: d.toLocaleDateString('en', { weekday: 'short' }),
+      sessionCount: 0,
+      isToday: dateStr === todayStr,
+    });
+  }
+
+  const { data, error } = await supabase
+    .from('study_sessions')
+    .select('studied_on')
+    .eq('user_id', userId)
+    .gte('studied_on', days[0].date);
+
+  if (error) {
+    log.warn('Weekly activity fetch error:', error.message);
+  }
+
+  if (data) {
+    for (const session of data) {
+      const day = days.find((d) => d.date === session.studied_on);
+      if (day) day.sessionCount += 1;
+    }
+  }
+
+  // Fallback: if no sessions found but user_stats shows study today, mark today
+  if (data?.length === 0) {
+    const { data: statsData } = await supabase
+      .from('user_stats')
+      .select('last_study_date')
+      .eq('user_id', userId)
+      .single();
+
+    if (statsData?.last_study_date) {
+      const lastDate = new Date(statsData.last_study_date).toISOString().split('T')[0];
+      const matchDay = days.find((d) => d.date === lastDate);
+      if (matchDay) matchDay.sessionCount = 1;
+    }
+  }
+
+  return days;
+};
+
+export const getCardsForReview = async (userId: string): Promise<number> => {
+  const { count, error } = await supabase
+    .from('user_progress')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', userId)
+    .lte('next_review_at', new Date().toISOString())
+    .eq('is_mastered', false);
+
+  if (error) {
+    log.warn('Cards for review fetch error:', error.message);
+    return 0;
+  }
+  return count || 0;
+};
+
+export const getTotalStudyDays = async (userId: string): Promise<number> => {
+  const { data, error } = await supabase
+    .from('study_sessions')
+    .select('studied_on')
+    .eq('user_id', userId);
+
+  if (error) {
+    log.warn('Total study days fetch error:', error.message);
+  }
+
+  if (data && data.length > 0) {
+    const uniqueDays = new Set(data.map((s) => s.studied_on));
+    return uniqueDays.size;
+  }
+
+  // Fallback: check if user has any stats at all (at least 1 day)
+  const { data: statsData } = await supabase
+    .from('user_stats')
+    .select('last_study_date, cards_learned_total')
+    .eq('user_id', userId)
+    .single();
+
+  if (statsData?.last_study_date && statsData.cards_learned_total > 0) {
+    return 1; // At minimum they studied once
+  }
+
+  return 0;
+};

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   BookOpen,
   Flame,
@@ -15,10 +15,14 @@ import {
   Calendar,
   Brain,
   Sparkles,
+  Bell,
 } from 'lucide-react';
 import { getUserStats, UserStats } from '../data/stats-api';
 import { getSuggestedTopics } from '../data/api';
 import { learningPaths } from '../data/learningPaths';
+import { NotificationPreferences } from './NotificationPreferences';
+import { UserStatsPanel } from './UserStatsPanel';
+import { scheduleReminder, clearScheduledReminder } from '../utils/studyReminder';
 import type { User } from '@supabase/supabase-js';
 import type { Database } from '../types/database.types';
 
@@ -34,6 +38,7 @@ export function Dashboard({ user, onNavigate, onSignOut }: DashboardProps) {
   const [stats, setStats] = useState<UserStats | null>(null);
   const [topics, setTopics] = useState<Topic[]>([]);
   const [loading, setLoading] = useState(false);
+  const [showNotificationPanel, setShowNotificationPanel] = useState(false);
 
   const loadData = useCallback(async () => {
     if (user?.id) {
@@ -54,6 +59,14 @@ export function Dashboard({ user, onNavigate, onSignOut }: DashboardProps) {
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  // Schedule study reminders based on current stats
+  useEffect(() => {
+    if (stats) {
+      scheduleReminder(stats.last_study_date);
+    }
+    return () => clearScheduledReminder();
+  }, [stats]);
 
   const displayStats = stats || {
     current_streak: 0,
@@ -88,6 +101,18 @@ export function Dashboard({ user, onNavigate, onSignOut }: DashboardProps) {
               {user?.email?.split('@')[0] || 'Learner'}
             </span>
             <button
+              onClick={() => setShowNotificationPanel((v) => !v)}
+              className={`p-2 rounded-full transition-all border border-transparent ${
+                showNotificationPanel
+                  ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 border-purple-300 dark:border-purple-700'
+                  : 'bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700 hover:border-gray-300 dark:hover:border-zinc-600'
+              }`}
+              title="Study Reminders"
+              aria-label="Toggle study reminders"
+            >
+              <Bell className="w-4 h-4" />
+            </button>
+            <button
               onClick={loadData}
               disabled={loading}
               className="p-2 bg-gray-100 dark:bg-zinc-800 rounded-full hover:bg-gray-200 dark:hover:bg-zinc-700 transition-all border border-transparent hover:border-gray-300 dark:hover:border-zinc-600"
@@ -107,6 +132,16 @@ export function Dashboard({ user, onNavigate, onSignOut }: DashboardProps) {
           Sign Out
         </button>
       </div>
+
+      {/* Notification Preferences Panel */}
+      <AnimatePresence>
+        {showNotificationPanel && (
+          <NotificationPreferences
+            lastStudyDate={stats?.last_study_date ?? null}
+            onClose={() => setShowNotificationPanel(false)}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Stats Grid - Colorful & Modern */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-8">
@@ -200,6 +235,9 @@ export function Dashboard({ user, onNavigate, onSignOut }: DashboardProps) {
           />
         </motion.div>
       </div>
+
+      {/* Detailed User Statistics */}
+      <UserStatsPanel userId={user.id} stats={stats} />
 
       {/* Quick Actions Row */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-10">
