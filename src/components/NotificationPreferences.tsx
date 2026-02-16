@@ -24,6 +24,11 @@ export function NotificationPreferences({ lastStudyDate, onClose }: Notification
     setPermission(getNotificationPermission());
   }, []);
 
+  function flashSaved() {
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+  }
+
   const handleToggle = useCallback(async () => {
     const newEnabled = !prefs.enabled;
 
@@ -55,11 +60,6 @@ export function NotificationPreferences({ lastStudyDate, onClose }: Notification
     const result = await requestNotificationPermission();
     setPermission(result);
   }, []);
-
-  function flashSaved() {
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
-  }
 
   return (
     <motion.div
