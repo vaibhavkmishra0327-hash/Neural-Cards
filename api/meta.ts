@@ -9,8 +9,6 @@
  * Triggered via conditional rewrites in vercel.json that match bot user agents.
  */
 
-import { createClient } from '@supabase/supabase-js';
-
 export const config = {
   runtime: 'edge',
 };
@@ -64,22 +62,46 @@ export default async function handler(req: Request) {
   const blogMatch = path.match(/^\/blog\/(.+)$/);
   if (blogMatch) {
     const slug = blogMatch[1];
+    const readableTitle = slug
+      .split('-')
+      .filter(Boolean)
+      .map((w: string) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(' ');
+
+    title = `${readableTitle} | NeuralCards Blog`;
+    description = `Read ${readableTitle} on NeuralCards Blog. Learn AI concepts with concise, practical explanations.`;
+    canonical = `${SITE_URL}/blog/${slug}`;
+    type = 'article';
+    ogImage = `${SITE_URL}/api/og?title=${encodeURIComponent(readableTitle)}&author=${encodeURIComponent(author)}&type=blog&cover=${encodeURIComponent(getCoverForTitle(readableTitle))}`;
 
     try {
-      const projectId = process.env.VITE_SUPABASE_PROJECT_ID;
-      const anonKey = process.env.VITE_SUPABASE_ANON_KEY;
+      const { projectId, anonKey } = resolveSupabaseConfig();
 
       if (projectId && anonKey) {
-        const supabase = createClient(
-          `https://${projectId}.supabase.co`,
-          anonKey
+        const response = await fetch(
+          `https://${projectId}.supabase.co/rest/v1/blogs?select=title,content,author,created_at,updated_at,topic_slug&slug=eq.${encodeURIComponent(slug)}&limit=1`,
+          {
+            headers: {
+              apikey: anonKey,
+              Authorization: `Bearer ${anonKey}`,
+              Accept: 'application/json',
+            },
+          }
         );
 
-        const { data: post } = await supabase
-          .from('blogs')
-          .select('title, content, author, created_at, updated_at, topic_slug')
-          .eq('slug', slug)
-          .single();
+        if (!response.ok) {
+          throw new Error(`Supabase REST failed with status ${response.status}`);
+        }
+
+        const data = (await response.json()) as Array<{
+          title: string;
+          content: string;
+          author?: string;
+          created_at?: string;
+          updated_at?: string;
+          topic_slug?: string;
+        }>;
+        const post = data?.[0];
 
         if (post) {
           title = `${post.title} | NeuralCards Blog`;
@@ -90,9 +112,7 @@ export default async function handler(req: Request) {
           author = post.author || 'Vaibhav Kumar Mishra';
           const cover = encodeURIComponent(getCoverForTitle(post.title));
           ogImage = `${SITE_URL}/api/og?title=${encodeURIComponent(post.title)}&author=${encodeURIComponent(author)}&type=blog&cover=${cover}`;
-          canonical = `${SITE_URL}/blog/${slug}`;
           publishedTime = post.created_at || '';
-          type = 'article';
         }
       }
     } catch {
@@ -176,4 +196,38 @@ function normalizePath(rawPath: string): string {
 
   const withoutTrailing = pathname.length > 1 ? pathname.replace(/\/+$/, '') : pathname;
   return withoutTrailing || '/';
+}
+
+function resolveSupabaseConfig(): { projectId: string | null; anonKey: string | null } {
+  let projectId =
+    process.env.VITE_SUPABASE_PROJECT_ID ||
+    process.env.SUPABASE_PROJECT_ID ||
+    process.env.NEXT_PUBLIC_SUPABASE_PROJECT_ID ||
+    null;
+
+  const anonKey =
+    process.env.VITE_SUPABASE_ANON_KEY ||
+    process.env.SUPABASE_ANON_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+    null;
+
+  if (!projectId && anonKey) {
+    projectId = extractProjectIdFromAnonKey(anonKey);
+  }
+
+  return { projectId, anonKey };
+}
+
+function extractProjectIdFromAnonKey(anonKey: string): string | null {
+  try {
+    const payload = anonKey.split('.')[1];
+    if (!payload) return null;
+
+    const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
+    const padded = base64 + '='.repeat((4 - (base64.length % 4)) % 4);
+    const json = JSON.parse(atob(padded)) as { ref?: string };
+    return json.ref || null;
+  } catch {
+    return null;
+  }
 }
