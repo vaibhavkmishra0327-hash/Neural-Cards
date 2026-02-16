@@ -174,7 +174,14 @@ function isStablePublicImageUrl(value?: string | null): value is string {
     const isHttp = parsed.protocol === 'http:' || parsed.protocol === 'https:';
     if (!isHttp) return false;
 
-    const expiringKeys = ['token', 'expires', 'exp', 'signature', 'x-amz-signature', 'x-amz-expires'];
+    const expiringKeys = [
+      'token',
+      'expires',
+      'exp',
+      'signature',
+      'x-amz-signature',
+      'x-amz-expires',
+    ];
     for (const key of expiringKeys) {
       if (parsed.searchParams.has(key)) {
         return false;
