@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../utils/supabase/client';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Calendar, Clock } from 'lucide-react';
+import { ArrowLeft, BookOpen, Calendar, Clock } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { log } from '../utils/logger';
 import { SEOHead } from './SEOHead';
@@ -18,6 +18,7 @@ interface BlogPostProps {
 export function BlogPost({ slug, onBack }: BlogPostProps) {
   const [post, setPost] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [showCoverFallback, setShowCoverFallback] = useState(false);
 
   const fetchPost = async () => {
     setLoading(true);
@@ -33,6 +34,7 @@ export function BlogPost({ slug, onBack }: BlogPostProps) {
 
   useEffect(() => {
     fetchPost();
+    setShowCoverFallback(false);
     window.scrollTo(0, 0);
   }, [slug]);
 
@@ -143,7 +145,7 @@ export function BlogPost({ slug, onBack }: BlogPostProps) {
               <img
                 src={resolvedCover.url}
                 alt={resolvedCover.alt}
-                className="w-full h-full object-cover"
+                className={`w-full h-full object-cover ${showCoverFallback ? 'hidden' : 'block'}`}
                 loading="eager"
                 onError={(e) => {
                   const target = e.currentTarget;
@@ -151,10 +153,16 @@ export function BlogPost({ slug, onBack }: BlogPostProps) {
                     target.src = stableCover.url;
                     return;
                   }
-                  target.style.display = 'none';
+                  setShowCoverFallback(true);
                 }}
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+              {showCoverFallback ? (
+                <div className="absolute inset-0 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-zinc-800 dark:to-zinc-900 flex items-center justify-center">
+                  <BookOpen className="w-12 h-12 text-muted-foreground/40" />
+                </div>
+              ) : (
+                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+              )}
             </div>
 
             <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mb-6 font-mono">

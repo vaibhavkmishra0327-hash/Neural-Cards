@@ -23,9 +23,7 @@ export default async function handler(req: Request) {
           width: '100%',
           display: 'flex',
           flexDirection: 'column',
-          backgroundImage: cover
-            ? 'none'
-            : 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%)',
+          backgroundImage: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%)',
           padding: '60px',
           fontFamily: 'sans-serif',
           position: 'relative',
@@ -58,7 +56,8 @@ export default async function handler(req: Request) {
               left: 0,
               width: '100%',
               height: '100%',
-              background: 'linear-gradient(135deg, rgba(15,23,42,0.85) 0%, rgba(30,27,75,0.75) 50%, rgba(49,46,129,0.7) 100%)',
+              background:
+                'linear-gradient(135deg, rgba(15,23,42,0.45) 0%, rgba(30,27,75,0.35) 50%, rgba(49,46,129,0.3) 100%)',
             }}
           />
         )}
