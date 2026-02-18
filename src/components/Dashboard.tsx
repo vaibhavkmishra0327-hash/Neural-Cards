@@ -139,6 +139,8 @@ export function Dashboard({ user, onNavigate, onSignOut }: DashboardProps) {
           <NotificationPreferences
             lastStudyDate={stats?.last_study_date ?? null}
             onClose={() => setShowNotificationPanel(false)}
+            userId={user.id}
+            userEmail={user.email || ''}
           />
         )}
       </AnimatePresence>

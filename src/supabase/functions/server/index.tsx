@@ -712,6 +712,81 @@ async function updateStreak(userId: string) {
 }
 
 // ====================
+// EMAIL NOTIFICATION PREFERENCES
+// ====================
+
+// Get email notification preferences
+app.get('/make-server-f02c4c3b/notifications/email', async (c) => {
+  try {
+    const accessToken = c.req.header('Authorization')?.split(' ')[1];
+    const {
+      data: { user },
+      error,
+    } = await supabaseAuth.auth.getUser(accessToken);
+
+    if (!user?.id || error) {
+      return c.json({ error: 'Unauthorized' }, 401);
+    }
+
+    const prefs = await kv.get(`user:${user.id}:email_prefs`);
+
+    return c.json({
+      prefs: prefs || {
+        user_id: user.id,
+        email_daily_reminder: false,
+        email_weekly_digest: false,
+        email_streak_alert: false,
+        email_achievement: false,
+        reminder_time: '19:00',
+      },
+    });
+  } catch (error) {
+    console.log('Get email prefs error:', error);
+    return c.json({ error: 'Failed to get email preferences' }, 500);
+  }
+});
+
+// Save email notification preferences
+app.put('/make-server-f02c4c3b/notifications/email', async (c) => {
+  try {
+    const accessToken = c.req.header('Authorization')?.split(' ')[1];
+    const {
+      data: { user },
+      error,
+    } = await supabaseAuth.auth.getUser(accessToken);
+
+    if (!user?.id || error) {
+      return c.json({ error: 'Unauthorized' }, 401);
+    }
+
+    const body = await c.req.json();
+
+    // Validate and whitelist fields
+    const prefs = {
+      user_id: user.id,
+      email_daily_reminder: !!body.email_daily_reminder,
+      email_weekly_digest: !!body.email_weekly_digest,
+      email_streak_alert: !!body.email_streak_alert,
+      email_achievement: !!body.email_achievement,
+      email_missed_class: !!body.email_missed_class,
+      email_reengagement: !!body.email_reengagement,
+      reminder_time:
+        typeof body.reminder_time === 'string' && /^\d{2}:\d{2}$/.test(body.reminder_time)
+          ? body.reminder_time
+          : '19:00',
+      updated_at: new Date().toISOString(),
+    };
+
+    await kv.set(`user:${user.id}:email_prefs`, prefs);
+
+    return c.json({ prefs });
+  } catch (error) {
+    console.log('Save email prefs error:', error);
+    return c.json({ error: 'Failed to save email preferences' }, 500);
+  }
+});
+
+// ====================
 // AI GENERATION PROXY
 // ====================
 // Keeps the Groq API key server-side only

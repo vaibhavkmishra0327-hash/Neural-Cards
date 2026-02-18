@@ -256,6 +256,42 @@ export type Database = {
         };
         Relationships: [];
       };
+      notification_preferences: {
+        Row: {
+          user_id: string;
+          email_daily_reminder: boolean;
+          email_weekly_digest: boolean;
+          email_streak_alert: boolean;
+          email_achievement: boolean;
+          email_missed_class: boolean;
+          email_reengagement: boolean;
+          reminder_time: string;
+          updated_at: string;
+        };
+        Insert: {
+          user_id: string;
+          email_daily_reminder?: boolean;
+          email_weekly_digest?: boolean;
+          email_streak_alert?: boolean;
+          email_achievement?: boolean;
+          email_missed_class?: boolean;
+          email_reengagement?: boolean;
+          reminder_time?: string;
+          updated_at?: string;
+        };
+        Update: {
+          user_id?: string;
+          email_daily_reminder?: boolean;
+          email_weekly_digest?: boolean;
+          email_streak_alert?: boolean;
+          email_achievement?: boolean;
+          email_missed_class?: boolean;
+          email_reengagement?: boolean;
+          reminder_time?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       user_stats: {
         Row: {
           user_id: string;
