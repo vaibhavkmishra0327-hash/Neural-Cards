@@ -98,9 +98,7 @@ export const getTopicsWithCardCount = async () => {
       .map((t) => ({ ...t, cardCount: 0 }));
   }
 
-  const { data: blogs, error: blogError } = await supabase
-    .from('blogs')
-    .select('slug, topic_slug');
+  const { data: blogs, error: blogError } = await supabase.from('blogs').select('slug, topic_slug');
 
   if (blogError) {
     log.error('Error fetching blogs for topic filter:', blogError);
