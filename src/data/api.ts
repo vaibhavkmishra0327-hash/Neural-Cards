@@ -93,15 +93,39 @@ export const getTopicsWithCardCount = async () => {
 
   if (countError) {
     log.error('Error fetching card counts:', countError);
-    return topics.map((t) => ({ ...t, cardCount: 0 }));
+    return topics
+      .filter((topic) => topic.description !== 'Detailed Blog Post')
+      .map((t) => ({ ...t, cardCount: 0 }));
   }
+
+  const { data: blogs, error: blogError } = await supabase
+    .from('blogs')
+    .select('slug, topic_slug');
+
+  if (blogError) {
+    log.error('Error fetching blogs for topic filter:', blogError);
+  }
+
+  const blogSlugs = new Set<string>();
+  (blogs || []).forEach((blog: { slug: string; topic_slug: string | null }) => {
+    if (blog.slug) blogSlugs.add(blog.slug);
+    if (blog.topic_slug) blogSlugs.add(blog.topic_slug);
+  });
+
+  const practiceTopics = topics.filter((topic) => {
+    if (topic.description === 'Detailed Blog Post') return false;
+    if (blogSlugs.has(topic.slug)) return false;
+    return true;
+  });
 
   const countMap: Record<string, number> = {};
   (countData || []).forEach((row: { topic_id: string }) => {
     countMap[row.topic_id] = (countMap[row.topic_id] || 0) + 1;
   });
 
-  return topics.map((t) => ({ ...t, cardCount: countMap[t.id] || 0 }));
+  return practiceTopics
+    .map((t) => ({ ...t, cardCount: countMap[t.id] || 0 }))
+    .filter((t) => t.cardCount > 0);
 };
 
 // 4. Suggested Topics fetch karna
