@@ -60,14 +60,9 @@ export function NotificationPreferences({
   const [emailSaving, setEmailSaving] = useState(false);
   const [emailSaved, setEmailSaved] = useState(false);
 
-  useEffect(() => {
-    setPermission(getNotificationPermission());
-  }, []);
-
   // Load email notification preferences
   useEffect(() => {
     let cancelled = false;
-    setEmailLoading(true);
     getEmailNotificationPrefs(userId).then((data) => {
       if (!cancelled) {
         setEmailPrefs(data);
@@ -285,6 +280,7 @@ export function NotificationPreferences({
                 value={prefs.reminderTime}
                 onChange={handleTimeChange}
                 disabled={!prefs.enabled}
+                title="Study reminder time"
                 className="bg-gray-100 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-lg px-3 py-1.5 text-sm disabled:opacity-40 disabled:cursor-not-allowed focus:ring-2 focus:ring-purple-500 outline-none"
               />
             </div>
@@ -387,6 +383,7 @@ export function NotificationPreferences({
                     value={emailPrefs.reminder_time}
                     onChange={handleEmailTimeChange}
                     disabled={emailSaving}
+                    title="Email reminder time"
                     className="bg-gray-100 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-lg px-3 py-1.5 text-sm disabled:opacity-40 disabled:cursor-not-allowed focus:ring-2 focus:ring-purple-500 outline-none"
                   />
                 </motion.div>
