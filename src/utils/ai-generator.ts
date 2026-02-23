@@ -63,33 +63,19 @@ export const generateContentWithGroq = async (
   const { systemPrompt, userPrompt } = buildPrompts(topicName, type);
 
   try {
-    // Get a FRESH user session — try refresh first, then validate with getUser()
+    // Get user session — check existing first, only refresh if needed
     let token: string | undefined;
 
-    // Step 1: Try refreshing the session to get a fresh access token
-    const { data: refreshed, error: refreshError } = await supabase.auth.refreshSession();
-    if (refreshed?.session?.access_token) {
-      token = refreshed.session.access_token;
-      log.info('Using freshly refreshed access token');
-    } else {
-      log.warn('Session refresh failed:', refreshError?.message || 'no session');
+    // Step 1: Check existing session (fast, no network)
+    const { data: current } = await supabase.auth.getSession();
+    if (current?.session?.access_token) {
+      token = current.session.access_token;
     }
 
-    // Step 2: If refresh failed, try getting current session
+    // Step 2: Session missing or expired — try refresh
     if (!token) {
-      const { data: current } = await supabase.auth.getSession();
-      token = current?.session?.access_token;
-    }
-
-    // Step 3: Validate the token is actually usable (not expired)
-    if (token) {
-      const { data: userData, error: userError } = await supabase.auth.getUser(token);
-      if (userError || !userData?.user) {
-        log.warn('Token validation failed, attempting full re-auth check:', userError?.message);
-        // Token is expired/invalid — try one more refresh
-        const { data: retryRefresh } = await supabase.auth.refreshSession();
-        token = retryRefresh?.session?.access_token;
-      }
+      const { data: refreshed } = await supabase.auth.refreshSession();
+      token = refreshed?.session?.access_token;
     }
 
     if (!token) {

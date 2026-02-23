@@ -17,6 +17,19 @@ export function AITutor({ topicTitle, cardFront, cardBack }: AITutorProps) {
   const [error, setError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const prevCardRef = useRef(cardFront);
+
+  // Reset conversation when the user navigates to a different card
+  useEffect(() => {
+    if (prevCardRef.current !== cardFront) {
+      prevCardRef.current = cardFront;
+      setMessages([]);
+      setError(null);
+      setInput('');
+      setIsLoading(false);
+      // Don't close the panel — just refresh context
+    }
+  }, [cardFront]);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {

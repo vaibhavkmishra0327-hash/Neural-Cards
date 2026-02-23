@@ -48,14 +48,21 @@ export const FlashcardPractice = memo(function FlashcardPractice({
   const [reviewedCards, setReviewedCards] = useState<Set<number>>(new Set());
   const [direction, setDirection] = useState<'left' | 'right' | null>(null);
   const [adaptiveDeck, setAdaptiveDeck] = useState<AdaptiveStudyDeck | null>(null);
+  const [adaptiveLoading, setAdaptiveLoading] = useState(false);
   const [enrichedData, setEnrichedData] = useState<Map<string, EnrichedCardData>>(new Map());
   const [enrichingCard, setEnrichingCard] = useState<string | null>(null);
+  const [enrichError, setEnrichError] = useState<string | null>(null);
 
   // Build adaptive study deck on mount
   useEffect(() => {
+    setAdaptiveLoading(true);
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (user && flashcards.length > 0) {
-        getAdaptiveStudyDeck(user.id, flashcards).then(setAdaptiveDeck);
+        getAdaptiveStudyDeck(user.id, flashcards)
+          .then(setAdaptiveDeck)
+          .finally(() => setAdaptiveLoading(false));
+      } else {
+        setAdaptiveLoading(false);
       }
     });
   }, [flashcards]);
@@ -73,10 +80,16 @@ export const FlashcardPractice = memo(function FlashcardPractice({
   const priorityInfo = getPriorityLabel(cardPriority?.priority);
   const currentEnriched = currentCard ? enrichedData.get(currentCard.id) : undefined;
 
+  // Clear enrichment error on card change
+  useEffect(() => {
+    setEnrichError(null);
+  }, [currentIndex]);
+
   // AI Enrichment handler
   const handleEnrich = useCallback(async () => {
     if (!currentCard || enrichingCard || enrichedData.has(currentCard.id)) return;
     setEnrichingCard(currentCard.id);
+    setEnrichError(null);
     const result = await enrichFlashcard(
       currentCard.front_content || '',
       currentCard.back_content || '',
@@ -84,6 +97,8 @@ export const FlashcardPractice = memo(function FlashcardPractice({
     );
     if (result.data) {
       setEnrichedData((prev) => new Map(prev).set(currentCard.id, result.data!));
+    } else if (result.error) {
+      setEnrichError(result.error);
     }
     setEnrichingCard(null);
   }, [currentCard, enrichingCard, enrichedData, topicTitle]);
@@ -227,6 +242,12 @@ export const FlashcardPractice = memo(function FlashcardPractice({
             <p className="text-gray-600 dark:text-gray-400">
               Click card to flip • Use arrow keys to navigate
             </p>
+            {adaptiveLoading && (
+              <div className="mt-2 flex items-center justify-center gap-2 text-xs text-purple-600 dark:text-purple-400">
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                Building smart study order...
+              </div>
+            )}
             {adaptiveDeck?.isAdaptive && (
               <div className="mt-3 flex items-center justify-center gap-3 text-xs">
                 {adaptiveDeck.stats.dueCount > 0 && (
@@ -375,6 +396,11 @@ export const FlashcardPractice = memo(function FlashcardPractice({
                             </button>
                           )}
                         </div>
+                        {enrichError && (
+                          <p className="text-xs text-red-300 mt-1">
+                            Enrichment failed: {enrichError}
+                          </p>
+                        )}
                         <span className="text-sm text-white/70">Rate your understanding below</span>
                       </div>
                     </div>

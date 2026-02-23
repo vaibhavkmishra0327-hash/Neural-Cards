@@ -280,23 +280,9 @@ export async function analyzeStudyPatterns(
   // Sort insights by priority
   insights.sort((a, b) => a.priority - b.priority);
 
-  // ── 3. Enhance recommendation with AI (non-blocking) ───
-  // Try to get an LLM-generated recommendation; fall back to heuristic if it fails
-  try {
-    const aiResult = await generateStudyInsights({
-      streak,
-      cardsLearned,
-      xp,
-      weakTopics: weakTopics.map((t) => t.topicTitle),
-    });
-    if (aiResult.data) {
-      nextStudyRecommendation = aiResult.data;
-    }
-  } catch (err) {
-    log.warn('AI insights enhancement failed, using heuristic:', err);
-  }
-
-  return {
+  // ── 3. Build result with heuristic immediately ──────────
+  // The AI enhancement runs in the background; the heuristic is available instantly.
+  const result: InsightsData = {
     insights: insights.slice(0, 5), // Show top 5
     weakTopics: weakTopics.slice(0, 5),
     nextStudyRecommendation,
@@ -316,4 +302,27 @@ export async function analyzeStudyPatterns(
           : `${dailyDone}/${dailyGoal} cards — ${dailyGoal - dailyDone} more to go`,
     },
   };
+
+  return result;
+}
+
+/**
+ * Enhance an existing InsightsData with an LLM-generated recommendation.
+ * Designed to be called in the background AFTER the heuristic result is already displayed.
+ */
+export async function enhanceInsightsWithAI(stats: UserStats): Promise<string | null> {
+  try {
+    const streak = stats.current_streak ?? 0;
+    const cardsLearned = stats.cards_learned_total ?? 0;
+    const xp = stats.xp ?? 0;
+    const aiResult = await generateStudyInsights({
+      streak,
+      cardsLearned,
+      xp,
+    });
+    return aiResult.data ?? null;
+  } catch (err) {
+    log.warn('AI insights enhancement failed:', err);
+    return null;
+  }
 }

@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import {
   analyzeStudyPatterns,
+  enhanceInsightsWithAI,
   type InsightsData,
   type StudyInsight,
 } from '../utils/ai-study-insights';
@@ -34,17 +35,34 @@ const insightIcons: Record<StudyInsight['type'], typeof Brain> = {
 export function AIStudyInsights({ userId, stats, onNavigate }: AIStudyInsightsProps) {
   const [data, setData] = useState<InsightsData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [expanded, setExpanded] = useState(false);
 
   const loadInsights = useCallback(async () => {
     setLoading(true);
-    const result = await analyzeStudyPatterns(userId, stats);
-    setData(result);
-    setLoading(false);
+    setError(null);
+    try {
+      // Show heuristic result immediately (fast, no LLM)
+      const result = await analyzeStudyPatterns(userId, stats);
+      setData(result);
+      setLoading(false);
+
+      // Enhance with AI in background (non-blocking)
+      if (stats) {
+        enhanceInsightsWithAI(stats).then((aiRec) => {
+          if (aiRec) {
+            setData((prev) => (prev ? { ...prev, nextStudyRecommendation: aiRec } : prev));
+          }
+        });
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load insights');
+      setLoading(false);
+    }
   }, [userId, stats]);
 
   useEffect(() => {
-    loadInsights(); // eslint-disable-line react-hooks/set-state-in-effect
+    loadInsights();
   }, [loadInsights]);
 
   if (loading) {
@@ -60,6 +78,28 @@ export function AIStudyInsights({ userId, stats, onNavigate }: AIStudyInsightsPr
           <Loader2 className="h-6 w-6 animate-spin text-purple-500" />
           <span className="ml-2 text-sm text-gray-500">Analyzing your study patterns...</span>
         </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="mb-8 p-6 bg-white dark:bg-zinc-900 border border-red-200 dark:border-red-800 rounded-2xl">
+        <div className="flex items-center gap-3 mb-3">
+          <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg">
+            <Brain className="w-5 h-5 text-red-600 dark:text-red-400" />
+          </div>
+          <h2 className="font-bold text-lg">AI Study Insights</h2>
+        </div>
+        <p className="text-sm text-red-600 dark:text-red-400 mb-3">
+          Could not load insights. {error}
+        </p>
+        <button
+          onClick={loadInsights}
+          className="text-sm font-medium text-purple-600 dark:text-purple-400 hover:underline"
+        >
+          Try again
+        </button>
       </div>
     );
   }

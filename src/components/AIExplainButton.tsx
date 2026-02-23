@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Lightbulb, X, Loader2, RefreshCw, Sparkles } from 'lucide-react';
 import { sendTutorMessage } from '../utils/ai-service';
@@ -15,6 +15,18 @@ export function AIExplainButton({ question, answer, topicTitle }: AIExplainProps
   const [explanation, setExplanation] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const prevCardRef = useRef({ question, answer });
+
+  // Reset explanation when the card changes so we don't show stale content
+  useEffect(() => {
+    if (prevCardRef.current.question !== question || prevCardRef.current.answer !== answer) {
+      prevCardRef.current = { question, answer };
+      setExplanation('');
+      setError(null);
+      setIsLoading(false);
+      setIsOpen(false);
+    }
+  }, [question, answer]);
 
   const fetchExplanation = useCallback(async () => {
     setIsLoading(true);
