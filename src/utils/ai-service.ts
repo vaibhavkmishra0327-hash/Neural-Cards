@@ -48,18 +48,21 @@ async function callAI<T = string>(
       body: JSON.stringify({ type, ...payload }),
     });
 
+    // Read body as text ONCE to avoid "body stream already read" errors
+    const rawText = await response.text();
+
     if (!response.ok) {
-      let errText = '';
+      let errMsg = rawText;
       try {
-        const errJson = await response.json();
-        errText = errJson.error || JSON.stringify(errJson);
+        const errJson = JSON.parse(rawText);
+        errMsg = errJson.error || JSON.stringify(errJson);
       } catch {
-        errText = await response.text();
+        // rawText is already the error message
       }
-      return { data: null, error: `AI error (${response.status}): ${errText}` };
+      return { data: null, error: `AI error (${response.status}): ${errMsg}` };
     }
 
-    const result = await response.json();
+    const result = JSON.parse(rawText);
     return { data: result.content as T, error: null };
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);

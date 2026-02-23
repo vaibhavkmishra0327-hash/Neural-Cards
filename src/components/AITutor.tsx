@@ -45,30 +45,37 @@ export function AITutor({ topicTitle, cardFront, cardBack }: AITutorProps) {
     }
   }, [messages.length, topicTitle, cardFront]);
 
-  const handleSend = useCallback(async () => {
-    const trimmedInput = input.trim();
-    if (!trimmedInput || isLoading) return;
+  const sendMessage = useCallback(
+    async (text: string) => {
+      const trimmed = text.trim();
+      if (!trimmed || isLoading) return;
 
-    setError(null);
-    const userMessage: TutorMessage = { role: 'user', content: trimmedInput };
-    setMessages((prev) => [...prev, userMessage]);
-    setInput('');
-    setIsLoading(true);
+      setError(null);
+      const userMessage: TutorMessage = { role: 'user', content: trimmed };
+      setMessages((prev) => [...prev, userMessage]);
+      setInput('');
+      setIsLoading(true);
 
-    const result = await sendTutorMessage(trimmedInput, [...messages, userMessage], {
-      topicTitle,
-      cardFront: cardFront ?? undefined,
-      cardBack: cardBack ?? undefined,
-    });
+      const result = await sendTutorMessage(trimmed, [...messages, userMessage], {
+        topicTitle,
+        cardFront: cardFront ?? undefined,
+        cardBack: cardBack ?? undefined,
+      });
 
-    if (result.error) {
-      setError(result.error);
-    } else if (result.data) {
-      setMessages((prev) => [...prev, { role: 'assistant', content: result.data! }]);
-    }
+      if (result.error) {
+        setError(result.error);
+      } else if (result.data) {
+        setMessages((prev) => [...prev, { role: 'assistant', content: result.data! }]);
+      }
 
-    setIsLoading(false);
-  }, [input, isLoading, messages, topicTitle, cardFront, cardBack]);
+      setIsLoading(false);
+    },
+    [isLoading, messages, topicTitle, cardFront, cardBack]
+  );
+
+  const handleSend = useCallback(() => {
+    sendMessage(input);
+  }, [input, sendMessage]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -142,9 +149,9 @@ export function AITutor({ topicTitle, cardFront, cardBack }: AITutorProps) {
                       onClick={() => setIsOpen(false)}
                       title="Close"
                       aria-label="Close tutor"
-                      className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                      className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700 hover:bg-red-100 dark:hover:bg-red-900/40 transition"
                     >
-                      <X className="h-5 w-5 text-gray-500" />
+                      <X className="h-5 w-5 text-gray-500 hover:text-red-500" />
                     </button>
                   </div>
                 </div>
@@ -196,8 +203,15 @@ export function AITutor({ topicTitle, cardFront, cardBack }: AITutorProps) {
                   )}
 
                   {error && (
-                    <div className="p-3 bg-red-50 dark:bg-red-900/20 rounded-xl text-xs text-red-600 dark:text-red-400">
-                      {error}
+                    <div className="p-3 bg-red-50 dark:bg-red-900/20 rounded-xl text-xs text-red-600 dark:text-red-400 flex items-start justify-between gap-2">
+                      <span>{error}</span>
+                      <button
+                        onClick={() => setError(null)}
+                        className="text-red-500 hover:text-red-700 dark:hover:text-red-300 flex-shrink-0"
+                        aria-label="Dismiss error"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
                     </div>
                   )}
 
@@ -215,10 +229,7 @@ export function AITutor({ topicTitle, cardFront, cardBack }: AITutorProps) {
                     ].map((suggestion) => (
                       <button
                         key={suggestion}
-                        onClick={() => {
-                          setInput(suggestion);
-                          setTimeout(() => handleSend(), 50);
-                        }}
+                        onClick={() => sendMessage(suggestion)}
                         className="px-3 py-1.5 text-xs bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400 rounded-full hover:bg-purple-100 dark:hover:bg-purple-900/40 transition-colors border border-purple-200 dark:border-purple-800"
                       >
                         {suggestion}
@@ -251,6 +262,12 @@ export function AITutor({ topicTitle, cardFront, cardBack }: AITutorProps) {
                       )}
                     </button>
                   </div>
+                  <button
+                    onClick={() => setIsOpen(false)}
+                    className="w-full mt-2 py-2 text-xs text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors text-center"
+                  >
+                    Close &amp; continue studying
+                  </button>
                 </div>
               </div>
             </motion.div>
