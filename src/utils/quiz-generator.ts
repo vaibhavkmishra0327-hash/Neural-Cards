@@ -26,7 +26,7 @@ export interface FillBlankQuestion {
   cardType: string;
 }
 
-export type QuizMode = 'mcq' | 'fill-blank' | 'flashcard';
+export type QuizMode = 'mcq' | 'fill-blank' | 'flashcard' | 'ai-quiz';
 
 /**
  * Generate MCQ questions from flashcards

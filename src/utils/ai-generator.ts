@@ -63,32 +63,52 @@ export const generateContentWithGroq = async (
   const { systemPrompt, userPrompt } = buildPrompts(topicName, type);
 
   try {
-    // Get a FRESH user session
-    const { data: refreshed } = await supabase.auth.refreshSession();
-    let token = refreshed?.session?.access_token;
+    // Get a FRESH user session — try refresh first, then validate with getUser()
+    let token: string | undefined;
 
+    // Step 1: Try refreshing the session to get a fresh access token
+    const { data: refreshed, error: refreshError } = await supabase.auth.refreshSession();
+    if (refreshed?.session?.access_token) {
+      token = refreshed.session.access_token;
+      log.info('Using freshly refreshed access token');
+    } else {
+      log.warn('Session refresh failed:', refreshError?.message || 'no session');
+    }
+
+    // Step 2: If refresh failed, try getting current session
     if (!token) {
       const { data: current } = await supabase.auth.getSession();
       token = current?.session?.access_token;
     }
 
+    // Step 3: Validate the token is actually usable (not expired)
+    if (token) {
+      const { data: userData, error: userError } = await supabase.auth.getUser(token);
+      if (userError || !userData?.user) {
+        log.warn('Token validation failed, attempting full re-auth check:', userError?.message);
+        // Token is expired/invalid — try one more refresh
+        const { data: retryRefresh } = await supabase.auth.refreshSession();
+        token = retryRefresh?.session?.access_token;
+      }
+    }
+
     if (!token) {
-      const msg = 'No auth session found. Please log in first.';
+      const msg = 'Your session has expired. Please log out and log back in.';
       log.error(msg);
       return { data: null, error: msg };
     }
 
     // Call Edge Function via raw fetch
-    // Both apikey + Authorization are needed:
-    //   apikey → Supabase API gateway authentication
-    //   Authorization → Edge Function's own admin check
+    //   Authorization: Bearer <anon_key> → passes Supabase API gateway check
+    //   x-user-token → carries actual user JWT for the function's own auth
     const response = await fetch(
       `https://${projectId}.supabase.co/functions/v1/make-server-f02c4c3b/generate-ai`,
       {
         method: 'POST',
         headers: {
           apikey: publicAnonKey,
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${publicAnonKey}`,
+          'x-user-token': token,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ systemPrompt, userPrompt, type }),

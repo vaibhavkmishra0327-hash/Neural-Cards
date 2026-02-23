@@ -7,17 +7,24 @@ import {
   ChevronLeft,
   ChevronRight,
   CheckCircle,
+  Brain,
+  Sparkles,
+  Loader2,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Database } from '../types/database.types';
 import { incrementProgress } from '../data/stats-api';
 import { supabase } from '../utils/supabase/client';
 import { AIExplainButton } from './AIExplainButton';
+import { AITutor } from './AITutor';
+import {
+  getAdaptiveStudyDeck,
+  getPriorityLabel,
+  type AdaptiveStudyDeck,
+} from '../utils/adaptiveStudy';
+import { enrichFlashcard, type EnrichedCardData } from '../utils/ai-service';
 
-type Flashcard = Database['public']['Tables']['flashcards']['Row'] & {
-  realWorldExample?: string;
-  pitfalls?: string[];
-};
+type Flashcard = Database['public']['Tables']['flashcards']['Row'];
 
 interface FlashcardPracticeProps {
   topicTitle: string;
@@ -40,13 +47,46 @@ export const FlashcardPractice = memo(function FlashcardPractice({
   const [isFlipped, setIsFlipped] = useState(false);
   const [reviewedCards, setReviewedCards] = useState<Set<number>>(new Set());
   const [direction, setDirection] = useState<'left' | 'right' | null>(null);
+  const [adaptiveDeck, setAdaptiveDeck] = useState<AdaptiveStudyDeck | null>(null);
+  const [enrichedData, setEnrichedData] = useState<Map<string, EnrichedCardData>>(new Map());
+  const [enrichingCard, setEnrichingCard] = useState<string | null>(null);
 
-  const currentCard = flashcards[currentIndex];
+  // Build adaptive study deck on mount
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user && flashcards.length > 0) {
+        getAdaptiveStudyDeck(user.id, flashcards).then(setAdaptiveDeck);
+      }
+    });
+  }, [flashcards]);
+
+  // Use adaptive ordering if available, otherwise original
+  const orderedCards = useMemo(() => adaptiveDeck?.cards ?? flashcards, [adaptiveDeck, flashcards]);
+
+  const currentCard = orderedCards[currentIndex];
   const progress = useMemo(
-    () => (flashcards.length > 0 ? ((currentIndex + 1) / flashcards.length) * 100 : 0),
-    [currentIndex, flashcards.length]
+    () => (orderedCards.length > 0 ? ((currentIndex + 1) / orderedCards.length) * 100 : 0),
+    [currentIndex, orderedCards.length]
   );
-  const isLastCard = currentIndex === flashcards.length - 1;
+  const isLastCard = currentIndex === orderedCards.length - 1;
+  const cardPriority = adaptiveDeck?.priorities.get(currentCard?.id);
+  const priorityInfo = getPriorityLabel(cardPriority?.priority);
+  const currentEnriched = currentCard ? enrichedData.get(currentCard.id) : undefined;
+
+  // AI Enrichment handler
+  const handleEnrich = useCallback(async () => {
+    if (!currentCard || enrichingCard || enrichedData.has(currentCard.id)) return;
+    setEnrichingCard(currentCard.id);
+    const result = await enrichFlashcard(
+      currentCard.front_content || '',
+      currentCard.back_content || '',
+      topicTitle
+    );
+    if (result.data) {
+      setEnrichedData((prev) => new Map(prev).set(currentCard.id, result.data!));
+    }
+    setEnrichingCard(null);
+  }, [currentCard, enrichingCard, enrichedData, topicTitle]);
   const isCardReviewed = reviewedCards.has(currentIndex);
 
   const handleFlip = useCallback(() => {
@@ -76,7 +116,7 @@ export const FlashcardPractice = memo(function FlashcardPractice({
         setDirection(null);
       }, 300);
     } else {
-      setIsFlipped(false); // Last card par bas wapas palat do
+      setIsFlipped(false);
     }
   };
 
@@ -107,7 +147,6 @@ export const FlashcardPractice = memo(function FlashcardPractice({
       }, 300);
     }
   };
-
   const handleKeyPress = (e: KeyboardEvent) => {
     if (e.key === ' ' || e.key === 'Enter') {
       e.preventDefault();
@@ -128,9 +167,9 @@ export const FlashcardPractice = memo(function FlashcardPractice({
   useEffect(() => {
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [currentIndex, isFlipped, flashcards.length]);
+  }, [currentIndex, isFlipped, orderedCards.length]);
 
-  if (!flashcards || flashcards.length === 0) {
+  if (!orderedCards || orderedCards.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4">
         <div className="text-center">
@@ -159,8 +198,14 @@ export const FlashcardPractice = memo(function FlashcardPractice({
               <span className="font-medium">Exit Practice</span>
             </button>
             <div className="flex items-center gap-4">
+              {adaptiveDeck?.isAdaptive && (
+                <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-1 bg-gradient-to-r from-purple-100 to-blue-100 dark:from-purple-900/30 dark:to-blue-900/30 text-purple-700 dark:text-purple-400 rounded-full text-xs font-semibold">
+                  <Brain className="h-3 w-3" />
+                  Smart Study
+                </span>
+              )}
               <div className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                {currentIndex + 1} / {flashcards.length}
+                {currentIndex + 1} / {orderedCards.length}
               </div>
             </div>
           </div>
@@ -182,6 +227,25 @@ export const FlashcardPractice = memo(function FlashcardPractice({
             <p className="text-gray-600 dark:text-gray-400">
               Click card to flip • Use arrow keys to navigate
             </p>
+            {adaptiveDeck?.isAdaptive && (
+              <div className="mt-3 flex items-center justify-center gap-3 text-xs">
+                {adaptiveDeck.stats.dueCount > 0 && (
+                  <span className="px-2 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-full">
+                    🔴 {adaptiveDeck.stats.dueCount} due
+                  </span>
+                )}
+                {adaptiveDeck.stats.weakCount > 0 && (
+                  <span className="px-2 py-1 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 rounded-full">
+                    🟠 {adaptiveDeck.stats.weakCount} weak
+                  </span>
+                )}
+                {adaptiveDeck.stats.newCount > 0 && (
+                  <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-full">
+                    🔵 {adaptiveDeck.stats.newCount} new
+                  </span>
+                )}
+              </div>
+            )}
           </div>
 
           <AnimatePresence mode="wait">
@@ -213,9 +277,18 @@ export const FlashcardPractice = memo(function FlashcardPractice({
                   <div className="absolute inset-0 w-full backface-hidden">
                     <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 md:p-12 border-2 border-purple-200 dark:border-purple-800 min-h-[400px] flex flex-col">
                       <div className="flex items-center justify-between mb-6">
-                        <span className="px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 rounded-full text-xs font-semibold">
-                          {currentCard.card_type}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className="px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 rounded-full text-xs font-semibold">
+                            {currentCard.card_type}
+                          </span>
+                          {cardPriority && (
+                            <span
+                              className={`px-2 py-0.5 rounded-full text-xs font-medium ${priorityInfo.color}`}
+                            >
+                              {priorityInfo.emoji} {priorityInfo.label}
+                            </span>
+                          )}
+                        </div>
                         <div className="text-purple-600 dark:text-purple-400 text-sm font-medium">
                           QUESTION
                         </div>
@@ -241,24 +314,66 @@ export const FlashcardPractice = memo(function FlashcardPractice({
                         <div className="text-lg md:text-xl leading-relaxed mb-6 whitespace-pre-line">
                           {currentCard.back_content}
                         </div>
-                        {currentCard.realWorldExample && (
+                        {currentEnriched?.realWorldExample && (
                           <div className="mt-4 p-4 bg-white/10 rounded-lg backdrop-blur-sm">
                             <div className="text-sm font-semibold mb-1 text-white/90">
                               💡 Real-World Example
                             </div>
                             <div className="text-sm text-white/80">
-                              {currentCard.realWorldExample}
+                              {currentEnriched.realWorldExample}
                             </div>
                           </div>
                         )}
+                        {currentEnriched?.memoryTip && (
+                          <div className="mt-2 p-3 bg-white/10 rounded-lg backdrop-blur-sm">
+                            <div className="text-sm font-semibold mb-1 text-white/90">
+                              🧠 Memory Tip
+                            </div>
+                            <div className="text-sm text-white/80">{currentEnriched.memoryTip}</div>
+                          </div>
+                        )}
+                        {currentEnriched?.pitfalls && currentEnriched.pitfalls.length > 0 && (
+                          <div className="mt-2 p-3 bg-white/10 rounded-lg backdrop-blur-sm">
+                            <div className="text-sm font-semibold mb-1 text-white/90">
+                              ⚠️ Common Pitfalls
+                            </div>
+                            {currentEnriched.pitfalls.map((p, i) => (
+                              <div key={i} className="text-sm text-white/80">
+                                • {p}
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
-                      <div className="mt-6 flex items-center justify-between">
-                        <div onClick={(e) => e.stopPropagation()}>
+                      <div className="mt-6 flex items-center justify-between flex-wrap gap-2">
+                        <div
+                          onClick={(e) => e.stopPropagation()}
+                          className="flex items-center gap-2 flex-wrap"
+                        >
                           <AIExplainButton
                             question={currentCard.front_content || ''}
                             answer={currentCard.back_content || ''}
                             topicTitle={topicTitle}
                           />
+                          <AITutor
+                            topicTitle={topicTitle}
+                            cardFront={currentCard.front_content || ''}
+                            cardBack={currentCard.back_content || ''}
+                          />
+                          {!currentEnriched && (
+                            <button
+                              onClick={handleEnrich}
+                              disabled={enrichingCard === currentCard.id}
+                              className="inline-flex items-center gap-1.5 px-3 py-2 bg-white/20 hover:bg-white/30 text-white rounded-xl text-sm font-medium transition-colors disabled:opacity-50"
+                            >
+                              {enrichingCard === currentCard.id ? (
+                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                              ) : (
+                                <Sparkles className="h-3.5 w-3.5" />
+                              )}
+                              Enrich
+                            </button>
+                          )}
                         </div>
                         <span className="text-sm text-white/70">Rate your understanding below</span>
                       </div>

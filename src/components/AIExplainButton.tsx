@@ -38,33 +38,22 @@ export function AIExplainButton({ question, answer, topicTitle }: AIExplainProps
         return;
       }
 
-      const systemPrompt =
-        'You are a friendly, patient tutor. Explain concepts simply and clearly. Use analogies and examples. Keep responses concise (under 250 words).';
-      const userPrompt = `A student is studying "${topicTitle || 'this topic'}" and needs help understanding this flashcard.
-
-Question: ${question}
-Answer: ${answer}
-
-Please explain this concept in a simple, easy-to-understand way. Include:
-1. A brief explanation in simple terms
-2. A real-world analogy or example
-3. Why this concept matters
-
-Keep it concise and beginner-friendly.`;
-
+      // Use the user-accessible /ai-assist endpoint instead of admin-only /generate-ai
       const response = await fetch(
-        `https://${projectId}.supabase.co/functions/v1/make-server-f02c4c3b/generate-ai`,
+        `https://${projectId}.supabase.co/functions/v1/make-server-f02c4c3b/ai-assist`,
         {
           method: 'POST',
           headers: {
             apikey: publicAnonKey,
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${publicAnonKey}`,
+            'x-user-token': token,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            systemPrompt,
-            userPrompt,
-            type: 'blog', // Use blog type to get raw text back
+            type: 'tutor',
+            message: `A student is studying "${topicTitle || 'this topic'}" and needs help understanding this flashcard.\n\nQuestion: ${question}\nAnswer: ${answer}\n\nPlease explain this concept in a simple, easy-to-understand way. Include:\n1. A brief explanation in simple terms\n2. A real-world analogy or example\n3. Why this concept matters\n\nKeep it concise and beginner-friendly.`,
+            context: { cardFront: question, cardBack: answer, topicTitle: topicTitle || '' },
+            history: [],
           }),
         }
       );
@@ -81,7 +70,7 @@ Keep it concise and beginner-friendly.`;
       }
 
       const data = await response.json();
-      const text = data?.content || '';
+      const text = data?.reply || data?.content || '';
       setExplanation(text);
       log.info('AI explanation generated successfully');
     } catch (err) {

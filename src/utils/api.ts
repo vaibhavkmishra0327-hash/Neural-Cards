@@ -11,7 +11,7 @@
  */
 
 import { cache, CacheKeys, CacheTTL } from './cache';
-import { projectId } from './supabase/info';
+import { projectId, publicAnonKey } from './supabase/info';
 import { log } from './logger';
 
 const BASE_URL = `https://${projectId}.supabase.co/functions/v1/make-server-f02c4c3b`;
@@ -57,10 +57,14 @@ async function apiRequest<T>(
   const { accessToken, cacheKey, cacheTTL, ...fetchOptions } = options;
   const url = `${BASE_URL}${endpoint}`;
 
-  // Add authorization header if token provided
+  // Add authorization headers
+  // Authorization: Bearer <anon_key> passes gateway JWT check
+  // x-user-token carries the actual user JWT for function-level auth
   const headers = new Headers(fetchOptions.headers || {});
+  headers.set('apikey', publicAnonKey);
+  headers.set('Authorization', `Bearer ${publicAnonKey}`);
   if (accessToken) {
-    headers.set('Authorization', `Bearer ${accessToken}`);
+    headers.set('x-user-token', accessToken);
   }
   headers.set('Content-Type', 'application/json');
 

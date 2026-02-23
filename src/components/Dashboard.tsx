@@ -22,6 +22,7 @@ import { getSuggestedTopics } from '../data/api';
 import { learningPaths } from '../data/learningPaths';
 import { NotificationPreferences } from './NotificationPreferences';
 import { UserStatsPanel } from './UserStatsPanel';
+import { AIStudyInsights } from './AIStudyInsights';
 import { scheduleReminder, clearScheduledReminder } from '../utils/studyReminder';
 import type { User } from '@supabase/supabase-js';
 import type { Database } from '../types/database.types';
@@ -240,6 +241,13 @@ export function Dashboard({ user, onNavigate, onSignOut }: DashboardProps) {
 
       {/* Detailed User Statistics */}
       <UserStatsPanel userId={user.id} stats={stats} />
+
+      {/* AI Study Insights */}
+      {stats && (
+        <div className="mb-8">
+          <AIStudyInsights userId={user.id} stats={stats} onNavigate={onNavigate} />
+        </div>
+      )}
 
       {/* Quick Actions Row */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-10">

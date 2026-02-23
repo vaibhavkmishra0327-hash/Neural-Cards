@@ -133,7 +133,12 @@ function missedClassHtml(name: string, daysMissed: number): string {
   `;
 }
 
-function reengagementHtml(name: string, daysMissed: number, cardsLearned: number, xp: number): string {
+function reengagementHtml(
+  name: string,
+  daysMissed: number,
+  cardsLearned: number,
+  xp: number
+): string {
   const messages = [
     `We haven't seen you in ${daysMissed} days and honestly... NeuralCards feels a little empty without you. 🥺`,
     `Your flashcards have been waiting patiently for ${daysMissed} days. They miss being flipped by you! 💜`,
@@ -196,7 +201,12 @@ Deno.serve(async (req) => {
     if (req.method === 'POST') {
       try {
         const body = await req.json();
-        if (body.type === 'achievement' && body.userId && body.achievementTitle && body.achievementIcon) {
+        if (
+          body.type === 'achievement' &&
+          body.userId &&
+          body.achievementTitle &&
+          body.achievementIcon
+        ) {
           const { data: userData } = await supabase.auth.admin.getUserById(body.userId);
           if (userData?.user?.email) {
             const { data: prefs } = await supabase
@@ -211,10 +221,17 @@ Deno.serve(async (req) => {
                 subject: `🎉 Achievement Unlocked: ${body.achievementTitle}`,
                 html: achievementHtml(name, body.achievementTitle, body.achievementIcon),
               });
-              return new Response(JSON.stringify({ message: 'Achievement email sent' }), { headers: { 'Content-Type': 'application/json' } });
+              return new Response(JSON.stringify({ message: 'Achievement email sent' }), {
+                headers: { 'Content-Type': 'application/json' },
+              });
             }
           }
-          return new Response(JSON.stringify({ message: 'Achievement email skipped (pref disabled or user not found)' }), { headers: { 'Content-Type': 'application/json' } });
+          return new Response(
+            JSON.stringify({
+              message: 'Achievement email skipped (pref disabled or user not found)',
+            }),
+            { headers: { 'Content-Type': 'application/json' } }
+          );
         }
       } catch {
         // Not a valid POST body, fall through to cron logic
@@ -239,7 +256,9 @@ Deno.serve(async (req) => {
     }
 
     if (!prefRows || prefRows.length === 0) {
-      return new Response(JSON.stringify({ message: 'No users with email notifications enabled', emailsSent: 0 }));
+      return new Response(
+        JSON.stringify({ message: 'No users with email notifications enabled', emailsSent: 0 })
+      );
     }
 
     for (const pref of prefRows) {
@@ -302,10 +321,17 @@ Deno.serve(async (req) => {
           to: email,
           subject: '📊 Your Weekly Learning Report',
           html: weeklyDigestHtml(name, {
-            cardsLearned: studyDays > 0 ? Math.round((userStats?.cards_learned_total || 0) / Math.max(1, studyDays)) * studyDays : 0,
+            cardsLearned:
+              studyDays > 0
+                ? Math.round((userStats?.cards_learned_total || 0) / Math.max(1, studyDays)) *
+                  studyDays
+                : 0,
             streak: currentStreak,
             studyDays,
-            xp: studyDays > 0 ? Math.round((userStats?.xp || 0) / Math.max(1, studyDays)) * studyDays : 0,
+            xp:
+              studyDays > 0
+                ? Math.round((userStats?.xp || 0) / Math.max(1, studyDays)) * studyDays
+                : 0,
           }),
         });
         if (sent) emailsSent++;
@@ -315,7 +341,9 @@ Deno.serve(async (req) => {
       if (pref.email_missed_class && lastStudyDate) {
         const lastStudy = new Date(lastStudyDate);
         const nowDate = new Date(today);
-        const daysSinceStudy = Math.floor((nowDate.getTime() - lastStudy.getTime()) / (1000 * 60 * 60 * 24));
+        const daysSinceStudy = Math.floor(
+          (nowDate.getTime() - lastStudy.getTime()) / (1000 * 60 * 60 * 24)
+        );
 
         // Send on exactly day 3 to avoid repeated emails every day
         if (daysSinceStudy === 3) {
@@ -332,7 +360,9 @@ Deno.serve(async (req) => {
       if (pref.email_reengagement && lastStudyDate) {
         const lastStudy = new Date(lastStudyDate);
         const nowDate = new Date(today);
-        const daysSinceStudy = Math.floor((nowDate.getTime() - lastStudy.getTime()) / (1000 * 60 * 60 * 24));
+        const daysSinceStudy = Math.floor(
+          (nowDate.getTime() - lastStudy.getTime()) / (1000 * 60 * 60 * 24)
+        );
 
         // Send emotional re-engagement emails at day 10, 15, and 20
         if (daysSinceStudy === 10 || daysSinceStudy === 15 || daysSinceStudy === 20) {

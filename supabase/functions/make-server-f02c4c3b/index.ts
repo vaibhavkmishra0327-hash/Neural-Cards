@@ -31,7 +31,7 @@ app.use(
       'https://www.neuralcards.com',
       'https://neural-cards.vercel.app',
     ],
-    allowHeaders: ['Content-Type', 'Authorization', 'apikey'],
+    allowHeaders: ['Content-Type', 'Authorization', 'apikey', 'x-user-token'],
     allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     exposeHeaders: ['Content-Length'],
     maxAge: 600,
@@ -73,8 +73,19 @@ function rateLimit(limit: number, windowMs: number) {
 // Strict rate limit for sensitive endpoints (5 req/min)
 app.use('/make-server-f02c4c3b/auth/*', rateLimit(5, 60_000));
 app.use('/make-server-f02c4c3b/generate-ai', rateLimit(5, 60_000));
+// User-facing AI features (10 req/min per IP)
+app.use('/make-server-f02c4c3b/ai-assist', rateLimit(10, 60_000));
 // General rate limit for all other endpoints (60 req/min)
 app.use('/make-server-f02c4c3b/*', rateLimit(60, 60_000));
+
+/**
+ * Extract user access token from the request.
+ * Prefers x-user-token header (bypasses gateway JWT check),
+ * falls back to Authorization header for backward compatibility.
+ */
+function getUserToken(c: any): string | undefined {
+  return c.req.header('x-user-token') || c.req.header('Authorization')?.split(' ')[1];
+}
 
 // Health check endpoint
 app.get('/make-server-f02c4c3b/health', (c) => {
@@ -159,7 +170,7 @@ app.post('/make-server-f02c4c3b/auth/signup', async (c) => {
 // Get user profile
 app.get('/make-server-f02c4c3b/user/profile', async (c) => {
   try {
-    const accessToken = c.req.header('Authorization')?.split(' ')[1];
+    const accessToken = getUserToken(c);
 
     if (!accessToken) {
       console.log('No access token provided');
@@ -222,7 +233,7 @@ app.get('/make-server-f02c4c3b/user/profile', async (c) => {
 // Update user profile
 app.put('/make-server-f02c4c3b/user/profile', async (c) => {
   try {
-    const accessToken = c.req.header('Authorization')?.split(' ')[1];
+    const accessToken = getUserToken(c);
     const {
       data: { user },
       error,
@@ -269,7 +280,7 @@ app.put('/make-server-f02c4c3b/user/profile', async (c) => {
 // Record flashcard review with spaced repetition
 app.post('/make-server-f02c4c3b/flashcard/review', async (c) => {
   try {
-    const accessToken = c.req.header('Authorization')?.split(' ')[1];
+    const accessToken = getUserToken(c);
     const {
       data: { user },
       error,
@@ -383,7 +394,7 @@ app.post('/make-server-f02c4c3b/flashcard/review', async (c) => {
 // Process multiple card reviews in a single request
 app.post('/make-server-f02c4c3b/flashcard/review/batch', async (c) => {
   try {
-    const accessToken = c.req.header('Authorization')?.split(' ')[1];
+    const accessToken = getUserToken(c);
     const {
       data: { user },
       error,
@@ -515,7 +526,7 @@ app.post('/make-server-f02c4c3b/flashcard/review/batch', async (c) => {
 // Get topic progress
 app.get('/make-server-f02c4c3b/progress/:topicId', async (c) => {
   try {
-    const accessToken = c.req.header('Authorization')?.split(' ')[1];
+    const accessToken = getUserToken(c);
     const {
       data: { user },
       error,
@@ -539,7 +550,7 @@ app.get('/make-server-f02c4c3b/progress/:topicId', async (c) => {
 // Get all user progress
 app.get('/make-server-f02c4c3b/progress', async (c) => {
   try {
-    const accessToken = c.req.header('Authorization')?.split(' ')[1];
+    const accessToken = getUserToken(c);
     const {
       data: { user },
       error,
@@ -561,7 +572,7 @@ app.get('/make-server-f02c4c3b/progress', async (c) => {
 // Get streak data
 app.get('/make-server-f02c4c3b/streak', async (c) => {
   try {
-    const accessToken = c.req.header('Authorization')?.split(' ')[1];
+    const accessToken = getUserToken(c);
     const {
       data: { user },
       error,
@@ -585,7 +596,7 @@ app.get('/make-server-f02c4c3b/streak', async (c) => {
 // Bookmark/unbookmark flashcard
 app.post('/make-server-f02c4c3b/flashcard/bookmark', async (c) => {
   try {
-    const accessToken = c.req.header('Authorization')?.split(' ')[1];
+    const accessToken = getUserToken(c);
     const {
       data: { user },
       error,
@@ -630,7 +641,7 @@ app.post('/make-server-f02c4c3b/flashcard/bookmark', async (c) => {
 // Get due flashcards for a topic
 app.get('/make-server-f02c4c3b/flashcards/due/:topicId', async (c) => {
   try {
-    const accessToken = c.req.header('Authorization')?.split(' ')[1];
+    const accessToken = getUserToken(c);
     const {
       data: { user },
       error,
@@ -718,7 +729,7 @@ async function updateStreak(userId: string) {
 // Get email notification preferences
 app.get('/make-server-f02c4c3b/notifications/email', async (c) => {
   try {
-    const accessToken = c.req.header('Authorization')?.split(' ')[1];
+    const accessToken = getUserToken(c);
     const {
       data: { user },
       error,
@@ -749,7 +760,7 @@ app.get('/make-server-f02c4c3b/notifications/email', async (c) => {
 // Save email notification preferences
 app.put('/make-server-f02c4c3b/notifications/email', async (c) => {
   try {
-    const accessToken = c.req.header('Authorization')?.split(' ')[1];
+    const accessToken = getUserToken(c);
     const {
       data: { user },
       error,
@@ -787,17 +798,112 @@ app.put('/make-server-f02c4c3b/notifications/email', async (c) => {
 });
 
 // ====================
-// AI GENERATION PROXY
+// USER-FACING AI FEATURES
+// ====================
+// Open to all authenticated users (quiz gen, tutor, explain, enrich, insights)
+
+app.post('/make-server-f02c4c3b/ai-assist', async (c) => {
+  try {
+    const token = getUserToken(c);
+    if (!token) return c.json({ error: 'Unauthorized' }, 401);
+    const {
+      data: { user },
+      error: authError,
+    } = await supabaseAuth.auth.getUser(token);
+    if (authError || !user) return c.json({ error: 'Invalid token' }, 401);
+
+    const body = await c.req.json();
+    const { type } = body;
+
+    if (!type) return c.json({ error: 'Missing type parameter' }, 400);
+
+    const groqApiKey = Deno.env.get('GROQ_API_KEY');
+    if (!groqApiKey) return c.json({ error: 'AI service not configured' }, 500);
+
+    let systemPrompt = '';
+    let userPrompt = '';
+
+    switch (type) {
+      case 'quiz': {
+        const { topicTitle, cards, count = 5 } = body;
+        const cardContext = (cards || []).map((c: any) => `Q: ${c.q}\nA: ${c.a}`).join('\n\n');
+        systemPrompt = 'You are a JSON generator that creates educational quiz questions.';
+        userPrompt = `Create ${count} multiple-choice questions about "${topicTitle}" based on these flashcards:\n\n${cardContext}\n\nSTRICT REQUIREMENTS:\n1. Return ONLY a raw JSON array. No Markdown, no extra text.\n2. Each question must have 4 plausible options (A, B, C, D).\n3. Include an explanation for the correct answer AND brief explanations for why each wrong answer is incorrect.\n\nJSON Format:\n[{\n  "question": "...",\n  "options": [\n    {"id": "A", "text": "...", "isCorrect": false},\n    {"id": "B", "text": "...", "isCorrect": true},\n    {"id": "C", "text": "...", "isCorrect": false},\n    {"id": "D", "text": "...", "isCorrect": false}\n  ],\n  "correctAnswer": "B",\n  "explanation": "...",\n  "wrongAnswerExplanations": {"A": "...", "C": "...", "D": "..."},\n  "difficulty": "easy|medium|hard"\n}]`;
+        break;
+      }
+      case 'explain-wrong': {
+        const { question, userAnswer, correctAnswer, topicTitle } = body;
+        systemPrompt = 'You are a patient tutor. Explain concepts simply in under 150 words.';
+        userPrompt = `A student studying "${topicTitle}" got this question wrong:\n\nQuestion: ${question}\nTheir answer: ${userAnswer}\nCorrect answer: ${correctAnswer}\n\nExplain:\n1. Why their answer is incorrect\n2. Why the correct answer is right\n3. A simple memory tip to remember this`;
+        break;
+      }
+      case 'tutor': {
+        const { message, history = [], context } = body;
+        const historyText = history.map((m: any) => `${m.role}: ${m.content}`).join('\n');
+        const cardCtx = context?.cardFront
+          ? `\nCurrent flashcard:\nQ: ${context.cardFront}\nA: ${context.cardBack || ''}`
+          : '';
+        systemPrompt = `You are a friendly, expert AI tutor for "${context?.topicTitle || 'AI/ML'}". Keep responses concise (under 200 words), use simple language, analogies, and examples. If the student seems confused, try a different explanation angle.`;
+        userPrompt = `${historyText ? 'Conversation so far:\n' + historyText + '\n\n' : ''}${cardCtx ? 'Context:' + cardCtx + '\n\n' : ''}Student says: ${message}`;
+        break;
+      }
+      case 'enrich': {
+        const { front, back, topicTitle } = body;
+        systemPrompt = 'You are a JSON generator that enriches educational flashcard content.';
+        userPrompt = `Enrich this flashcard about "${topicTitle}":\nQ: ${front}\nA: ${back}\n\nReturn a JSON object (NO markdown, raw JSON only):\n{\n  "realWorldExample": "A concrete real-world example (2-3 sentences)",\n  "pitfalls": ["Common mistake 1", "Common mistake 2"],\n  "codeExample": "Short code snippet if applicable, or null",\n  "memoryTip": "A mnemonic or memory trick to remember this"\n}`;
+        break;
+      }
+      case 'insights': {
+        const { streak, cardsLearned, weakTopics, xp } = body;
+        systemPrompt = 'You are a study coach. Give brief, actionable advice in 2-3 sentences.';
+        userPrompt = `Student profile: ${streak}-day streak, ${cardsLearned} cards learned, ${xp} XP. ${weakTopics?.length ? 'Weak topics: ' + weakTopics.join(', ') : 'No weak topics identified.'}\nGive one specific, encouraging study recommendation.`;
+        break;
+      }
+      default:
+        return c.json({ error: `Unknown AI assist type: ${type}` }, 400);
+    }
+
+    const groqResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${groqApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt },
+        ],
+        model: 'llama-3.3-70b-versatile',
+        temperature: type === 'quiz' || type === 'enrich' ? 0.5 : 0.7,
+      }),
+    });
+
+    if (!groqResponse.ok) {
+      const errText = await groqResponse.text();
+      console.error('Groq API error:', errText);
+      return c.json({ error: 'AI generation failed' }, 500);
+    }
+
+    const result = await groqResponse.json();
+    const content = result.choices?.[0]?.message?.content || '';
+    return c.json({ content, type });
+  } catch (error) {
+    console.error('AI assist error:', error);
+    return c.json({ error: 'Internal server error' }, 500);
+  }
+});
+
+// ====================
+// AI GENERATION PROXY (Admin only)
 // ====================
 // Keeps the Groq API key server-side only
 
 app.post('/make-server-f02c4c3b/generate-ai', async (c) => {
   try {
-    // Validate user auth
-    const authHeader = c.req.header('Authorization');
-    if (!authHeader) return c.json({ error: 'Unauthorized' }, 401);
-
-    const token = authHeader.replace('Bearer ', '');
+    // Validate user auth (reads from x-user-token or Authorization)
+    const token = getUserToken(c);
+    if (!token) return c.json({ error: 'Unauthorized' }, 401);
     const {
       data: { user },
       error: authError,

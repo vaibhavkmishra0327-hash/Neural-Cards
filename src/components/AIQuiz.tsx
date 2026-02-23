@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowLeft,
@@ -7,20 +7,17 @@ import {
   Trophy,
   RotateCcw,
   ChevronRight,
-  Timer,
-  Lightbulb,
   Sparkles,
-  Loader2,
+  Lightbulb,
 } from 'lucide-react';
-import { explainWrongAnswer } from '../utils/ai-service';
+import { generateAIQuiz, type AIQuizQuestion } from '../utils/ai-service';
 import { Database } from '../types/database.types';
-import { generateMCQQuestions, calculateScore } from '../utils/quiz-generator';
 import { incrementProgress } from '../data/stats-api';
 import { supabase } from '../utils/supabase/client';
 
 type Flashcard = Database['public']['Tables']['flashcards']['Row'];
 
-interface MCQQuizProps {
+interface AIQuizProps {
   topicTitle: string;
   topicSlug?: string;
   flashcards: Flashcard[];
@@ -28,8 +25,10 @@ interface MCQQuizProps {
   onComplete?: () => void;
 }
 
-export function MCQQuiz({ topicTitle, topicSlug, flashcards, onExit, onComplete }: MCQQuizProps) {
-  const questions = useMemo(() => generateMCQQuestions(flashcards, 10), [flashcards]);
+export function AIQuiz({ topicTitle, topicSlug, flashcards, onExit, onComplete }: AIQuizProps) {
+  const [questions, setQuestions] = useState<AIQuizQuestion[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [isAnswered, setIsAnswered] = useState(false);
@@ -37,38 +36,33 @@ export function MCQQuiz({ topicTitle, topicSlug, flashcards, onExit, onComplete 
   const [wrongCount, setWrongCount] = useState(0);
   const [showResults, setShowResults] = useState(false);
   const [showExplanation, setShowExplanation] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(30);
-  const [timerActive, setTimerActive] = useState(true);
-  const [answers, setAnswers] = useState<{ questionId: string; correct: boolean }[]>([]);
-  const [aiExplanation, setAiExplanation] = useState<string | null>(null);
-  const [aiExplanationLoading, setAiExplanationLoading] = useState(false);
+  const loadingRef = useRef(false);
+
+  // Generate AI quiz on mount
+  useEffect(() => {
+    if (loadingRef.current) return;
+    loadingRef.current = true;
+
+    const cardSummaries = flashcards.slice(0, 15);
+
+    generateAIQuiz(topicTitle, cardSummaries)
+      .then((result) => {
+        if (result.data && result.data.length > 0) {
+          setQuestions(result.data);
+        } else {
+          setError(
+            result.error || 'AI could not generate quiz questions. Try the standard MCQ instead.'
+          );
+        }
+      })
+      .catch(() => {
+        setError('Failed to generate AI quiz. Please check your connection and try again.');
+      })
+      .finally(() => setLoading(false));
+  }, [topicTitle, flashcards]);
 
   const currentQuestion = questions[currentIndex];
   const progress = questions.length > 0 ? ((currentIndex + 1) / questions.length) * 100 : 0;
-
-  const handleTimeUp = useCallback(() => {
-    setIsAnswered(true);
-    setTimerActive(false);
-    setWrongCount((c) => c + 1);
-    setAnswers((prev) => [...prev, { questionId: currentQuestion?.id || '', correct: false }]);
-  }, [currentQuestion]);
-
-  // Timer
-  useEffect(() => {
-    if (!timerActive || isAnswered || showResults) return;
-    if (timeLeft <= 0) {
-      handleTimeUp(); // eslint-disable-line react-hooks/set-state-in-effect
-      return;
-    }
-    const interval = setInterval(() => setTimeLeft((t) => t - 1), 1000);
-    return () => clearInterval(interval);
-  }, [timeLeft, timerActive, isAnswered, showResults, handleTimeUp]);
-
-  // Reset timer on new question
-  useEffect(() => {
-    setTimeLeft(30); // eslint-disable-line react-hooks/set-state-in-effect
-    setTimerActive(true);
-  }, [currentIndex]);
 
   const handleSelectAnswer = useCallback(
     (optionId: string) => {
@@ -76,21 +70,16 @@ export function MCQQuiz({ topicTitle, topicSlug, flashcards, onExit, onComplete 
 
       setSelectedAnswer(optionId);
       setIsAnswered(true);
-      setTimerActive(false);
 
       const isCorrect = optionId === currentQuestion.correctAnswer;
-
       if (isCorrect) {
         setCorrectCount((c) => c + 1);
-        // Track progress
         supabase.auth.getUser().then(({ data: { user } }) => {
           if (user) incrementProgress(user.id, 1, topicSlug);
         });
       } else {
         setWrongCount((c) => c + 1);
       }
-
-      setAnswers((prev) => [...prev, { questionId: currentQuestion.id, correct: isCorrect }]);
     },
     [isAnswered, currentQuestion, topicSlug]
   );
@@ -101,8 +90,6 @@ export function MCQQuiz({ topicTitle, topicSlug, flashcards, onExit, onComplete 
       setSelectedAnswer(null);
       setIsAnswered(false);
       setShowExplanation(false);
-      setAiExplanation(null);
-      setAiExplanationLoading(false);
     } else {
       setShowResults(true);
       if (onComplete) onComplete();
@@ -117,42 +104,18 @@ export function MCQQuiz({ topicTitle, topicSlug, flashcards, onExit, onComplete 
     setWrongCount(0);
     setShowResults(false);
     setShowExplanation(false);
-    setAnswers([]);
-    setAiExplanation(null);
-    setAiExplanationLoading(false);
   }, []);
-
-  // AI explain wrong answer
-  const handleAIExplain = useCallback(async () => {
-    if (!currentQuestion || aiExplanationLoading || aiExplanation) return;
-    setAiExplanationLoading(true);
-    try {
-      const userAnswer =
-        currentQuestion.options.find((o) => o.id === selectedAnswer)?.text || 'No answer';
-      const correctAnswer = currentQuestion.options.find((o) => o.isCorrect)?.text || '';
-      const result = await explainWrongAnswer(
-        currentQuestion.question,
-        userAnswer,
-        correctAnswer,
-        topicTitle
-      );
-      setAiExplanation(result.data || result.error || 'No explanation generated.');
-    } catch {
-      setAiExplanation('Could not generate AI explanation. Please try again.');
-    } finally {
-      setAiExplanationLoading(false);
-    }
-  }, [currentQuestion, selectedAnswer, aiExplanationLoading, aiExplanation, topicTitle]);
 
   // Keyboard shortcuts
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
-      if (showResults) return;
-      if (!isAnswered) {
-        if (e.key === '1' || e.key === 'a') handleSelectAnswer('A');
-        else if (e.key === '2' || e.key === 'b') handleSelectAnswer('B');
-        else if (e.key === '3' || e.key === 'c') handleSelectAnswer('C');
-        else if (e.key === '4' || e.key === 'd') handleSelectAnswer('D');
+      if (showResults || loading) return;
+      if (!isAnswered && currentQuestion) {
+        const optionKeys = ['1', '2', '3', '4'];
+        const keyIdx = optionKeys.indexOf(e.key);
+        if (keyIdx >= 0 && keyIdx < currentQuestion.options.length) {
+          handleSelectAnswer(currentQuestion.options[keyIdx].id);
+        }
       } else {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
@@ -163,32 +126,73 @@ export function MCQQuiz({ topicTitle, topicSlug, flashcards, onExit, onComplete 
     };
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
-  }, [isAnswered, showResults, handleSelectAnswer, handleNext]);
+  }, [isAnswered, showResults, loading, handleSelectAnswer, handleNext, currentQuestion]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (questions.length === 0) {
+  // Loading state
+  if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4">
-        <div className="text-center">
-          <div className="text-6xl mb-4">📝</div>
-          <h2 className="text-2xl font-bold mb-2 text-gray-900 dark:text-white">
-            Not Enough Cards for Quiz
+      <div className="min-h-screen bg-gradient-to-br from-amber-50 via-white to-orange-50 dark:from-gray-900 dark:via-gray-900 dark:to-amber-900/20 flex items-center justify-center">
+        <div className="text-center max-w-md">
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
+            className="mx-auto mb-6"
+          >
+            <Sparkles className="h-16 w-16 text-amber-500" />
+          </motion.div>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+            AI is crafting your quiz...
           </h2>
-          <p className="text-gray-600 dark:text-gray-400 mb-4">
-            Need at least 2 flashcards to generate a quiz.
+          <p className="text-gray-500 dark:text-gray-400">
+            Generating intelligent questions about {topicTitle}
           </p>
-          <button onClick={onExit} className="px-6 py-3 bg-purple-600 text-white rounded-xl">
-            Go Back
-          </button>
+          <div className="mt-6 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden max-w-xs mx-auto">
+            <motion.div
+              className="h-full bg-gradient-to-r from-amber-500 to-orange-500"
+              initial={{ width: '0%' }}
+              animate={{ width: '90%' }}
+              transition={{ duration: 8, ease: 'easeOut' }}
+            />
+          </div>
         </div>
       </div>
     );
   }
 
-  // Results Screen
-  if (showResults) {
-    const { score, grade } = calculateScore(correctCount, questions.length);
+  // Error state
+  if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 dark:from-gray-900 dark:via-gray-900 dark:to-purple-900/20">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4">
+        <div className="text-center max-w-md">
+          <div className="text-6xl mb-4">⚠️</div>
+          <h2 className="text-2xl font-bold mb-2 text-gray-900 dark:text-white">
+            Quiz Generation Failed
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">{error}</p>
+          <div className="flex gap-3 justify-center">
+            <button
+              onClick={() => window.location.reload()}
+              className="px-6 py-3 bg-amber-600 text-white rounded-xl hover:bg-amber-700 transition"
+            >
+              Try Again
+            </button>
+            <button
+              onClick={onExit}
+              className="px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl"
+            >
+              Go Back
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Results screen
+  if (showResults) {
+    const score = questions.length > 0 ? Math.round((correctCount / questions.length) * 100) : 0;
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-amber-50 via-white to-orange-50 dark:from-gray-900 dark:via-gray-900 dark:to-amber-900/20">
         <div className="container mx-auto px-4 py-12">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
@@ -202,8 +206,12 @@ export function MCQQuiz({ topicTitle, topicSlug, flashcards, onExit, onComplete 
                 transition={{ delay: 0.2, type: 'spring' }}
                 className="mb-6"
               >
-                <Trophy className="h-20 w-20 mx-auto text-yellow-500" />
+                <Trophy className="h-20 w-20 mx-auto text-amber-500" />
               </motion.div>
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-amber-100 dark:bg-amber-900/30 rounded-full text-xs font-semibold text-amber-700 dark:text-amber-400 mb-4">
+                <Sparkles className="h-3 w-3" />
+                AI-Powered Quiz
+              </div>
               <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
                 Quiz Complete!
               </h2>
@@ -218,55 +226,28 @@ export function MCQQuiz({ topicTitle, topicSlug, flashcards, onExit, onComplete 
                   <div className="text-3xl font-bold text-red-600">{wrongCount}</div>
                   <div className="text-sm text-red-700 dark:text-red-400">Wrong</div>
                 </div>
-                <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-xl">
-                  <div className="text-3xl font-bold text-purple-600">{score}%</div>
-                  <div className="text-sm text-purple-700 dark:text-purple-400">Grade: {grade}</div>
+                <div className="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-xl">
+                  <div className="text-3xl font-bold text-amber-600">{score}%</div>
+                  <div className="text-sm text-amber-700 dark:text-amber-400">Score</div>
                 </div>
               </div>
 
-              {/* Score message */}
               <div className="mb-8 p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
                 <p className="text-lg text-gray-700 dark:text-gray-300">
                   {score >= 90
-                    ? '🌟 Outstanding! You really know this topic!'
+                    ? '🌟 Outstanding! The AI quiz was no match for you!'
                     : score >= 70
-                      ? '👏 Great job! Keep up the good work!'
+                      ? '👏 Great job tackling AI-generated challenges!'
                       : score >= 50
-                        ? '📚 Not bad! Review the tough ones and try again.'
-                        : "💪 Keep practicing! You'll get there."}
+                        ? '📚 Solid effort! Review the explanations to improve.'
+                        : '💪 The AI quiz is tough! Keep studying and try again.'}
                 </p>
-              </div>
-
-              {/* Answer Review */}
-              <div className="mb-8 text-left">
-                <h3 className="font-semibold text-gray-900 dark:text-white mb-3">Answer Review</h3>
-                <div className="space-y-2 max-h-60 overflow-y-auto">
-                  {answers.map((a, i) => (
-                    <div
-                      key={i}
-                      className={`flex items-center gap-3 p-3 rounded-lg text-sm ${
-                        a.correct
-                          ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400'
-                          : 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400'
-                      }`}
-                    >
-                      {a.correct ? (
-                        <CheckCircle className="h-4 w-4 shrink-0" />
-                      ) : (
-                        <XCircle className="h-4 w-4 shrink-0" />
-                      )}
-                      <span className="truncate">
-                        Q{i + 1}: {questions[i]?.question}
-                      </span>
-                    </div>
-                  ))}
-                </div>
               </div>
 
               <div className="flex gap-4">
                 <button
                   onClick={handleRestart}
-                  className="flex-1 px-6 py-3 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition flex items-center justify-center gap-2"
+                  className="flex-1 px-6 py-3 bg-amber-600 text-white rounded-xl hover:bg-amber-700 transition flex items-center justify-center gap-2"
                 >
                   <RotateCcw className="h-5 w-5" />
                   Try Again
@@ -287,29 +268,25 @@ export function MCQQuiz({ topicTitle, topicSlug, flashcards, onExit, onComplete 
 
   if (!currentQuestion) return null;
 
+  const optionLabels = ['A', 'B', 'C', 'D'];
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-900 dark:to-blue-900/20">
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-white to-orange-50 dark:from-gray-900 dark:via-gray-900 dark:to-amber-900/20">
       {/* Header */}
       <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-b dark:border-gray-700 sticky top-0 z-50">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <button
               onClick={onExit}
-              className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-purple-600 transition-colors"
+              className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-amber-600 transition-colors"
             >
               <ArrowLeft className="h-5 w-5" />
               <span className="font-medium">Exit Quiz</span>
             </button>
             <div className="flex items-center gap-4">
-              <div
-                className={`flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium ${
-                  timeLeft <= 10
-                    ? 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400'
-                    : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
-                }`}
-              >
-                <Timer className="h-4 w-4" />
-                {timeLeft}s
+              <div className="flex items-center gap-1 px-3 py-1 bg-amber-100 dark:bg-amber-900/30 rounded-full text-xs font-semibold text-amber-700 dark:text-amber-400">
+                <Sparkles className="h-3 w-3" />
+                AI Quiz
               </div>
               <div className="text-sm font-medium text-gray-600 dark:text-gray-400">
                 {currentIndex + 1} / {questions.length}
@@ -318,7 +295,7 @@ export function MCQQuiz({ topicTitle, topicSlug, flashcards, onExit, onComplete 
           </div>
           <div className="mt-3 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
             <div
-              className="h-full bg-gradient-to-r from-blue-600 to-purple-600 transition-all duration-300 ease-out"
+              className="h-full bg-gradient-to-r from-amber-500 to-orange-500 transition-all duration-300 ease-out"
               style={{ width: `${progress}%` }}
             />
           </div>
@@ -329,8 +306,8 @@ export function MCQQuiz({ topicTitle, topicSlug, flashcards, onExit, onComplete 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-2">
-            <span className="inline-block px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full text-xs font-semibold mb-4">
-              MULTIPLE CHOICE • {topicTitle}
+            <span className="inline-block px-3 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-full text-xs font-semibold mb-4">
+              AI-GENERATED • {topicTitle}
             </span>
           </div>
 
@@ -343,10 +320,20 @@ export function MCQQuiz({ topicTitle, topicSlug, flashcards, onExit, onComplete 
               transition={{ duration: 0.3 }}
             >
               {/* Question Card */}
-              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 md:p-8 mb-6 border-2 border-blue-200 dark:border-blue-800">
-                <span className="text-xs font-semibold text-blue-500 mb-2 block">
-                  {currentQuestion.cardType.toUpperCase()}
-                </span>
+              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 md:p-8 mb-6 border-2 border-amber-200 dark:border-amber-800">
+                {currentQuestion.difficulty && (
+                  <span
+                    className={`text-xs font-semibold mb-2 block ${
+                      currentQuestion.difficulty === 'hard'
+                        ? 'text-red-500'
+                        : currentQuestion.difficulty === 'medium'
+                          ? 'text-amber-500'
+                          : 'text-green-500'
+                    }`}
+                  >
+                    {currentQuestion.difficulty.toUpperCase()}
+                  </span>
+                )}
                 <h2 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white leading-relaxed">
                   {currentQuestion.question}
                 </h2>
@@ -354,15 +341,15 @@ export function MCQQuiz({ topicTitle, topicSlug, flashcards, onExit, onComplete 
 
               {/* Options */}
               <div className="space-y-3 mb-6">
-                {currentQuestion.options.map((option) => {
+                {currentQuestion.options.map((option, idx) => {
                   let optionClasses =
                     'w-full text-left p-4 md:p-5 rounded-xl border-2 transition-all duration-200 flex items-start gap-3';
 
                   if (!isAnswered) {
                     optionClasses +=
                       selectedAnswer === option.id
-                        ? ' border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                        : ' border-gray-200 dark:border-gray-700 hover:border-blue-300 hover:bg-blue-50/50 dark:hover:bg-blue-900/10 bg-white dark:bg-gray-800';
+                        ? ' border-amber-500 bg-amber-50 dark:bg-amber-900/20'
+                        : ' border-gray-200 dark:border-gray-700 hover:border-amber-300 hover:bg-amber-50/50 dark:hover:bg-amber-900/10 bg-white dark:bg-gray-800';
                   } else if (option.isCorrect) {
                     optionClasses +=
                       ' border-green-500 bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-300';
@@ -392,7 +379,7 @@ export function MCQQuiz({ topicTitle, topicSlug, flashcards, onExit, onComplete 
                               : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
                         }`}
                       >
-                        {option.id}
+                        {optionLabels[idx]}
                       </span>
                       <span className="text-gray-900 dark:text-white font-medium pt-1">
                         {option.text}
@@ -421,68 +408,33 @@ export function MCQQuiz({ topicTitle, topicSlug, flashcards, onExit, onComplete 
                   >
                     {selectedAnswer === currentQuestion.correctAnswer
                       ? '✅ Correct!'
-                      : selectedAnswer === null
-                        ? "⏰ Time's up!"
-                        : '❌ Incorrect'}
+                      : '❌ Incorrect'}
                   </div>
 
-                  {/* Explanation Toggle */}
+                  {/* AI Explanation */}
                   <button
                     onClick={() => setShowExplanation((s) => !s)}
-                    className="flex items-center gap-2 text-blue-600 dark:text-blue-400 mb-4 hover:underline text-sm font-medium"
+                    className="flex items-center gap-2 text-amber-600 dark:text-amber-400 mb-4 hover:underline text-sm font-medium"
                   >
                     <Lightbulb className="h-4 w-4" />
-                    {showExplanation ? 'Hide Explanation' : 'Show Explanation (E)'}
+                    {showExplanation ? 'Hide AI Explanation' : 'Show AI Explanation (E)'}
                   </button>
 
                   <AnimatePresence>
-                    {showExplanation && (
+                    {showExplanation && currentQuestion.explanation && (
                       <motion.div
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: 'auto', opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
                         className="overflow-hidden mb-4"
                       >
-                        <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl text-sm text-gray-700 dark:text-gray-300 whitespace-pre-line border border-blue-200 dark:border-blue-800">
+                        <div className="p-4 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-xl text-sm text-gray-700 dark:text-gray-300 whitespace-pre-line border border-amber-200 dark:border-amber-800">
+                          <div className="flex items-center gap-2 text-amber-700 dark:text-amber-400 font-semibold mb-2">
+                            <Sparkles className="h-4 w-4" />
+                            AI Explanation
+                          </div>
                           {currentQuestion.explanation}
                         </div>
-
-                        {/* AI Explanation for wrong answers */}
-                        {selectedAnswer !== currentQuestion.correctAnswer && (
-                          <div className="mt-3">
-                            {!aiExplanation && (
-                              <button
-                                onClick={handleAIExplain}
-                                disabled={aiExplanationLoading}
-                                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg text-sm font-medium hover:from-purple-700 hover:to-pink-700 transition disabled:opacity-50"
-                              >
-                                {aiExplanationLoading ? (
-                                  <>
-                                    <Loader2 className="h-4 w-4 animate-spin" /> Generating AI
-                                    Explanation...
-                                  </>
-                                ) : (
-                                  <>
-                                    <Sparkles className="h-4 w-4" /> AI: Why was I wrong?
-                                  </>
-                                )}
-                              </button>
-                            )}
-                            {aiExplanation && (
-                              <motion.div
-                                initial={{ opacity: 0, y: 5 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                className="p-4 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl text-sm text-gray-700 dark:text-gray-300 whitespace-pre-line border border-purple-200 dark:border-purple-800"
-                              >
-                                <div className="flex items-center gap-2 mb-2 text-purple-700 dark:text-purple-400 font-semibold">
-                                  <Sparkles className="h-4 w-4" />
-                                  AI Explanation
-                                </div>
-                                {aiExplanation}
-                              </motion.div>
-                            )}
-                          </div>
-                        )}
                       </motion.div>
                     )}
                   </AnimatePresence>
@@ -490,7 +442,7 @@ export function MCQQuiz({ topicTitle, topicSlug, flashcards, onExit, onComplete 
                   {/* Next Button */}
                   <button
                     onClick={handleNext}
-                    className="w-full py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:from-blue-700 hover:to-purple-700 transition font-semibold flex items-center justify-center gap-2 shadow-lg"
+                    className="w-full py-4 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-xl hover:from-amber-600 hover:to-orange-600 transition font-semibold flex items-center justify-center gap-2 shadow-lg"
                   >
                     {currentIndex < questions.length - 1 ? (
                       <>
@@ -509,7 +461,7 @@ export function MCQQuiz({ topicTitle, topicSlug, flashcards, onExit, onComplete 
 
           {/* Keyboard hint */}
           <div className="mt-6 text-center text-xs text-gray-500 dark:text-gray-600">
-            Press 1-4 or A-D to answer • Enter to continue • E for explanation
+            Press 1-4 to answer • Enter to continue • E for explanation
           </div>
         </div>
       </div>
