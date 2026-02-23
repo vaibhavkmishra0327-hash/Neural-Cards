@@ -126,7 +126,7 @@ export function AIQuiz({ topicTitle, topicSlug, flashcards, onExit, onComplete }
     };
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
-  }, [isAnswered, showResults, loading, handleSelectAnswer, handleNext, currentQuestion]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isAnswered, showResults, loading, handleSelectAnswer, handleNext, currentQuestion]);
 
   // Loading state
   if (loading) {

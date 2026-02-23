@@ -57,7 +57,7 @@ export function MCQQuiz({ topicTitle, topicSlug, flashcards, onExit, onComplete 
   useEffect(() => {
     if (!timerActive || isAnswered || showResults) return;
     if (timeLeft <= 0) {
-      handleTimeUp(); // eslint-disable-line react-hooks/set-state-in-effect
+      handleTimeUp();
       return;
     }
     const interval = setInterval(() => setTimeLeft((t) => t - 1), 1000);
@@ -66,7 +66,7 @@ export function MCQQuiz({ topicTitle, topicSlug, flashcards, onExit, onComplete 
 
   // Reset timer on new question
   useEffect(() => {
-    setTimeLeft(30); // eslint-disable-line react-hooks/set-state-in-effect
+    setTimeLeft(30);
     setTimerActive(true);
   }, [currentIndex]);
 
