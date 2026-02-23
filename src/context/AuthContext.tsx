@@ -1,4 +1,12 @@
-import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useMemo,
+  ReactNode,
+  useCallback,
+} from 'react';
 import { supabase } from '../utils/supabase/client';
 import { projectId, publicAnonKey } from '../utils/supabase/info';
 import type { User, Session } from '@supabase/supabase-js';
@@ -111,14 +119,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setIsAdmin(false);
   }, []);
 
-  const value: AuthContextType = {
-    user,
-    session,
-    isLoading,
-    isAuthenticated: !!user,
-    isAdmin,
-    signOut,
-  };
+  const value = useMemo<AuthContextType>(
+    () => ({
+      user,
+      session,
+      isLoading,
+      isAuthenticated: !!user,
+      isAdmin,
+      signOut,
+    }),
+    [user, session, isLoading, isAdmin, signOut]
+  );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

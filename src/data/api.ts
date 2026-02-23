@@ -1,13 +1,27 @@
 import { supabase } from '../utils/supabase/client';
 import { Database } from '../types/database.types';
 import { learningPaths } from './learningPaths';
-import { localFlashcardDB } from './flashcardContent';
 import { log } from '../utils/logger';
+import { cache, CacheTTL } from '../utils/cache';
 
 type Topic = Database['public']['Tables']['topics']['Row'];
+type Flashcard = Database['public']['Tables']['flashcards']['Row'];
+
+// Cache keys for API layer
+const API_CACHE_KEYS = {
+  TOPICS: 'api_topics',
+  TOPICS_WITH_COUNT: 'api_topics_with_count',
+  ALL_FLASHCARDS: 'api_all_flashcards',
+  SUGGESTED_TOPICS: 'api_suggested_topics',
+  FLASHCARDS_BY_TOPIC: (slug: string) => `api_flashcards_${slug}`,
+} as const;
 
 // 1. Topics fetch karna
 export const getTopics = async () => {
+  // Check cache first
+  const cached = cache.get<Topic[]>(API_CACHE_KEYS.TOPICS);
+  if (cached) return cached;
+
   const { data, error } = await supabase
     .from('topics')
     .select('*')
@@ -17,6 +31,8 @@ export const getTopics = async () => {
     log.error('Error fetching topics:', error);
     return [];
   }
+
+  cache.set(API_CACHE_KEYS.TOPICS, data, CacheTTL.FLASHCARDS);
   return data;
 };
 
@@ -49,11 +65,16 @@ export const getFlashcardsByTopic = async (slug: string) => {
     log.warn('Supabase fetch failed, using local data:', err);
   }
 
-  // Step C: Fallback to local flashcard DB
-  const localCards = localFlashcardDB[slug];
-  if (localCards && localCards.length > 0) {
-    log.info('Using local flashcards for:', slug, `(${localCards.length} cards)`);
-    return localCards;
+  // Step C: Fallback to local flashcard DB (dynamic import to avoid bundling 103KB eagerly)
+  try {
+    const { localFlashcardDB } = await import('./flashcardContent');
+    const localCards = localFlashcardDB[slug];
+    if (localCards && localCards.length > 0) {
+      log.info('Using local flashcards for:', slug, `(${localCards.length} cards)`);
+      return localCards;
+    }
+  } catch (importErr) {
+    log.warn('Failed to load local flashcard DB:', importErr);
   }
 
   log.warn('No flashcards found for slug:', slug);
@@ -62,6 +83,9 @@ export const getFlashcardsByTopic = async (slug: string) => {
 
 // 3. ALL Flashcards fetch karna (for Practice Session)
 export const getAllFlashcards = async () => {
+  const cached = cache.get<Flashcard[]>(API_CACHE_KEYS.ALL_FLASHCARDS);
+  if (cached) return cached;
+
   const { data, error } = await supabase
     .from('flashcards')
     .select('*')
@@ -71,26 +95,35 @@ export const getAllFlashcards = async () => {
     log.error('Error fetching all flashcards:', error);
     return [];
   }
+
+  cache.set(API_CACHE_KEYS.ALL_FLASHCARDS, data, CacheTTL.FLASHCARDS);
   return data;
 };
 
 // 3b. Topics WITH flashcard count (for Practice Hub)
 export const getTopicsWithCardCount = async () => {
-  const { data: topics, error: topicError } = await supabase
-    .from('topics')
-    .select('*')
-    .order('created_at', { ascending: true });
+  // Check cache first (stale-while-revalidate)
+  const cached = cache.getStale<(Topic & { cardCount: number })[]>(
+    API_CACHE_KEYS.TOPICS_WITH_COUNT
+  );
+  if (cached && !cached.isStale) return cached.data;
 
+  // Parallelize independent queries
+  const [topicsResult, countResult, blogsResult] = await Promise.all([
+    supabase.from('topics').select('*').order('created_at', { ascending: true }),
+    supabase.from('flashcards').select('topic_id'),
+    supabase.from('blogs').select('slug, topic_slug'),
+  ]);
+
+  const { data: topics, error: topicError } = topicsResult;
   if (topicError || !topics) {
     log.error('Error fetching topics:', topicError);
+    // Return stale data if available
+    if (cached) return cached.data;
     return [];
   }
 
-  // Get flashcard counts per topic
-  const { data: countData, error: countError } = await supabase
-    .from('flashcards')
-    .select('topic_id');
-
+  const { data: countData, error: countError } = countResult;
   if (countError) {
     log.error('Error fetching card counts:', countError);
     return topics
@@ -98,7 +131,7 @@ export const getTopicsWithCardCount = async () => {
       .map((t) => ({ ...t, cardCount: 0 }));
   }
 
-  const { data: blogs, error: blogError } = await supabase.from('blogs').select('slug, topic_slug');
+  const { data: blogs, error: blogError } = blogsResult;
 
   if (blogError) {
     log.error('Error fetching blogs for topic filter:', blogError);
@@ -121,19 +154,27 @@ export const getTopicsWithCardCount = async () => {
     countMap[row.topic_id] = (countMap[row.topic_id] || 0) + 1;
   });
 
-  return practiceTopics
+  const result = practiceTopics
     .map((t) => ({ ...t, cardCount: countMap[t.id] || 0 }))
     .filter((t) => t.cardCount > 0);
+
+  cache.set(API_CACHE_KEYS.TOPICS_WITH_COUNT, result, CacheTTL.FLASHCARDS);
+  return result;
 };
 
 // 4. Suggested Topics fetch karna
 export const getSuggestedTopics = async () => {
+  const cached = cache.get<Topic[]>(API_CACHE_KEYS.SUGGESTED_TOPICS);
+  if (cached) return cached;
+
   const { data, error } = await supabase.from('topics').select('*').limit(3);
 
   if (error) {
     log.error('Error fetching suggested topics:', error);
     return [];
   }
+
+  cache.set(API_CACHE_KEYS.SUGGESTED_TOPICS, data, CacheTTL.FLASHCARDS);
   return data;
 };
 
