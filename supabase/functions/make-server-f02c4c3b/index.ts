@@ -30,6 +30,8 @@ app.use(
       'https://neuralcards.com',
       'https://www.neuralcards.com',
       'https://neural-cards.vercel.app',
+      'http://localhost:5173',
+      'http://localhost:3000',
     ],
     allowHeaders: ['Content-Type', 'Authorization', 'apikey', 'x-user-token'],
     allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -84,7 +86,8 @@ app.use('/make-server-f02c4c3b/*', rateLimit(60, 60_000));
  * falls back to Authorization header for backward compatibility.
  */
 function getUserToken(c: any): string | undefined {
-  return c.req.header('x-user-token') || c.req.header('Authorization')?.split(' ')[1];
+  // Only use x-user-token header — Authorization carries the anon key, not a user JWT
+  return c.req.header('x-user-token') || undefined;
 }
 
 // Health check endpoint

@@ -8,6 +8,7 @@
 
 import { supabase } from './supabase/client';
 import { log } from './logger';
+import { generateStudyInsights } from './ai-service';
 import type { UserStats } from '../data/stats-api';
 
 export interface StudyInsight {
@@ -278,6 +279,22 @@ export async function analyzeStudyPatterns(
 
   // Sort insights by priority
   insights.sort((a, b) => a.priority - b.priority);
+
+  // ── 3. Enhance recommendation with AI (non-blocking) ───
+  // Try to get an LLM-generated recommendation; fall back to heuristic if it fails
+  try {
+    const aiResult = await generateStudyInsights({
+      streak,
+      cardsLearned,
+      xp,
+      weakTopics: weakTopics.map((t) => t.topicTitle),
+    });
+    if (aiResult.data) {
+      nextStudyRecommendation = aiResult.data;
+    }
+  } catch (err) {
+    log.warn('AI insights enhancement failed, using heuristic:', err);
+  }
 
   return {
     insights: insights.slice(0, 5), // Show top 5

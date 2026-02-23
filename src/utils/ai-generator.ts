@@ -116,12 +116,14 @@ export const generateContentWithGroq = async (
     );
 
     if (!response.ok) {
-      let errText = '';
+      // Read body as text ONCE to avoid "body stream already read" errors
+      const rawErr = await response.text();
+      let errText = rawErr;
       try {
-        const errJson = await response.json();
-        errText = errJson.error || JSON.stringify(errJson);
+        const errJson = JSON.parse(rawErr);
+        errText = errJson.error || rawErr;
       } catch {
-        errText = await response.text();
+        // rawErr is already the error message
       }
       const msg = `Edge Function error (${response.status}): ${errText}`;
       log.error(msg);
@@ -129,7 +131,8 @@ export const generateContentWithGroq = async (
       return { data: null, error: msg };
     }
 
-    const data = await response.json();
+    const rawBody = await response.text();
+    const data = JSON.parse(rawBody);
     const text = data?.content || '';
     log.info(`AI Response received, length: ${text.length}`);
 

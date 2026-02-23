@@ -1,8 +1,7 @@
 import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Lightbulb, X, Loader2, RefreshCw, Sparkles } from 'lucide-react';
-import { supabase } from '../utils/supabase/client';
-import { projectId, publicAnonKey } from '../utils/supabase/info';
+import { sendTutorMessage } from '../utils/ai-service';
 import { log } from '../utils/logger';
 
 interface AIExplainProps {
@@ -22,64 +21,25 @@ export function AIExplainButton({ question, answer, topicTitle }: AIExplainProps
     setError(null);
     setExplanation('');
 
-    try {
-      // Get auth token
-      const { data: refreshed } = await supabase.auth.refreshSession();
-      let token = refreshed?.session?.access_token;
+    const prompt = `Please explain this concept in a simple, easy-to-understand way. Include:\n1. A brief explanation in simple terms\n2. A real-world analogy or example\n3. Why this concept matters\n\nKeep it concise and beginner-friendly.`;
 
-      if (!token) {
-        const { data: current } = await supabase.auth.getSession();
-        token = current?.session?.access_token;
-      }
+    const result = await sendTutorMessage(prompt, [], {
+      topicTitle: topicTitle || 'this topic',
+      cardFront: question,
+      cardBack: answer,
+    });
 
-      if (!token) {
-        setError('Please log in to use AI explanations.');
-        setIsLoading(false);
-        return;
-      }
-
-      // Use the user-accessible /ai-assist endpoint instead of admin-only /generate-ai
-      const response = await fetch(
-        `https://${projectId}.supabase.co/functions/v1/make-server-f02c4c3b/ai-assist`,
-        {
-          method: 'POST',
-          headers: {
-            apikey: publicAnonKey,
-            Authorization: `Bearer ${publicAnonKey}`,
-            'x-user-token': token,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            type: 'tutor',
-            message: `A student is studying "${topicTitle || 'this topic'}" and needs help understanding this flashcard.\n\nQuestion: ${question}\nAnswer: ${answer}\n\nPlease explain this concept in a simple, easy-to-understand way. Include:\n1. A brief explanation in simple terms\n2. A real-world analogy or example\n3. Why this concept matters\n\nKeep it concise and beginner-friendly.`,
-            context: { cardFront: question, cardBack: answer, topicTitle: topicTitle || '' },
-            history: [],
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        let errText = '';
-        try {
-          const errJson = await response.json();
-          errText = errJson.error || JSON.stringify(errJson);
-        } catch {
-          errText = await response.text();
-        }
-        throw new Error(`API error (${response.status}): ${errText}`);
-      }
-
-      const data = await response.json();
-      const text = data?.reply || data?.content || '';
-      setExplanation(text);
+    if (result.error) {
+      setError(result.error);
+      log.error('AI Explain error:', result.error);
+    } else if (result.data) {
+      setExplanation(result.data);
       log.info('AI explanation generated successfully');
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Failed to get explanation';
-      setError(msg);
-      log.error('AI Explain error:', msg);
-    } finally {
-      setIsLoading(false);
+    } else {
+      setError('No explanation returned. Please try again.');
     }
+
+    setIsLoading(false);
   }, [question, answer, topicTitle]);
 
   const handleOpen = useCallback(() => {

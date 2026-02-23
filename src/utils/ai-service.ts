@@ -12,11 +12,13 @@ import { log } from './logger';
 const AI_ENDPOINT = `https://${projectId}.supabase.co/functions/v1/make-server-f02c4c3b/ai-assist`;
 
 async function getAuthToken(): Promise<string | null> {
-  const { data: refreshed } = await supabase.auth.refreshSession();
-  if (refreshed?.session?.access_token) return refreshed.session.access_token;
-
+  // Check existing session first — only refresh if missing
   const { data: current } = await supabase.auth.getSession();
-  return current?.session?.access_token ?? null;
+  if (current?.session?.access_token) return current.session.access_token;
+
+  // Session missing or expired — attempt refresh
+  const { data: refreshed } = await supabase.auth.refreshSession();
+  return refreshed?.session?.access_token ?? null;
 }
 
 interface AIResponse<T = string> {
