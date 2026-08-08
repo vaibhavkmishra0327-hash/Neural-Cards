@@ -12,16 +12,16 @@ import {
   BookOpen,
 } from 'lucide-react';
 
-// 👇 Note: Prop ka naam 'onPathSelect' rakha hai (App.tsx me bhi yahi use karna)
+// 👇 Note: Prop name is 'onPathSelect' (use the same name in App.tsx)
 interface LearningPathListProps {
   onPathSelect: (slug: string) => void;
 }
 
 export function LearningPathList({ onPathSelect }: LearningPathListProps) {
-  // 👇 Data wohi hai, bas ID match kar lena 'src/data/learning-paths.ts' se
+  // 👇 Data remains the same; ensure IDs match 'src/data/learning-paths.ts'
   const paths = [
     {
-      id: 'math-for-ml', // Slug match hona chahiye
+      id: 'math-for-ml', // Slug should match
       title: 'Math for Machine Learning',
       description:
         'Master the mathematical foundations: linear algebra, calculus, probability & statistics.',

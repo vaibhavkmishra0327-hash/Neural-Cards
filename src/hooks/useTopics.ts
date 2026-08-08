@@ -3,7 +3,7 @@ import { getTopics } from '../data/api';
 import { Database } from '../types/database.types';
 import { log } from '../utils/logger';
 
-// Topic ka Type extract kar rahe hain taaki TypeScript khush rahe
+// Extract Topic type so TypeScript gets correct inference
 type Topic = Database['public']['Tables']['topics']['Row'];
 
 export function useTopics() {
@@ -26,7 +26,7 @@ export function useTopics() {
     }
 
     fetchTopics();
-  }, []); // Empty array = Sirf ek baar chalega jab component load hoga
+  }, []); // Empty array = runs only once when the component loads
 
   return { topics, loading, error };
 }

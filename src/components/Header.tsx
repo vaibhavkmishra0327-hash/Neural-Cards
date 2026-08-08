@@ -54,7 +54,7 @@ export function Header({
         // Logic: Input "Linear Algebra" -> Slug "linear-algebra" -> Go to Practice
         const slug = searchQuery.toLowerCase().trim().replace(/ /g, '-');
 
-        // Seedha Practice Page par le jao
+        // Navigate directly to the Practice page
         onNavigate('practice', { slug: slug, title: searchQuery });
 
         // Cleanup

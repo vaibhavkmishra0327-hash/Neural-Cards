@@ -10,7 +10,7 @@ export function Footer({ onNavigate }: FooterProps) {
     e.preventDefault();
     if (onNavigate) {
       onNavigate(page);
-      window.scrollTo(0, 0); // Footer se click karne par upar scroll karo
+      window.scrollTo(0, 0); // Scroll to top when navigating from the footer
     }
   };
 

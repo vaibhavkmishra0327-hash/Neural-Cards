@@ -20,7 +20,7 @@ export interface UserStats {
   last_topic_slug: string | null;
 }
 
-// Helper: Stats create karne ke liye
+// Helper: Create initial stats
 const createInitialStats = async (userId: string) => {
   const { data, error } = await supabase
     .from('user_stats')
@@ -49,7 +49,7 @@ export const getUserStats = async (userId: string): Promise<UserStats | null> =>
     .eq('user_id', userId)
     .single();
 
-  // Agar row nahi mili, toh nayi banao
+  // If no row is found, create a new one
   if (error && error.code === 'PGRST116') {
     return await createInitialStats(userId);
   }
@@ -67,18 +67,18 @@ export const getUserStats = async (userId: string): Promise<UserStats | null> =>
     yesterday.setDate(yesterday.getDate() - 1);
     const yesterdayStr = yesterday.toDateString();
 
-    // Agar kal nahi padha tha aur aaj bhi nahi -> Reset streak
+    // If the user did not study yesterday or today -> reset streak
     if (lastDate !== today && lastDate !== yesterdayStr && lastDate !== null) {
-      // Database mein update karo
+      // Update in the database
       await supabase
         .from('user_stats')
         .update({ current_streak: 0, daily_cards_completed: 0 })
         .eq('user_id', userId);
-      // UI ke liye return karo
+      // Return updated values for the UI
       return { ...data, current_streak: 0, daily_cards_completed: 0 };
     }
 
-    // Agar naya din hai par streak zinda hai (kal padha tha), to sirf daily count 0 dikhao
+    // If it is a new day but the streak is still active (studied yesterday), show daily count as 0
     if (lastDate === yesterdayStr) {
       return { ...data, daily_cards_completed: 0 };
     }

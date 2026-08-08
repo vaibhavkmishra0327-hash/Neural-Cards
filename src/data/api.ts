@@ -16,7 +16,7 @@ const API_CACHE_KEYS = {
   FLASHCARDS_BY_TOPIC: (slug: string) => `api_flashcards_${slug}`,
 } as const;
 
-// 1. Topics fetch karna
+// 1. Fetch topics
 export const getTopics = async () => {
   // Check cache first
   const cached = cache.get<Topic[]>(API_CACHE_KEYS.TOPICS);
@@ -36,12 +36,12 @@ export const getTopics = async () => {
   return data;
 };
 
-// 2. Flashcards fetch karna (with local fallback)
+// 2. Fetch flashcards (with local fallback)
 export const getFlashcardsByTopic = async (slug: string) => {
   log.info('Fetching topic for slug:', slug);
 
   try {
-    // Step A: Topic ID nikalo from Supabase
+    // Step A: Get the topic ID from Supabase
     const { data: topicData, error: topicError } = await supabase
       .from('topics')
       .select('*')
@@ -81,7 +81,7 @@ export const getFlashcardsByTopic = async (slug: string) => {
   return [];
 };
 
-// 3. ALL Flashcards fetch karna (for Practice Session)
+// 3. Fetch all flashcards (for Practice Session)
 export const getAllFlashcards = async () => {
   const cached = cache.get<Flashcard[]>(API_CACHE_KEYS.ALL_FLASHCARDS);
   if (cached) return cached;
@@ -162,7 +162,7 @@ export const getTopicsWithCardCount = async () => {
   return result;
 };
 
-// 4. Suggested Topics fetch karna
+// 4. Fetch suggested topics
 export const getSuggestedTopics = async () => {
   const cached = cache.get<Topic[]>(API_CACHE_KEYS.SUGGESTED_TOPICS);
   if (cached) return cached;
@@ -178,10 +178,10 @@ export const getSuggestedTopics = async () => {
   return data;
 };
 
-// 👇 4. NEW: USER KI REAL PROGRESS NIKALNA (Fixed)
+// 👇 4. NEW: Fetch real user progress (fixed)
 export const getUserProgress = async (userId: string) => {
   try {
-    // A. User ka last completed topic nikalo (learning path progress)
+    // A. Get the user's last completed topic (learning path progress)
     const { data } = await supabase
       .from('user_path_progress')
       .select('node_id, completed_at')
@@ -241,7 +241,7 @@ export const getUserProgress = async (userId: string) => {
       };
     }
 
-    // E. Returning user with path progress -> Next Topic calculate karo
+    // E. Returning user with path progress -> calculate the next topic
     const lastTopicSlug = progressData[0].node_id;
 
     // 1. Find which Path this slug belongs to

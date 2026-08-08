@@ -5,10 +5,10 @@
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { projectId, publicAnonKey } from './info';
-// 👇 Type Import (Make sure path is correct)
+// 👇 Type import (make sure the path is correct)
 import { Database } from '../../types/database.types';
 
-// 👇 Variable ko Type assign kiya
+// 👇 Assign a type to the variable
 let supabaseInstance: SupabaseClient<Database> | null = null;
 
 /**
@@ -16,7 +16,7 @@ let supabaseInstance: SupabaseClient<Database> | null = null;
  */
 export function getSupabaseClient(): SupabaseClient<Database> {
   if (!supabaseInstance) {
-    // 👇 Create Client karte waqt Generic Type <Database> pass kiya
+    // 👇 Pass generic type <Database> when creating the client
     supabaseInstance = createClient<Database>(`https://${projectId}.supabase.co`, publicAnonKey, {
       auth: {
         persistSession: true,

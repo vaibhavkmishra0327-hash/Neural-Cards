@@ -7,7 +7,7 @@ interface LearningPathViewProps {
   pathSlug: string;
   userId: string;
   onBack: () => void;
-  // 👇 UPDATE: nodeId add kiya hai taaki progress track ho sake
+  // 👇 UPDATE: added nodeId so progress can be tracked
   onNodeClick: (nodeSlug: string, nodeTitle: string, nodeId: string) => void;
 }
 

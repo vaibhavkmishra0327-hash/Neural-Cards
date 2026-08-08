@@ -1,7 +1,7 @@
 import { LearningPath } from '../types';
 import { supabase } from '../utils/supabase/client';
 
-// 👇 1. TUMHARA DATA (Ye same rahega)
+// 👇 1. Source data (kept as-is)
 export const learningPaths: LearningPath[] = [
   {
     id: 'math-for-ml',
@@ -147,9 +147,9 @@ export const learningPaths: LearningPath[] = [
   },
 ];
 
-// 👇 2. YE LOGIC MISSING THA (Ise add karo tabhi match hoga)
+// 👇 2. Missing logic that was required for matching behavior
 
-// Helper: Slug ko Title me badalne ke liye (e.g. 'linear-algebra' -> 'Linear Algebra')
+// Helper: Convert a slug to a title (e.g. 'linear-algebra' -> 'Linear Algebra')
 const formatTitle = (slug: string) => {
   return slug
     .split('-')
@@ -159,7 +159,7 @@ const formatTitle = (slug: string) => {
 
 // Main Function — now fetches topics DYNAMICALLY from database
 export const getLearningPath = async (slug: string) => {
-  // 1. Path dhoondo (metadata still from config — title, icon, color etc.)
+  // 1. Find the path (metadata still comes from config — title, icon, color, etc.)
   const path = learningPaths.find((p) => p.id === slug);
 
   if (!path) return null;
@@ -183,7 +183,7 @@ export const getLearningPath = async (slug: string) => {
           title: formatTitle(topicSlug),
         }));
 
-  // 4. Topics array ko "Nodes" me convert karo
+  // 4. Convert the topics array into "nodes"
   const nodes = topicList.map((t: { slug: string; title: string }, index: number) => ({
     id: t.slug,
     topic_slug: t.slug,
@@ -199,7 +199,7 @@ export const getLearningPath = async (slug: string) => {
     console.warn('Failed to fetch topics from DB, using fallback:', error.message);
   }
 
-  // 5. Formatted data return karo
+  // 5. Return the formatted data
   return {
     ...path,
     slug: path.id,
@@ -209,7 +209,7 @@ export const getLearningPath = async (slug: string) => {
   };
 };
 
-// Mock function progress ke liye
+// Mock function for progress updates
 export const completeNode = async (nodeId: string, _userId: string) => {
   console.warn('Completed:', nodeId);
   return Promise.resolve();

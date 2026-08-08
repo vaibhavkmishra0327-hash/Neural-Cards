@@ -122,7 +122,7 @@ export const FlashcardPractice = memo(function FlashcardPractice({
 
     setReviewedCards((prev) => new Set(prev).add(currentIndex));
 
-    // Logic: Agar last card hai to flip back karo, nahi to agla card dikhao
+    // Logic: if this is the last card, just flip back; otherwise move to the next card
     if (!isLastCard) {
       setDirection('right');
       setTimeout(() => {
@@ -146,10 +146,10 @@ export const FlashcardPractice = memo(function FlashcardPractice({
     }
   };
 
-  // 👇 MAIN FIX YAHAN HAI: Next Button Logic Updated
+  // 👇 MAIN FIX: updated next-button logic
   const handleNext = () => {
     if (isLastCard) {
-      // Agar aakhri card hai, to COMPLETE logic chalao
+      // If this is the last card, run completion logic
       if (onComplete) onComplete();
       if (onExit) onExit();
     } else {
@@ -454,7 +454,7 @@ export const FlashcardPractice = memo(function FlashcardPractice({
 
             <button
               onClick={handleNext}
-              // 👇 Logic Fix: Last card par disable nahi hoga agar review ho chuka hai, ya fir agar hum chahein to hamesha enable rakh sakte hain
+              // 👇 Logic fix: keep the last-card button enabled after review
               disabled={isLastCard && !isCardReviewed}
               className={`px-6 py-3 rounded-xl transition-colors font-semibold flex items-center gap-2 shadow-lg ${
                 isLastCard

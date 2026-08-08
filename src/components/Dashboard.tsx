@@ -45,11 +45,11 @@ export function Dashboard({ user, onNavigate, onSignOut }: DashboardProps) {
     if (user?.id) {
       setLoading(true);
 
-      // 1. Stats lao
+      // 1. Load stats
       const statsData = await getUserStats(user.id);
       if (statsData) setStats(statsData);
 
-      // 2. Topics lao (Continue Learning ke liye)
+      // 2. Load topics (for Continue Learning)
       const topicsData = await getSuggestedTopics();
       setTopics(topicsData);
 

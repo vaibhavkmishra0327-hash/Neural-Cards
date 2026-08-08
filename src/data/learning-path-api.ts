@@ -3,7 +3,7 @@ import { LearningPath, PathNode } from '../types/learning-path.types';
 import { log } from '../utils/logger';
 import { learningPaths } from './learningPaths';
 
-// Helper: Slug ko Title me convert karo (e.g. 'linear-algebra' -> 'Linear Algebra')
+// Helper: Convert a slug to a title (e.g. 'linear-algebra' -> 'Linear Algebra')
 const formatTitle = (slug: string) => {
   return slug
     .split('-')
@@ -112,7 +112,7 @@ export const getLearningPath = async (
       return getLocalLearningPath(pathSlug, userId);
     }
 
-    // 3️⃣ User ki Progress Lao
+    // 3️⃣ Fetch user progress
     const { data: progressData } = await supabase
       .from('user_path_progress')
       .select('node_id, status')
@@ -120,7 +120,7 @@ export const getLearningPath = async (
 
     const safeProgress = progressData || [];
 
-    // 4️⃣ Nodes + Progress Merge Karo
+    // 4️⃣ Merge nodes with user progress
     const mergedNodes: PathNode[] = nodesData.map((node) => {
       const userProgress = safeProgress.find((p) => p.node_id === node.id);
 

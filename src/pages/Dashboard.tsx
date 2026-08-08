@@ -1,7 +1,7 @@
-import { useTopics } from '../hooks/useTopics'; // Seedha import
+import { useTopics } from '../hooks/useTopics'; // Direct import
 
 export default function Dashboard() {
-  // 1 line mein data, loading, aur error sab mil gaya!
+  // topics, loading, and error come from a single hook call.
   const { topics, loading, error } = useTopics();
 
   if (loading) return <div>Loading awesome content...</div>;

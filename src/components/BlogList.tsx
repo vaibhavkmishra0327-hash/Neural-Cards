@@ -16,7 +16,7 @@ export function BlogList({ onNavigate }: BlogListProps) {
 
   const fetchBlogs = async () => {
     setLoading(true);
-    // Sirf published blogs dikhao, latest pehle
+    // Show only published blogs, newest first
     const { data, error } = await supabase
       .from('blogs')
       .select('*')
@@ -31,7 +31,7 @@ export function BlogList({ onNavigate }: BlogListProps) {
     setLoading(false);
   };
 
-  // \ud83d\udc47 Page load hote hi Blogs fetch karo
+  // \ud83d\udc47 Fetch blogs when the page loads
   useEffect(() => {
     fetchBlogs();
   }, []);
@@ -166,7 +166,7 @@ export function BlogList({ onNavigate }: BlogListProps) {
                       {blog.title}
                     </h2>
 
-                    {/* Markdown ka starting text dikhayenge (strip symbols manually or just show raw excerpt) */}
+                    {/* Show the opening markdown text (strip symbols or show raw excerpt) */}
                     <p className="text-muted-foreground text-sm line-clamp-3 mb-6 flex-1">
                       {blog.content.replace(/[#*`]/g, '').slice(0, 150)}...
                     </p>
