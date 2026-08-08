@@ -5,7 +5,6 @@
       "type": "module",
       "dependencies": {
             "@google/generative-ai": "^0.24.1",
-            "@jsr/supabase__supabase-js": "^2.49.8",
             "@radix-ui/react-accordion": "^1.2.3",
             "@radix-ui/react-alert-dialog": "^1.1.6",
             "@radix-ui/react-aspect-ratio": "^1.1.2",
@@ -97,6 +96,7 @@
             "lint:fix": "eslint . --fix",
             "format": "prettier --write \"src/**/*.{ts,tsx,css,json}\"",
             "format:check": "prettier --check \"src/**/*.{ts,tsx,css,json}\"",
-            "type-check": "tsc --noEmit"
+            "type-check": "tsc --noEmit",
+            "validate:local": "npm run lint -- --max-warnings 65 && npm run format:check && npm run type-check && npm run test:run && npm run build"
       }
 }

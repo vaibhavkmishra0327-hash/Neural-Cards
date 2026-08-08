@@ -29,11 +29,16 @@ function loadEnv() {
 
 loadEnv();
 
-const SUPABASE_URL = process.env.VITE_SUPABASE_URL || '';
+const SUPABASE_PROJECT_ID = process.env.VITE_SUPABASE_PROJECT_ID || '';
+const SUPABASE_URL =
+  process.env.VITE_SUPABASE_URL ||
+  (SUPABASE_PROJECT_ID ? `https://${SUPABASE_PROJECT_ID}.supabase.co` : '');
 const SUPABASE_ANON_KEY = process.env.VITE_SUPABASE_ANON_KEY || '';
 
 if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-  console.warn('⚠️ VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY not set. Blog posts will not be included in sitemap.');
+  console.warn(
+    '⚠️ Set VITE_SUPABASE_PROJECT_ID (or VITE_SUPABASE_URL) and VITE_SUPABASE_ANON_KEY to include blog posts in sitemap.'
+  );
 }
 
 const BASE_URL = 'https://neural-cards.vercel.app';

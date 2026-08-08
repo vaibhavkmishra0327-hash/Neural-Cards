@@ -86,6 +86,8 @@ src/
 If you want to contribute, feel free to fork and open a PR. The usual flow:
 
 ```bash
+npm ci
+npm run validate:local
 git checkout -b feature/your-feature
 git commit -m "add your feature"
 git push origin feature/your-feature
@@ -104,5 +106,4 @@ MIT — do whatever you want with it.
 **Made by [Vaibhav Mishra](https://github.com/vaibhavkmishra0327-hash)**
 
 If you found this helpful, a ⭐ on the repo would mean a lot!
-
 

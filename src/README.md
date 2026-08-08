@@ -398,9 +398,17 @@ http://localhost:5173
 ### Environment Variables
 
 ```env
-VITE_SUPABASE_URL=https://xxx.supabase.co
+VITE_SUPABASE_PROJECT_ID=your_supabase_project_id
 VITE_SUPABASE_ANON_KEY=your_anon_key
 ```
+
+### Full Local Validation
+
+```bash
+npm run validate:local
+```
+
+This runs lint (CI-compatible warning budget), format check, type-check, tests, and build.
 
 ### Deploy to Production
 
